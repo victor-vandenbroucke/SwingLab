@@ -3,6 +3,6 @@
    Die vind je in Supabase bij Project Settings > API (of Data API).
    Laat ze leeg om SwingLab zonder accounts te gebruiken. */
 window.SWINGLAB_SUPABASE = {
-  url: '',      // bijvoorbeeld: 'https://abcdefghijkl.supabase.co'
-  anonKey: ''   // de lange sleutel bij 'anon public'
+  url: 'https://twtjgrbenioaslfousmu.supabase.co',      // bijvoorbeeld: 'https://abcdefghijkl.supabase.co'
+  anonKey: 'sb_publishable_rFeCcSFiF6FJqYB6lLxcKg__Nc4zUF-'   // de lange sleutel bij 'anon public'
 };

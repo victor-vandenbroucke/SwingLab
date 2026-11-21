@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3F4F2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SwingLab">
+<meta name="description" content="Train je slagen voor padel, tennis en pickleball met je telefoon als racket.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<title>SwingLab</title>
+<style>
+:root{
+  --bg:#F3F4F2; --surface:#FFFFFF; --ink:#000000; --ink2:#5E5F63; --ink3:#8E8E93;
+  --line:rgba(0,0,0,.08); --track:rgba(0,0,0,.07);
+  --lime:#B9E631; --lime-ink:#000000; --amber:#FF9F0A;
+  --glass:rgba(255,255,255,.7); --glass-line:rgba(255,255,255,.9);
+  --num:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#000000; --surface:#1C1C1E; --ink:#FFFFFF; --ink2:#A1A1A6; --ink3:#6C6C70;
+    --line:rgba(255,255,255,.1); --track:rgba(255,255,255,.12);
+    --glass:rgba(36,36,38,.72); --glass-line:rgba(255,255,255,.12);
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:17px;line-height:1.4;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+[hidden]{display:none!important}
+.num{font-family:var(--num);font-variation-settings:"wdth" 125;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+
+/* Views */
+.view{display:none;max-width:560px;margin:0 auto;padding:16px 20px 120px}
+.view.active{display:block}
+.top{display:flex;align-items:center;gap:12px;margin:8px 0 22px}
+.top img{width:40px;height:40px;border-radius:10px;box-shadow:0 0 0 1px var(--line)}
+.top h1{margin:0;font-family:var(--num);font-variation-settings:"wdth" 112;font-weight:800;font-size:26px;letter-spacing:-.02em}
+h2{font-family:var(--num);font-variation-settings:"wdth" 112;font-weight:800;font-size:28px;letter-spacing:-.02em;margin:8px 0 18px}
+h3{font-size:15px;font-weight:600;color:var(--ink2);margin:28px 0 10px}
+
+/* Home: today */
+.today{display:flex;align-items:center;gap:22px;padding:22px;background:var(--surface);border-radius:28px}
+.ring{width:132px;height:132px;flex:none}
+.ring circle{fill:none;stroke-width:12}
+.ring .tr{stroke:var(--track)}
+.ring .pr{stroke:var(--lime);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
+.today .big{font-size:44px;line-height:1}
+.today .of{color:var(--ink2);font-size:15px;margin-top:6px}
+.today .done{display:inline-block;margin-top:10px;background:var(--lime);color:var(--lime-ink);font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 0;padding:0 4px}
+.facts div{padding:6px 0}
+.facts b{display:block;font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:22px;line-height:1.1}
+.facts span{font-size:13px;color:var(--ink2)}
+
+/* Segmented controls */
+.seg{display:flex;background:var(--track);border-radius:14px;padding:3px;gap:2px}
+.seg button{flex:1;padding:10px 6px;border-radius:11px;font-size:15px;font-weight:600;color:var(--ink2);transition:background .2s,color .2s}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.hint{font-size:14px;color:var(--ink2);margin:10px 4px 0;min-height:40px}
+
+.start{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:26px;padding:20px;border-radius:22px;background:var(--ink);color:var(--bg);font-size:19px;font-weight:700}
+.start svg{width:22px;height:22px}
+.start:active{transform:scale(.98)}
+
+/* Tab bar (glass) */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:4px;padding:6px;border-radius:99px;background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:20}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:92px;padding:8px 14px;border-radius:99px;font-size:12px;font-weight:600;color:var(--ink2)}
+.tabbar svg{width:22px;height:22px}
+.tabbar button[aria-current="page"]{background:var(--track);color:var(--ink)}
+
+/* Stats */
+.bars{display:flex;align-items:flex-end;gap:8px;height:150px;padding:18px 16px 12px;background:var(--surface);border-radius:24px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bar i{display:block;width:100%;max-width:30px;border-radius:8px;background:var(--track);min-height:6px}
+.bar.on i{background:var(--ink)}
+.bar.goal i{background:var(--lime)}
+.bar span{font-size:12px;color:var(--ink2)}
+.list{background:var(--surface);border-radius:24px;padding:4px 18px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .l{min-width:0}
+.row .l div:first-child{font-weight:600}
+.row .l div+div{font-size:14px;color:var(--ink2)}
+.row .r{text-align:right;font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:20px;white-space:nowrap}
+.row .r small{display:block;font-family:var(--ui);font-weight:400;font-size:13px;color:var(--ink2)}
+.empty{padding:22px 4px;color:var(--ink2);font-size:15px}
+
+/* Settings */
+details{background:var(--surface);border-radius:20px;margin-bottom:10px}
+summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:17px 18px;font-weight:600;cursor:pointer}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:rotate(45deg);transition:transform .2s;margin-right:4px}
+details[open] summary::after{transform:rotate(225deg)}
+.dbody{padding:0 18px 18px;font-size:15px;color:var(--ink2)}
+.dbody p{margin:0 0 10px}
+.dbody p:last-child{margin-bottom:0}
+.stepper{display:flex;align-items:center;gap:16px}
+.stepper button{width:44px;height:44px;border-radius:50%;background:var(--track);font-size:24px;font-weight:500;color:var(--ink)}
+.stepper output{font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:28px;color:var(--ink);min-width:70px;text-align:center}
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:var(--surface);border-radius:20px;margin-bottom:10px;font-weight:600}
+.toggle small{display:block;font-weight:400;font-size:13px;color:var(--ink2)}
+.sw{position:relative;width:51px;height:31px;flex:none}
+.sw input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.sw span{position:absolute;inset:0;border-radius:99px;background:var(--track);transition:background .2s;pointer-events:none}
+.sw span::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2);transition:transform .2s}
+.sw input:checked+span{background:#34C759}
+.sw input:checked+span::after{transform:translateX(20px)}
+.sport-set{padding:12px 0;border-bottom:1px solid var(--line)}
+.sport-set:last-of-type{border-bottom:0}
+.sport-set h4{margin:0 0 6px;color:var(--ink);font-size:15px}
+.slider{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px;margin:6px 0}
+.slider label{font-size:14px}
+.slider output{font-weight:600;color:var(--ink);font-size:14px}
+.slider input{grid-column:1/-1;width:100%;accent-color:var(--ink)}
+.textbtn{margin-top:12px;font-size:15px;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.danger{display:block;width:100%;margin-top:22px;padding:16px;border-radius:20px;background:var(--surface);color:#FF3B30;font-weight:600}
+.foot{margin:22px 4px 0;font-size:13px;color:var(--ink3)}
+
+/* Training screen */
+.train{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 18px) 22px calc(env(safe-area-inset-bottom,0px) + 22px);user-select:none;-webkit-user-select:none;touch-action:none}
+.t-head{width:100%;max-width:520px;display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--ink2)}
+.t-head b{color:var(--ink);font-weight:600}
+.dial{position:relative;width:min(80vw,46vh,360px);aspect-ratio:1;margin:auto 0}
+.dial svg{position:absolute;inset:0;width:100%;height:100%}
+.dial circle{fill:none;stroke-width:7}
+.dial .tr{stroke:var(--track)}
+.dial .live{stroke:var(--ink);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%}
+.dial .mark{stroke:var(--lime);stroke-width:7;transform:rotate(-90deg);transform-origin:50% 50%}
+.dial .flash{position:absolute;inset:9%;border-radius:50%;background:var(--lime);transform:scale(.6);opacity:0}
+.dial.hit .flash{animation:pop .5s cubic-bezier(.2,.9,.3,1)}
+.dial.fast .flash{background:var(--amber);animation:pop .6s cubic-bezier(.2,.9,.3,1)}
+@keyframes pop{0%{opacity:1;transform:scale(.7)}35%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.04)}}
+.dial .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.speed{font-size:clamp(64px,24vw,132px);line-height:.9}
+.unit{font-size:16px;color:var(--ink2);margin-top:8px}
+.verdict{font-size:18px;font-weight:700;margin-top:10px;min-height:26px}
+.dial.hit .speed,.dial.hit .unit,.dial.hit .verdict{color:var(--lime-ink)}
+.t-stats{display:flex;gap:30px;margin-bottom:22px}
+.t-stats div{text-align:center}
+.t-stats b{display:block;font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:30px;line-height:1.05}
+.t-stats span{font-size:13px;color:var(--ink2)}
+.nosensor{width:100%;max-width:420px;background:var(--surface);border-radius:20px;padding:16px 18px;font-size:15px;color:var(--ink2);margin-bottom:16px;text-align:center}
+.nosensor button{margin-top:10px;padding:10px 18px;border-radius:99px;background:var(--track);font-weight:600;color:var(--ink)}
+.hold{position:relative;overflow:hidden;width:100%;max-width:420px;padding:19px;border-radius:22px;background:var(--surface);font-weight:700;font-size:17px;box-shadow:0 0 0 1px var(--line)}
+.hold i{position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(0)}
+.hold span{position:relative;mix-blend-mode:difference;color:#fff}
+.hold.pressing i{transform:scaleX(1);transition:transform .7s linear}
+
+/* Sheet */
+.backdrop{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;background:var(--bg);border-radius:30px 30px 0 0;padding:26px 24px calc(env(safe-area-inset-bottom,0px) + 24px);max-height:92vh;overflow:auto}
+.sheet h2{margin-top:0}
+.how{display:flex;gap:16px;align-items:flex-start;margin-bottom:18px}
+.how svg{flex:none;width:52px;height:52px}
+.how p{margin:0;font-size:16px}
+.how p b{display:block}
+.sheet .start{margin-top:8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 96px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:16px;font-size:15px;max-width:calc(100% - 40px);z-index:70;text-align:center}
+
+@media (prefers-reduced-motion:reduce){
+  .ring .pr{transition:none}
+  .dial.hit .flash,.dial.fast .flash{animation-duration:.01s}
+}
+@media (min-width:700px){.view{padding-top:40px}}
+</style>
+</head>
+<body>
+
+<!-- ============ VANDAAG ============ -->
+<main id="view-home" class="view active" aria-label="Vandaag">
+  <header class="top">
+    <img src="icons/icon-192.png" alt="">
+    <h1>SwingLab</h1>
+  </header>
+
+  <section class="today" aria-label="Dagdoel">
+    <svg class="ring" viewBox="0 0 132 132" aria-hidden="true">
+      <circle class="tr" cx="66" cy="66" r="54"/>
+      <circle class="pr" id="goalRing" cx="66" cy="66" r="54" stroke-dasharray="339.3" stroke-dashoffset="339.3"/>
+    </svg>
+    <div>
+      <div class="big num" id="todayHits">0</div>
+      <div class="of" id="todayOf">van 100 goede slagen vandaag</div>
+      <div class="done" id="todayDone" hidden>Dagdoel gehaald</div>
+    </div>
+  </section>
+
+  <div class="facts">
+    <div><b id="factStreak">0</b><span id="factStreakLbl">dagen op rij</span></div>
+    <div><b id="factBest">0</b><span id="factBestLbl">km/u record padel</span></div>
+    <div><b id="factTotal">0</b><span>slagen in totaal</span></div>
+  </div>
+
+  <h3 id="lblSport">Sport</h3>
+  <div class="seg" role="group" aria-labelledby="lblSport" id="segSport">
+    <button type="button" data-sport="padel">Padel</button>
+    <button type="button" data-sport="tennis">Tennis</button>
+    <button type="button" data-sport="pickleball">Pickleball</button>
+  </div>
+
+  <h3 id="lblMode">Modus</h3>
+  <div class="seg" role="group" aria-labelledby="lblMode" id="segMode">
+    <button type="button" data-mode="power">Kracht</button>
+    <button type="button" data-mode="control">Controle</button>
+  </div>
+  <p class="hint" id="modeHint"></p>
+
+  <button type="button" class="start" id="btnStart">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+    Start training
+  </button>
+</main>
+
+<!-- ============ VOORTGANG ============ -->
+<main id="view-stats" class="view" aria-label="Voortgang">
+  <h2>Voortgang</h2>
+  <h3>Goede slagen, laatste 7 dagen</h3>
+  <div class="bars" id="weekBars"></div>
+
+  <h3>Totaal</h3>
+  <div class="list" id="totalsList"></div>
+
+  <h3>Per sport</h3>
+  <div class="list" id="sportList"></div>
+
+  <h3>Laatste trainingen</h3>
+  <div class="list" id="sessionList"></div>
+</main>
+
+<!-- ============ INSTELLINGEN ============ -->
+<main id="view-settings" class="view" aria-label="Instellingen">
+  <h2>Instellingen</h2>
+
+  <details>
+    <summary>Dagdoel</summary>
+    <div class="dbody">
+      <p>Hoeveel goede slagen wil je per dag maken?</p>
+      <div class="stepper">
+        <button type="button" id="goalMinus" aria-label="Dagdoel verlagen">−</button>
+        <output id="goalOut">100</output>
+        <button type="button" id="goalPlus" aria-label="Dagdoel verhogen">+</button>
+      </div>
+    </div>
+  </details>
+
+  <div class="toggle">
+    <div>Slaggeluid<small>Zet je telefoon niet op stil</small></div>
+    <label class="sw"><input type="checkbox" id="optSound" aria-label="Slaggeluid"><span></span></label>
+  </div>
+  <div class="toggle">
+    <div>Trillen<small>Werkt op Android, niet op iPhone</small></div>
+    <label class="sw"><input type="checkbox" id="optVibrate" aria-label="Trillen"><span></span></label>
+  </div>
+
+  <details>
+    <summary>Gevoeligheid per sport</summary>
+    <div class="dbody">
+      <p>Pas aan wanneer een slag telt als goede slag. Lagere waarden maken het makkelijker.</p>
+      <div id="thresholdSets"></div>
+      <button type="button" class="textbtn" id="resetThresholds">Standaardwaarden terugzetten</button>
+    </div>
+  </details>
+
+  <details>
+    <summary>Zo houd je je telefoon vast</summary>
+    <div class="dbody">
+      <p>Houd je telefoon vast zoals je racket. De bovenkant van de telefoon is de racketkop en het scherm is je slagvlak.</p>
+      <p>Maak je slag zoals op het veld, met een vlotte zwaai door het raakpunt. Een duwende of trage beweging geeft geen slaggeluid.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Veilig trainen</summary>
+    <div class="dbody">
+      <p>Gebruik een hoesje met polskoord of houd je telefoon heel stevig vast. Een snelle zwaai kan een telefoon uit je hand doen vliegen.</p>
+      <p>Zorg voor minstens twee meter vrije ruimte rondom je, ook boven je hoofd voor smashes.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Hoe juist zijn de snelheden?</summary>
+    <div class="dbody">
+      <p>SwingLab meet hoe snel je telefoon draait en rekent dat om naar een geschatte snelheid van je racketkop. Het is geen radarmeting.</p>
+      <p>De cijfers zijn vooral nuttig om jezelf te vergelijken met vorige trainingen, op hetzelfde toestel.</p>
+    </div>
+  </details>
+
+  <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.</p>
+</main>
+
+<nav class="tabbar" aria-label="Hoofdmenu">
+  <button type="button" data-view="home" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Vandaag
+  </button>
+  <button type="button" data-view="stats">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Voortgang
+  </button>
+  <button type="button" data-view="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Instellingen
+  </button>
+</nav>
+
+<!-- ============ TRAINING ============ -->
+<section id="train" class="train" hidden aria-label="Training">
+  <div class="t-head"><span id="tLabel"><b>Padel</b>, kracht</span><span id="tTime" class="num">0:00</span></div>
+
+  <div class="dial" id="dial">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <circle class="tr" cx="100" cy="100" r="92"/>
+      <circle class="mark" id="dialMark" cx="100" cy="100" r="92" stroke-dasharray="0 578"/>
+      <circle class="live" id="dialLive" cx="100" cy="100" r="92" stroke-dasharray="578" stroke-dashoffset="578"/>
+    </svg>
+    <div class="flash"></div>
+    <div class="center" aria-live="polite">
+      <div class="speed num" id="tSpeed">–</div>
+      <div class="unit" id="tUnit">km/u, laatste slag</div>
+      <div class="verdict" id="tVerdict">Maak een slag</div>
+    </div>
+  </div>
+
+  <div class="t-stats">
+    <div><b id="tSwings">0</b><span>slagen</span></div>
+    <div><b id="tHits">0</b><span>goed</span></div>
+    <div><b id="tBest">0</b><span>record km/u</span></div>
+  </div>
+
+  <div class="nosensor" id="noSensor" hidden>
+    Geen bewegingssensor gevonden. Open SwingLab op je telefoon om echt te trainen.
+    <br><button type="button" id="btnFake">Test-slag</button>
+  </div>
+
+  <button type="button" class="hold" id="btnStop"><i></i><span>Houd ingedrukt om te stoppen</span></button>
+</section>
+
+<!-- ============ UITLEG (eerste keer) ============ -->
+<div class="backdrop" id="onboard" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="obTitle">
+    <h2 id="obTitle">Zo werkt SwingLab</h2>
+    <div class="how">
+      <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="17" y="4" width="18" height="32" rx="4"/><path d="M26 36v12"/><path d="M21 9h10" stroke="#B9E631" stroke-width="3"/></svg>
+      <p><b>Je telefoon is je racket</b>De bovenkant is de racketkop, het scherm is je slagvlak.</p>
+    </div>
+    <div class="how">
+      <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 34c8-16 22-22 36-20"/><path d="M38 8l7 6-8 5"/><circle cx="26" cy="40" r="4" fill="#B9E631" stroke="none"/></svg>
+      <p><b>Zwaai vlot door</b>Een goede, snelle slag hoor je meteen. Een duwende beweging blijft stil.</p>
+    </div>
+    <div class="how">
+      <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M26 6l18 8v12c0 10-8 17-18 20C16 43 8 36 8 26V14z"/><path d="M19 26l5 5 9-10"/></svg>
+      <p><b>Houd hem stevig vast</b>Gebruik een hoesje met polskoord en houd twee meter vrije ruimte rondom je.</p>
+    </div>
+    <button type="button" class="start" id="btnOnboardOk">Begrepen</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- Basis ---------- */
+var KEY = 'swinglab.v1';
+var SPORTS = {
+  padel:      { name: 'Padel',      radius: 1.05 },
+  tennis:     { name: 'Tennis',     radius: 1.35 },
+  pickleball: { name: 'Pickleball', radius: 1.00 }
+};
+var DEFAULT_THRESHOLDS = {
+  padel:      { power: 60, ctrlMin: 25, ctrlMax: 45 },
+  tennis:     { power: 70, ctrlMin: 30, ctrlMax: 50 },
+  pickleball: { power: 45, ctrlMin: 20, ctrlMax: 35 }
+};
+var MODE_HINTS = {
+  power: {
+    padel: 'Je hoort een slag als je snel genoeg zwaait. Goed voor smash, vibora en harde slagen.',
+    tennis: 'Je hoort een slag als je snel genoeg zwaait. Goed voor forehand, backhand en service.',
+    pickleball: 'Je hoort een slag als je snel genoeg zwaait. Goed voor drives en smashes.'
+  },
+  control: {
+    padel: 'Je hoort een slag als je tempo binnen een bereik blijft. Te hard geeft een waarschuwing. Goed voor volleys, bandeja en lobs.',
+    tennis: 'Je hoort een slag als je tempo binnen een bereik blijft. Te hard geeft een waarschuwing. Goed voor volleys, slice en lobs.',
+    pickleball: 'Je hoort een slag als je tempo binnen een bereik blijft. Te hard geeft een waarschuwing. Goed voor dinks en resets.'
+  }
+};
+var ONSET_KMH = 15;
+
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
+
+var DEFAULTS = {
+  settings: { sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, thresholds: clone(DEFAULT_THRESHOLDS) },
+  stats: { total: 0, hits: 0, timeMs: 0, perSport: { padel: 0, tennis: 0, pickleball: 0 }, best: { padel: 0, tennis: 0, pickleball: 0 }, days: {}, sessions: [] }
+};
+
+/* Bewaarde waarden winnen altijd; standaardwaarden vullen alleen aan wat ontbreekt. */
+function mergeDefaults(def, saved) {
+  if (!isObj(saved)) return clone(def);
+  var out = {}, k;
+  for (k in saved) if (Object.prototype.hasOwnProperty.call(saved, k)) out[k] = saved[k];
+  for (k in def) {
+    if (!Object.prototype.hasOwnProperty.call(def, k)) continue;
+    if (isObj(def[k])) out[k] = mergeDefaults(def[k], saved[k]);
+    else if (Array.isArray(def[k])) out[k] = Array.isArray(saved[k]) ? saved[k] : clone(def[k]);
+    else out[k] = (typeof saved[k] === typeof def[k]) ? saved[k] : def[k];
+  }
+  return out;
+}
+
+function load() {
+  var raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) {}
+  var saved = null;
+  if (raw) { try { saved = JSON.parse(raw); } catch (e) { saved = null; } }
+  var d = mergeDefaults(DEFAULTS, saved);
+  if (!SPORTS[d.settings.sport]) d.settings.sport = 'padel';
+  if (d.settings.mode !== 'power' && d.settings.mode !== 'control') d.settings.mode = 'power';
+  return d;
+}
+var data = load();
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+}
+
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function dayKey(d) { d = d || new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function keyToDate(k) { var p = k.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function addDays(d, n) { var x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; }
+function fmt(n) { return Math.round(n).toLocaleString('nl-BE'); }
+function $(id) { return document.getElementById(id); }
+
+function streaks(days) {
+  var keys = Object.keys(days).filter(function (k) { return days[k] && days[k].s > 0; }).sort();
+  var longest = 0, run = 0, prev = null;
+  keys.forEach(function (k) {
+    var d = keyToDate(k);
+    run = (prev && dayKey(addDays(prev, 1)) === k) ? run + 1 : 1;
+    if (run > longest) longest = run;
+    prev = d;
+  });
+  var set = {}; keys.forEach(function (k) { set[k] = true; });
+  var cur = 0, d = new Date();
+  if (!set[dayKey(d)]) d = addDays(d, -1);
+  while (set[dayKey(d)]) { cur++; d = addDays(d, -1); }
+  return { current: cur, longest: longest };
+}
+
+/* ---------- DETECTOR START ---------- */
+function speedKmh(omegaDegPerSec, radius) {
+  return omegaDegPerSec * Math.PI / 180 * radius * 3.6;
+}
+function judgeSwing(peak, mode, th) {
+  if (mode === 'control') {
+    if (peak < th.ctrlMin) return 'slow';
+    if (peak > th.ctrlMax) return 'fast';
+    return 'hit';
+  }
+  return peak >= th.power ? 'hit' : 'slow';
+}
+function createDetector() {
+  var inSwing = false, peak = 0, t0 = 0, judged = false, lastEnd = -1e9, blocked = false;
+  function reset() { inSwing = false; peak = 0; judged = false; }
+  return {
+    /* v = huidige snelheid (km/u), t = tijd (ms). Geeft een slag terug op het moment net na de top. */
+    push: function (v, t, mode, th) {
+      if (blocked) { if (v < ONSET_KMH * 0.6) { blocked = false; lastEnd = t; } return null; }
+      if (!inSwing) {
+        if (v >= ONSET_KMH && t - lastEnd > 250) { inSwing = true; peak = v; t0 = t; judged = false; }
+        return null;
+      }
+      if (t - t0 > 1500) { reset(); blocked = true; return null; } // geen slag maar ronddraaien: wachten tot de telefoon stilvalt
+      if (v > peak) peak = v;
+      var ev = null;
+      if (!judged && v < peak * 0.8) {
+        judged = true;
+        ev = { peak: peak, result: judgeSwing(peak, mode, th) };
+      }
+      if (v < ONSET_KMH * 0.6) {
+        if (!judged) ev = { peak: peak, result: judgeSwing(peak, mode, th) };
+        lastEnd = t; reset();
+      }
+      return ev;
+    },
+    reset: function () { reset(); blocked = false; lastEnd = -1e9; }
+  };
+}
+/* ---------- DETECTOR END ---------- */
+
+/* ---------- Geluid ---------- */
+var audio = null, noiseBuf = null;
+var SOUND = {
+  padel:      { nf: 1400, nq: 1.2, nv: 0.9, nd: 0.05,  f0: 320,  f1: 140, bv: 0.8, bd: 0.09 },
+  tennis:     { nf: 2600, nq: 1.6, nv: 1.0, nd: 0.04,  f0: 420,  f1: 180, bv: 0.6, bd: 0.07 },
+  pickleball: { nf: 1800, nq: 6,   nv: 0.7, nd: 0.035, f0: 1100, f1: 700, bv: 0.7, bd: 0.06 }
+};
+function unlockAudio() {
+  try {
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
+  } catch (e) {}
+  try {
+    if (!audio) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audio = new AC();
+      noiseBuf = audio.createBuffer(1, Math.floor(audio.sampleRate * 0.12), audio.sampleRate);
+      var ch = noiseBuf.getChannelData(0);
+      for (var i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+    }
+    if (audio.state === 'suspended') audio.resume();
+    var o = audio.createOscillator(), g = audio.createGain();
+    g.gain.value = 0.0001; o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + 0.02);
+  } catch (e) {}
+}
+function playHit(sport, strength) {
+  if (!audio || !data.settings.sound) return;
+  var p = SOUND[sport] || SOUND.padel, t = audio.currentTime, s = Math.max(0.6, Math.min(1.3, strength || 1));
+  var src = audio.createBufferSource(); src.buffer = noiseBuf;
+  var bp = audio.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = p.nf; bp.Q.value = p.nq;
+  var ng = audio.createGain(); ng.gain.setValueAtTime(p.nv * s, t); ng.gain.exponentialRampToValueAtTime(0.001, t + p.nd);
+  src.connect(bp); bp.connect(ng); ng.connect(audio.destination); src.start(t); src.stop(t + p.nd + 0.02);
+  var o = audio.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(p.f0, t); o.frequency.exponentialRampToValueAtTime(p.f1, t + p.bd);
+  var og = audio.createGain(); og.gain.setValueAtTime(p.bv * s, t); og.gain.exponentialRampToValueAtTime(0.001, t + p.bd);
+  o.connect(og); og.connect(audio.destination); o.start(t); o.stop(t + p.bd + 0.02);
+}
+function playWarn() {
+  if (!audio || !data.settings.sound) return;
+  [0, 0.13].forEach(function (d) {
+    var t = audio.currentTime + d, o = audio.createOscillator(), g = audio.createGain();
+    o.type = 'square'; o.frequency.value = 150;
+    g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+    o.connect(g); g.connect(audio.destination); o.start(t); o.stop(t + 0.1);
+  });
+}
+function buzz(pattern) {
+  if (data.settings.vibrate && navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+}
+
+/* ---------- Weergave: Vandaag ---------- */
+function todayRec() { return data.stats.days[dayKey()] || { s: 0, h: 0 }; }
+
+function renderHome() {
+  var s = data.settings, rec = todayRec();
+  $('todayHits').textContent = fmt(rec.h);
+  $('todayOf').textContent = 'van ' + fmt(s.goal) + ' goede slagen vandaag';
+  var frac = Math.min(1, rec.h / Math.max(1, s.goal));
+  $('goalRing').setAttribute('stroke-dashoffset', String(339.3 * (1 - frac)));
+  $('todayDone').hidden = rec.h < s.goal;
+
+  var st = streaks(data.stats.days);
+  $('factStreak').textContent = st.current;
+  $('factStreakLbl').textContent = st.current === 1 ? 'dag op rij' : 'dagen op rij';
+  $('factBest').textContent = fmt(data.stats.best[s.sport] || 0);
+  $('factBestLbl').textContent = 'km/u record ' + SPORTS[s.sport].name.toLowerCase();
+  $('factTotal').textContent = fmt(data.stats.total);
+
+  Array.prototype.forEach.call(document.querySelectorAll('#segSport button'), function (b) {
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-sport') === s.sport));
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#segMode button'), function (b) {
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-mode') === s.mode));
+  });
+  $('modeHint').textContent = MODE_HINTS[s.mode][s.sport];
+}
+
+/* ---------- Weergave: Voortgang ---------- */
+function rowHTML(title, sub, right, rightSub) {
+  return '<div class="row"><div class="l"><div>' + title + '</div>' + (sub ? '<div>' + sub + '</div>' : '') +
+    '</div><div class="r">' + right + (rightSub ? '<small>' + rightSub + '</small>' : '') + '</div></div>';
+}
+function fmtDur(ms) {
+  var m = Math.round(ms / 60000);
+  if (m < 60) return m + ' min';
+  return Math.floor(m / 60) + ' u ' + pad2(m % 60);
+}
+function renderStats() {
+  var days = data.stats.days, goal = data.settings.goal, today = new Date(), vals = [], max = 1, i;
+  var names = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
+  for (i = 6; i >= 0; i--) {
+    var d = addDays(today, -i), r = days[dayKey(d)] || { s: 0, h: 0 };
+    vals.push({ label: names[d.getDay()], h: r.h });
+    if (r.h > max) max = r.h;
+  }
+  $('weekBars').innerHTML = vals.map(function (v) {
+    var cls = v.h >= goal ? 'bar goal' : (v.h > 0 ? 'bar on' : 'bar');
+    var hPct = v.h > 0 ? Math.max(6, Math.round(v.h / max * 100)) : 4;
+    return '<div class="' + cls + '" title="' + v.h + ' goede slagen"><i style="height:' + hPct + '%"></i><span>' + v.label + '</span></div>';
+  }).join('');
+
+  var st = streaks(days), dayCount = Object.keys(days).filter(function (k) { return days[k].s > 0; }).length;
+  var ratio = data.stats.total ? Math.round(data.stats.hits / data.stats.total * 100) : 0;
+  $('totalsList').innerHTML =
+    rowHTML('Slagen', fmt(data.stats.hits) + ' goed (' + ratio + '%)', fmt(data.stats.total)) +
+    rowHTML('Trainingen', dayCount + (dayCount === 1 ? ' dag' : ' dagen') + ' getraind', fmt(data.stats.sessions.length)) +
+    rowHTML('Reeks', 'Langste: ' + st.longest + (st.longest === 1 ? ' dag' : ' dagen'), st.current + '<small>dagen nu</small>') +
+    rowHTML('Trainingstijd', '', fmtDur(data.stats.timeMs));
+
+  $('sportList').innerHTML = Object.keys(SPORTS).map(function (k) {
+    return rowHTML(SPORTS[k].name, fmt(data.stats.perSport[k] || 0) + ' slagen', fmt(data.stats.best[k] || 0), 'km/u record');
+  }).join('');
+
+  var ses = data.stats.sessions.slice(-8).reverse();
+  $('sessionList').innerHTML = ses.length ? ses.map(function (x) {
+    var d = new Date(x.t);
+    var when = d.toLocaleDateString('nl-BE', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' +
+               d.toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' });
+    var title = (SPORTS[x.sport] ? SPORTS[x.sport].name : x.sport) + ', ' + (x.mode === 'control' ? 'controle' : 'kracht');
+    return rowHTML(title, when + ', ' + x.hits + ' van ' + x.swings + ' goed', fmt(x.peak), 'km/u top');
+  }).join('') : '<div class="empty">Nog geen trainingen. Start er een via Vandaag.</div>';
+}
+
+/* ---------- Weergave: Instellingen ---------- */
+function renderSettings() {
+  var s = data.settings;
+  $('goalOut').textContent = s.goal;
+  $('optSound').checked = !!s.sound;
+  $('optVibrate').checked = !!s.vibrate;
+  $('thresholdSets').innerHTML = Object.keys(SPORTS).map(function (k) {
+    var t = s.thresholds[k];
+    return '<div class="sport-set"><h4>' + SPORTS[k].name + '</h4>' +
+      sliderHTML(k, 'power', 'Kracht: goed vanaf', t.power, 30, 120) +
+      sliderHTML(k, 'ctrlMin', 'Controle: minimaal', t.ctrlMin, 10, 80) +
+      sliderHTML(k, 'ctrlMax', 'Controle: maximaal', t.ctrlMax, 20, 100) + '</div>';
+  }).join('');
+}
+function sliderHTML(sport, field, label, val, min, max) {
+  var id = 'th-' + sport + '-' + field;
+  return '<div class="slider"><label for="' + id + '">' + label + '</label><output id="' + id + '-out">' + val + ' km/u</output>' +
+    '<input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="1" value="' + val + '" data-sport="' + sport + '" data-field="' + field + '"></div>';
+}
+
+function toast(msg, ms) {
+  var t = $('toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3500);
+}
+
+/* ---------- Navigatie ---------- */
+function showView(name) {
+  ['home', 'stats', 'settings'].forEach(function (v) {
+    $('view-' + v).classList.toggle('active', v === name);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.tabbar button'), function (b) {
+    if (b.getAttribute('data-view') === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  if (name === 'home') renderHome();
+  if (name === 'stats') renderStats();
+  if (name === 'settings') renderSettings();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Training ---------- */
+var T = null; // lopende training
+var detector = createDetector();
+var DIAL_C = 578;
+
+function requestMotion() {
+  if (typeof DeviceMotionEvent === 'undefined') return Promise.resolve('none');
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    return DeviceMotionEvent.requestPermission().then(function (r) { return r === 'granted' ? 'ok' : 'denied'; }, function () { return 'denied'; });
+  }
+  return Promise.resolve('ok');
+}
+
+function startTraining() {
+  unlockAudio(); // moet binnen de tik gebeuren
+  requestMotion().then(function (res) {
+    if (res === 'denied') {
+      toast('SwingLab heeft toegang tot beweging nodig. Sluit de app helemaal af, open hem opnieuw en kies Sta toe.', 6000);
+      return;
+    }
+    beginSession(res === 'ok');
+  });
+}
+
+function beginSession(hasMotionApi) {
+  var s = data.settings;
+  T = { sport: s.sport, mode: s.mode, th: s.thresholds[s.sport], radius: SPORTS[s.sport].radius,
+        start: Date.now(), pending: null, swings: 0, hits: 0, peak: 0, sumPeak: 0, live: 0, gotSensor: false, raf: 0, wake: null, timer: 0, noSensorTimer: 0 };
+  detector.reset();
+  $('tLabel').innerHTML = '<b>' + SPORTS[T.sport].name + '</b>, ' + (T.mode === 'control' ? 'controle' : 'kracht');
+  $('tSpeed').textContent = '–';
+  $('tUnit').textContent = 'km/u, laatste slag';
+  $('tVerdict').textContent = 'Maak een slag';
+  $('tSwings').textContent = '0'; $('tHits').textContent = '0';
+  $('tBest').textContent = fmt(data.stats.best[T.sport] || 0);
+  $('tTime').textContent = '0:00';
+  $('noSensor').hidden = true;
+  setDialMark();
+  $('train').hidden = false;
+  document.body.style.overflow = 'hidden';
+
+  if (hasMotionApi) window.addEventListener('devicemotion', onMotion);
+  T.noSensorTimer = setTimeout(function () { if (T && !T.gotSensor) $('noSensor').hidden = false; }, 2000);
+  T.timer = setInterval(updateClock, 1000);
+  T.raf = requestAnimationFrame(drawLive);
+  requestWake();
+}
+
+function setDialMark() {
+  // groene boog = zone waarin een slag als goed telt; schaal loopt tot 2x de krachtdrempel
+  var scale = scaleMax(), mark = $('dialMark');
+  var a, b;
+  if (T.mode === 'control') { a = T.th.ctrlMin / scale; b = T.th.ctrlMax / scale; }
+  else { a = T.th.power / scale; b = 1; }
+  a = Math.max(0, Math.min(1, a)); b = Math.max(a, Math.min(1, b));
+  mark.setAttribute('stroke-dasharray', '0 ' + (DIAL_C * a) + ' ' + (DIAL_C * (b - a)) + ' ' + DIAL_C);
+}
+function scaleMax() { return Math.max(T.th.power, T.th.ctrlMax) * 1.6; }
+
+function drawLive() {
+  if (!T) return;
+  var frac = Math.max(0, Math.min(1, T.live / scaleMax()));
+  $('dialLive').setAttribute('stroke-dashoffset', String(DIAL_C * (1 - frac)));
+  T.live *= 0.9; // zakt rustig terug als er geen nieuwe meting komt
+  T.raf = requestAnimationFrame(drawLive);
+}
+
+function updateClock() {
+  if (!T) return;
+  var sec = Math.floor((Date.now() - T.start) / 1000);
+  $('tTime').textContent = Math.floor(sec / 60) + ':' + pad2(sec % 60);
+}
+
+function onMotion(e) {
+  if (!T) return;
+  var rr = e.rotationRate;
+  if (!rr || (rr.alpha == null && rr.beta == null && rr.gamma == null)) return;
+  if (!T.gotSensor) { T.gotSensor = true; $('noSensor').hidden = true; }
+  var a = rr.alpha || 0, b = rr.beta || 0, g = rr.gamma || 0;
+  var v = speedKmh(Math.sqrt(a * a + b * b + g * g), T.radius);
+  feed(v, performance.now());
+}
+
+function feed(v, t) {
+  if (v > T.live) T.live = v;
+  var ev = detector.push(v, t, T.mode, T.th);
+  if (ev) onSwing(ev);
+}
+
+/* Een trage "slag" kan ook de uithaal (backswing) vóór je echte slag zijn. Die tellen we pas na 0,7 s mee,
+   en laten we vallen als er binnen die tijd een snellere slag volgt. */
+var BACKSWING_MS = 700;
+function onSwing(ev) {
+  ev.peak = Math.round(ev.peak);
+  ev.at = performance.now();
+  if (T.pending) {
+    clearTimeout(T.pending.timer);
+    var prev = T.pending; T.pending = null;
+    if (!(ev.at - prev.at < BACKSWING_MS && ev.peak > prev.peak)) commitSwing(prev);
+  }
+  showSwing(ev);
+  if (ev.result === 'slow') {
+    T.pending = ev;
+    ev.timer = setTimeout(function () { if (T && T.pending === ev) { T.pending = null; commitSwing(ev); } }, BACKSWING_MS);
+  } else {
+    commitSwing(ev);
+  }
+}
+
+function showSwing(ev) {
+  var peak = ev.peak, st = data.stats;
+  var isRecord = peak > (st.best[T.sport] || 0);
+  var dial = $('dial');
+  dial.classList.remove('hit', 'fast'); void dial.offsetWidth;
+  if (ev.result === 'hit') {
+    playHit(T.sport, T.mode === 'power' ? peak / T.th.power : 1);
+    buzz(25);
+    dial.classList.add('hit');
+    $('tVerdict').textContent = isRecord ? 'Nieuw record' : 'Goed';
+  } else if (ev.result === 'fast') {
+    playWarn(); buzz([60, 40, 60]);
+    dial.classList.add('fast');
+    $('tVerdict').textContent = 'Te hard';
+  } else {
+    $('tVerdict').textContent = T.mode === 'control' ? 'Iets vlotter' : 'Sneller';
+  }
+  $('tSpeed').textContent = peak;
+}
+
+function commitSwing(ev) {
+  var peak = ev.peak, k = dayKey(), st = data.stats;
+  T.swings++; T.sumPeak += peak; if (peak > T.peak) T.peak = peak;
+  st.total++; st.perSport[T.sport] = (st.perSport[T.sport] || 0) + 1;
+  if (!st.days[k]) st.days[k] = { s: 0, h: 0 };
+  st.days[k].s++;
+  if (peak > (st.best[T.sport] || 0)) st.best[T.sport] = peak;
+  if (ev.result === 'hit') { T.hits++; st.hits++; st.days[k].h++; }
+  $('tSwings').textContent = T.swings;
+  $('tHits').textContent = T.hits;
+  $('tBest').textContent = fmt(st.best[T.sport]);
+  save();
+}
+
+function stopTraining() {
+  if (!T) return;
+  if (T.pending) { clearTimeout(T.pending.timer); var pend = T.pending; T.pending = null; commitSwing(pend); }
+  window.removeEventListener('devicemotion', onMotion);
+  cancelAnimationFrame(T.raf); clearInterval(T.timer); clearTimeout(T.noSensorTimer);
+  releaseWake();
+  var dur = Date.now() - T.start;
+  if (T.swings > 0) {
+    data.stats.timeMs += dur;
+    data.stats.sessions.push({ t: T.start, sport: T.sport, mode: T.mode, swings: T.swings, hits: T.hits, peak: T.peak,
+      avg: Math.round(T.sumPeak / T.swings), dur: dur });
+    if (data.stats.sessions.length > 200) data.stats.sessions = data.stats.sessions.slice(-200);
+    save();
+  }
+  var summary = T.swings > 0 ? (T.hits + ' van ' + T.swings + ' slagen goed. Top: ' + T.peak + ' km/u.') : '';
+  T = null;
+  $('train').hidden = true;
+  document.body.style.overflow = '';
+  renderHome();
+  if (summary) toast('Training bewaard. ' + summary);
+}
+
+function requestWake() {
+  if (!('wakeLock' in navigator)) return;
+  navigator.wakeLock.request('screen').then(function (w) { if (T) T.wake = w; else w.release(); }, function () {});
+}
+function releaseWake() {
+  if (T && T.wake) { try { T.wake.release(); } catch (e) {} }
+}
+
+/* Test-slag zonder sensor: stuurt een gesimuleerde zwaaicurve door dezelfde detectie */
+function fakeSwing() {
+  if (!T) return;
+  unlockAudio();
+  var target = T.mode === 'control'
+    ? T.th.ctrlMin + Math.random() * (T.th.ctrlMax - T.th.ctrlMin + 20) - 5
+    : T.th.power * (0.7 + Math.random() * 0.6);
+  var steps = 24, i = 0, t0 = performance.now();
+  (function step() {
+    if (!T) return;
+    var x = i / steps, v = target * Math.sin(Math.PI * x);
+    feed(Math.max(0, v), t0 + i * 16);
+    i++;
+    if (i <= steps) setTimeout(step, 16); else feed(0, t0 + (i + 1) * 16);
+  })();
+}
+
+/* ---------- Gebeurtenissen ---------- */
+function bind() {
+  Array.prototype.forEach.call(document.querySelectorAll('.tabbar button'), function (b) {
+    b.addEventListener('click', function () { showView(b.getAttribute('data-view')); });
+  });
+  $('segSport').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    data.settings.sport = b.getAttribute('data-sport'); save(); renderHome();
+  });
+  $('segMode').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    data.settings.mode = b.getAttribute('data-mode'); save(); renderHome();
+  });
+  $('btnStart').addEventListener('click', startTraining);
+  // na de flits de kleuraanpassing weer weghalen, zodat de cijfers leesbaar blijven (ook in donkere modus)
+  $('dial').querySelector('.flash').addEventListener('animationend', function () { $('dial').classList.remove('hit', 'fast'); });
+  $('btnFake').addEventListener('click', fakeSwing);
+
+  // Stoppen vraagt een lange druk, zodat je hand op het scherm de training niet per ongeluk beëindigt
+  var stopBtn = $('btnStop'), holdTimer = 0;
+  function holdStart(e) { e.preventDefault(); stopBtn.classList.add('pressing'); holdTimer = setTimeout(function () { stopBtn.classList.remove('pressing'); stopTraining(); }, 700); }
+  function holdEnd() { stopBtn.classList.remove('pressing'); clearTimeout(holdTimer); }
+  stopBtn.addEventListener('pointerdown', holdStart);
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (n) { stopBtn.addEventListener(n, holdEnd); });
+  stopBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); stopTraining(); } });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && T) stopTraining(); });
+
+  $('goalMinus').addEventListener('click', function () { data.settings.goal = Math.max(10, data.settings.goal - 10); save(); $('goalOut').textContent = data.settings.goal; });
+  $('goalPlus').addEventListener('click', function () { data.settings.goal = Math.min(1000, data.settings.goal + 10); save(); $('goalOut').textContent = data.settings.goal; });
+  $('optSound').addEventListener('change', function (e) { data.settings.sound = e.target.checked; save(); });
+  $('optVibrate').addEventListener('change', function (e) { data.settings.vibrate = e.target.checked; save(); });
+
+  $('thresholdSets').addEventListener('input', function (e) {
+    var el = e.target; if (!el.matches('input[type=range]')) return;
+    var sp = el.getAttribute('data-sport'), f = el.getAttribute('data-field'), v = +el.value, th = data.settings.thresholds[sp];
+    th[f] = v;
+    if (f === 'ctrlMin' && th.ctrlMax < v + 5) th.ctrlMax = v + 5;
+    if (f === 'ctrlMax' && th.ctrlMin > v - 5) th.ctrlMin = Math.max(10, v - 5);
+    save();
+    ['power', 'ctrlMin', 'ctrlMax'].forEach(function (k) {
+      var inp = $('th-' + sp + '-' + k); if (inp && inp !== el) inp.value = th[k];
+      var out = $('th-' + sp + '-' + k + '-out'); if (out) out.textContent = th[k] + ' km/u';
+    });
+  });
+  $('resetThresholds').addEventListener('click', function () {
+    data.settings.thresholds = clone(DEFAULT_THRESHOLDS); save(); renderSettings(); toast('Standaardwaarden teruggezet.');
+  });
+  $('btnReset').addEventListener('click', function () {
+    if (!confirm('Alle slagen, records en trainingen wissen? Dit kan niet ongedaan worden.')) return;
+    data.stats = clone(DEFAULTS.stats); save(); renderSettings(); toast('Alle gegevens gewist.');
+  });
+
+  $('btnOnboardOk').addEventListener('click', function () {
+    data.settings.onboarded = true; save(); $('onboard').hidden = true;
+  });
+
+  // Scherm uit of app naar de achtergrond: training bewaren en stoppen
+  document.addEventListener('visibilitychange', function () { if (document.hidden && T) stopTraining(); });
+}
+
+/* ---------- Start ---------- */
+bind();
+renderHome();
+if (!data.settings.onboarded) $('onboard').hidden = false;
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+
+/* alleen voor tests */
+window.__swinglab = { data: function () { return data; }, createDetector: createDetector, speedKmh: speedKmh, mergeDefaults: mergeDefaults, streaks: streaks, feed: function (v, t) { if (T) feed(v, t); } };
+})();
+</script>
+</body>
+</html>

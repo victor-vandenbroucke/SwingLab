@@ -1,8 +1,8 @@
 /* SwingLab service worker: werkt offline na het eerste bezoek.
    Verhoog CACHE bij elke nieuwe versie zodat oude bestanden opgeruimd worden. */
-const CACHE = 'swinglab-v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
+const CACHE = 'swinglab-v2';
+const ASSETS = ['./', './index.html', './tv.html', './manifest.webmanifest', './peerjs.min.js',
+  './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -20,8 +20,8 @@ self.addEventListener('fetch', (e) => {
   // Pagina zelf: eerst online proberen (zodat updates meteen zichtbaar zijn), anders uit de cache
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req).then((res) => {
-      const copy = res.clone(); caches.open(CACHE).then((c) => c.put('./index.html', copy)); return res;
-    }).catch(() => caches.match('./index.html')));
+      const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); return res;
+    }).catch(() => caches.match(req).then((hit) => hit || caches.match('./index.html'))));
     return;
   }
   // Rest (iconen, lettertype): eerst uit de cache, anders online ophalen en bewaren

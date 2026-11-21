@@ -63,7 +63,9 @@ button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
 .verdict.bad{color:var(--amber)}
 .verdict.miss{color:rgba(255,255,255,.55)}
 @keyframes verdict{0%{opacity:0;transform:scale(.8)}15%{opacity:1;transform:scale(1.05)}25%{transform:scale(1)}75%{opacity:1}100%{opacity:0}}
-.points{position:absolute;left:0;right:0;top:30vh;text-align:center;font-size:5vh;color:#fff;opacity:0}
+.shot{position:absolute;left:0;right:0;top:29vh;text-align:center;font-size:3.6vh;font-weight:600;color:rgba(255,255,255,.85);opacity:0;transition:opacity .25s}
+.shot.show{opacity:1}
+.points{position:absolute;left:0;right:0;top:35vh;text-align:center;font-size:5vh;color:#fff;opacity:0}
 .points.show{animation:pts 1s ease-out}
 @keyframes pts{0%{opacity:0;transform:translateY(2vh)}20%{opacity:1}100%{opacity:0;transform:translateY(-4vh)}}
 .hud-bottom{position:absolute;bottom:4vh;left:0;right:0;text-align:center}
@@ -96,7 +98,7 @@ button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
       <div class="brand"><img src="icon-192.png" alt=""><b>SwingLab op tv</b></div>
       <ol class="steps">
         <li><span>Open <b>SwingLab</b> op je telefoon en kies <b>Speel op tv</b>.</span></li>
-        <li><span>Vul de code van dit scherm in en tik op <b>Verbinden</b>.</span></li>
+        <li><span>Tik de code van dit scherm in op je telefoon.</span></li>
         <li><span>Maak twee forehands om te kalibreren. Daarna komen de ballen.</span></li>
       </ol>
     </div>
@@ -125,9 +127,10 @@ button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
     <div class="right"><div class="ballcount num" id="hudBall">0/20</div><div class="small">ballen</div><div class="combo" id="hudCombo" hidden>x1.0</div></div>
   </div>
   <div class="verdict" id="verdict"></div>
+  <div class="shot" id="hudShot"></div>
   <div class="points num" id="points"></div>
   <div class="hud-bottom"><div class="speed num" id="hudSpeed"></div><div class="small" id="hudSpeedLbl"></div></div>
-  <div class="demo" id="demoHint" hidden>Oefenmodus: pijltje links en rechts om te slaan, Esc om te stoppen</div>
+  <div class="demo" id="demoHint" hidden>Oefenmodus: pijltje links of rechts om te slaan, met Shift erbij voor een lob. Esc om te stoppen.</div>
 </section>
 
 <section id="done" class="layer dim" hidden>
@@ -138,6 +141,7 @@ button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
     <div><b id="donePerfect">0</b><span>perfect</span></div>
     <div><b id="doneGood">0</b><span>goed</span></div>
     <div><b id="doneMiss">0</b><span>gemist</span></div>
+    <div><b id="doneOut">0</b><span>uit of net</span></div>
     <div><b id="doneBest">0</b><span>km/u top</span></div>
   </div>
   <div class="again" id="doneAgain">Zwaai om nog een ronde te spelen</div>
@@ -148,7 +152,7 @@ button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
 (function () {
 'use strict';
 
-var CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+var CHARS = '0123456789';
 var COURTS = {
   padel:      { name: 'Padel',      L: 20,    Wd: 10,    net: 0.88, court: '#1F5C9E', out: '#0C2B4D', glass: true },
   tennis:     { name: 'Tennis',     L: 23.77, Wd: 10.97, net: 0.91, court: '#2F6C8F', out: '#24553A', glass: false },
@@ -157,6 +161,10 @@ var COURTS = {
 var LEVELS = { rustig: 2.0, normaal: 1.55, snel: 1.2 };
 var BALLS = 20, G = 9.81, NET_MS = 30;
 var WIN_PERFECT = 90, WIN_GOOD = 220, LATE_FINAL = 600;
+var DRAG = 0.022;                                   // luchtweerstand van de bal
+var BALL_K = { padel: 1.0, tennis: 1.15, pickleball: 0.75 }; // racketsnelheid naar balsnelheid
+var REBOUND = { rustig: 9, normaal: 11, snel: 14 };          // km/u die de inkomende bal zelf meegeeft
+var RACKET_SCALE = 2.2;                             // racket iets groter tekenen zodat je hem goed ziet
 
 var S = { phase: 'pair', sport: 'padel', hand: 'right', level: 'normaal', demo: false };
 var R = null;            // lopende ronde
@@ -246,7 +254,7 @@ function setPhase(p) {
 function startCountdown() {
   setCamera();
   balls = []; parts = [];
-  R = { balls: 0, score: 0, streak: 0, perfect: 0, good: 0, miss: 0, best: 0, inc: null, nextLaunch: 0, lastJudge: 0, endAt: 0 };
+  R = { balls: 0, score: 0, streak: 0, perfect: 0, good: 0, miss: 0, outs: 0, best: 0, inc: null, nextLaunch: 0, lastJudge: 0, endAt: 0, pending: 0 };
   updateHud();
   $('hudSpeed').textContent = ''; $('hudSpeedLbl').textContent = '';
   setPhase('countdown');
@@ -269,12 +277,12 @@ function endRound() {
   if (rec) { try { localStorage.setItem(key, String(R.score)); } catch (e) {} }
   $('doneScore').textContent = R.score.toLocaleString('nl-BE');
   $('donePerfect').textContent = R.perfect; $('doneGood').textContent = R.good;
-  $('doneMiss').textContent = R.miss; $('doneBest').textContent = R.best;
+  $('doneMiss').textContent = R.miss; $('doneOut').textContent = R.outs; $('doneBest').textContent = R.best;
   $('doneRecord').hidden = !rec;
   $('doneAgain').textContent = S.demo ? 'Druk op spatie voor nog een ronde, Esc om te stoppen' : 'Zwaai om nog een ronde te spelen';
   R.endAt = performance.now();
   setPhase('done');
-  send({ type: 'round', score: R.score, perfect: R.perfect, good: R.good, miss: R.miss, best: R.best, balls: R.balls, record: rec });
+  send({ type: 'round', score: R.score, perfect: R.perfect, good: R.good, miss: R.miss, outs: R.outs, best: R.best, balls: R.balls, record: rec });
 }
 
 /* ---------- Ballen ---------- */
@@ -311,45 +319,134 @@ function ballPos(b, now) {
     }
     return [x, y, z];
   }
-  // terugslag
-  t = (now - b.tr) / 1000;
-  x = b.r0[0] + (b.r1[0] - b.r0[0]) / b.Tr * t;
-  y = b.r0[1] + (b.r1[1] - b.r0[1]) / b.Tr * t;
-  if (t <= b.Tr) z = b.r0[2] + b.vz * t - G / 2 * t * t;
-  else {
-    if (!b.bounced) { b.bounced = true; playBounce(0.35); }
-    var u2 = t - b.Tr, vzl = -(b.vz - G * b.Tr) * 0.5;
-    z = Math.max(0, vzl * u2 - G / 2 * u2 * u2);
-  }
-  return [x, y, z];
+  // terugslag: volg de vooraf berekende baan
+  var pts = b.sim.pts, f = (now - b.tr) / 1000 / b.sim.dt, i = Math.floor(f);
+  if (i >= pts.length - 1) return pts[pts.length - 1].slice();
+  var a = pts[i], c = pts[i + 1], u3 = f - i;
+  return [a[0] + (c[0] - a[0]) * u3, a[1] + (c[1] - a[1]) * u3, a[2] + (c[2] - a[2]) * u3];
 }
 
-function hitBall(b, d, speed, now) {
-  var c = court(), perfect = Math.abs(d) <= WIN_PERFECT;
-  var p = ballPos(b, now);
-  b.judged = true; b.kind = 'out'; b.tr = now; b.r0 = p; b.bounced = false; b.trail = [];
-  var cross = clamp(d / WIN_GOOD, -1, 1);
-  var tx = clamp(b.side * cross * c.Wd * 0.38 + (Math.random() - 0.5) * c.Wd * 0.12, -c.Wd * 0.42, c.Wd * 0.42);
-  var depth = clamp((speed - 30) / 70, 0, 1);
-  b.r1 = [tx, c.L * (0.62 + 0.28 * depth), 0];
-  b.Tr = clamp(1.5 - (speed - 40) / 70, 0.65, 1.6) * (c.L / 20);
-  b.vz = (0 - p[2] + G / 2 * b.Tr * b.Tr) / b.Tr;
+/* ---------- Balfysica van je terugslag ----------
+   Zwaartekracht, luchtweerstand, het net, stuitsen en bij padel de glazen wanden.
+   Uitkomst: 'in', 'out' (uit of rechtstreeks tegen het glas) of 'net' (in het net of te kort). */
+function simulateShot(p0, speedKmh, elDeg, azDeg) {
+  var c = court(), v = ballSpeed(speedKmh);
+  var el = elDeg * Math.PI / 180, az = azDeg * Math.PI / 180;
+  var vx = v * Math.cos(el) * Math.sin(az), vy = v * Math.cos(el) * Math.cos(az), vz = v * Math.sin(el);
+  var x = p0[0], y = p0[1], z = p0[2], dt = 1 / 240, t = 0, hw = c.Wd / 2, L = c.L, nY = L / 2;
+  var pts = [[x, y, z]], bounces = 0, outcome = null, tEvent = 0, netHit = false, apex = z, land = null, bounceTimes = [];
+  for (var i = 1; t < 3.4; i++) {
+    var sp = Math.sqrt(vx * vx + vy * vy + vz * vz);
+    vx -= DRAG * sp * vx * dt; vy -= DRAG * sp * vy * dt; vz -= (G + DRAG * sp * vz) * dt;
+    var py = y; x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
+    if (z > apex) apex = z;
+    if (!netHit && py < nY && y >= nY && z < c.net + 0.03) {
+      netHit = true; y = nY - 0.03; vy = -0.15 * vy; vx *= 0.3;
+      if (!outcome) { outcome = 'net'; tEvent = t; }
+    }
+    if (c.glass && y > nY) {
+      if (y > L && z < 3 && vy > 0) { if (!bounces && !outcome) { outcome = 'out'; tEvent = t; } y = L; vy = -0.7 * vy; }
+      if (Math.abs(x) > hw && z < 3) { if (!bounces && !outcome) { outcome = 'out'; tEvent = t; } x = (x > 0 ? 1 : -1) * hw; vx = -0.7 * vx; }
+    }
+    if (z <= 0 && vz < 0) {
+      z = 0; bounces++; bounceTimes.push(t);
+      if (bounces === 1) {
+        land = [x, y];
+        if (!outcome) { outcome = y < nY ? 'net' : ((y > L || Math.abs(x) > hw) ? 'out' : 'in'); tEvent = t; }
+      }
+      vz = -0.68 * vz; vx *= 0.85; vy *= 0.85;
+      if (bounces >= 4) break;
+    }
+    if (i % 4 === 0) pts.push([x, y, z]);
+  }
+  if (!outcome) { outcome = 'out'; tEvent = t; }
+  return { pts: pts, dt: 4 / 240, outcome: outcome, tEvent: tEvent, apex: apex, land: land, el: elDeg, bounceTimes: bounceTimes };
+}
 
-  var base = perfect ? 100 : 60, mult = 1 + Math.min(R.streak, 10) * 0.1;
-  var pts = Math.round((base + Math.max(0, Math.round(speed - 30))) * mult);
-  R.streak++; R.score += pts; if (perfect) R.perfect++; else R.good++;
+/* Hoek waarbij een neutrale zwaai (zonder opwaartse beweging) het net ruim haalt.
+   Waar de bal dan landt, volgt vanzelf uit je snelheid: traag is kort, heel hard gaat uit. */
+var NET_CLEAR = 0.6;
+function ballSpeed(racketKmh) { return clamp((racketKmh * (BALL_K[S.sport] || 1) + (REBOUND[S.level] || 11)) / 3.6, 5, 42); }
+/* Opwaartse zwaai: hoe meer je van laag naar hoog zwaait, hoe hoger de bal, tot ongeveer 55 graden (een echte lob).
+   Neerwaarts zwaaien drukt de bal omlaag. */
+function launchAngle(el0, lift) {
+  if (lift >= 0) return clamp(el0 + (55 - el0) * Math.min(lift, 60) / 45, el0, 66);
+  return clamp(el0 + 0.9 * Math.max(lift, -60), -10, el0);
+}
+function neutralElevation(p0, speedKmh) {
+  var c = court(), lo = -6, hi = 45, need = c.net + NET_CLEAR;
+  for (var k = 0; k < 18; k++) {
+    var mid = (lo + hi) / 2;
+    if (heightAtNet(p0, speedKmh, mid) < need) lo = mid; else hi = mid;
+  }
+  return hi;
+}
+function heightAtNet(p0, speedKmh, elDeg) {
+  var nY = court().L / 2, v = ballSpeed(speedKmh), e = elDeg * Math.PI / 180;
+  var vy = v * Math.cos(e), vz = v * Math.sin(e), y = p0[1], z = p0[2], dt = 1 / 120;
+  for (var t = 0; t < 4; t += dt) {
+    var sp = Math.sqrt(vy * vy + vz * vz);
+    vy -= DRAG * sp * vy * dt; vz -= (G + DRAG * sp * vz) * dt; y += vy * dt; z += vz * dt;
+    if (y >= nY) return z;
+    if (z <= 0) return -1;
+  }
+  return -1;
+}
+
+function hitBall(b, d, speed, lift, now) {
+  var c = court(), perfect = Math.abs(d) <= WIN_PERFECT, nY = c.L / 2;
+  var p = ballPos(b, now);
+  b.judged = true; b.kind = 'out'; b.tr = now; b.trail = []; b.bounceIdx = 0;
+  var el0 = neutralElevation(p, speed);
+  var hasLift = typeof lift === 'number' && isFinite(lift);
+  var el = hasLift ? launchAngle(el0, lift) : el0;
+  // vroeg = cross, laat = langs de lijn
+  var az = b.side * clamp(d / WIN_GOOD, -1, 1) * 16 - b.side * 3 + (Math.random() - 0.5) * 6;
+  b.sim = simulateShot(p, speed, el, az);
+
+  var timingPts = perfect ? 100 : 60;
+  if (perfect) R.perfect++; else R.good++;
   if (speed > R.best) R.best = Math.round(speed);
-  R.lastJudge = now;
+  R.pending++;
 
   playHit(speed / 60); if (perfect) playPerfect();
   burst(p, perfect);
   showVerdict(perfect ? 'Perfect' : 'Goed', perfect ? 'perfect' : 'good');
-  showPoints('+' + pts);
+  $('hudShot').className = 'shot';
   $('hudSpeed').textContent = Math.round(speed) + ' km/u';
-  $('hudSpeedLbl').textContent = b.side === sideFor('fh') ? 'forehand' : 'backhand';
+  $('hudSpeedLbl').textContent = (b.side === sideFor('fh') ? 'forehand' : 'backhand') + (hasLift ? ', ' + (lift >= 0 ? '+' : '') + Math.round(lift) + '° omhoog' : '');
   updateHud();
-  send({ type: 'result', verdict: perfect ? 'Perfect' : 'Goed', hit: true, swung: true, perfect: perfect, points: pts, speed: Math.round(speed) });
+  send({ type: 'result', verdict: perfect ? 'Perfect' : 'Goed', hit: true, swung: true, perfect: perfect, points: 0, speed: Math.round(speed) });
+  // langere slagen (lobs) krijgen meer tijd voor de volgende bal komt
+  R.nextLaunch = Math.max(R.nextLaunch, now + b.sim.tEvent * 1000 + 500);
+  setTimeout(function () { resolveShot(b, perfect, speed, timingPts); }, b.sim.tEvent * 1000);
 }
+
+function resolveShot(b, perfect, speed, timingPts) {
+  if (!R || S.phase !== 'play') return;
+  var sim = b.sim, c = court(), now = performance.now();
+  var lob = sim.el >= 26 && sim.apex >= 3.4;
+  var kind = lob ? 'Lob' : (speed >= 80 ? 'Harde slag' : 'Slag');
+  R.pending--; R.lastJudge = now;
+  if (sim.outcome === 'in') {
+    var deep = sim.land && sim.land[1] > c.L * 0.8;
+    var mult = 1 + Math.min(R.streak, 10) * 0.1;
+    var pts = Math.round((timingPts + Math.max(0, Math.round(speed - 30)) + (lob && deep ? 40 : 0)) * mult);
+    R.streak++; R.score += pts;
+    showPoints('+' + pts);
+    showShot(kind + (deep ? ', diep' : '') + ', binnen');
+    send({ type: 'outcome', outcome: 'in', text: kind + (deep ? ', diep' : ''), points: pts });
+  } else {
+    R.streak = 0; R.outs++;
+    var txt = sim.outcome === 'net' ? 'In het net' : 'Uit';
+    playMiss();
+    showVerdict(txt, 'bad');
+    showShot(kind + ', timing ' + (perfect ? 'perfect' : 'goed'));
+    send({ type: 'outcome', outcome: sim.outcome, text: txt, points: 0 });
+  }
+  updateHud();
+}
+function showShot(t) { var el = $('hudShot'); el.textContent = t; el.className = 'shot show'; clearTimeout(showShot._t); showShot._t = setTimeout(function () { el.className = 'shot'; }, 1600); }
 
 function finalizeMiss(b, now) {
   b.judged = true;
@@ -367,7 +464,7 @@ function sideFor(dir) {
 }
 
 /* Slag binnen: tp = geschatte toptijd van de zwaai op dit toestel */
-function onSwing(side, speed, lagMs) {
+function onSwing(side, speed, lagMs, lift) {
   var now = performance.now(), tp = now - lagMs - (S.demo ? 0 : NET_MS);
   if (S.phase === 'done') { if (now - R.endAt > 2000) startCountdown(); return; }
   if (S.phase !== 'play' || !R) return;
@@ -375,7 +472,7 @@ function onSwing(side, speed, lagMs) {
   if (!b || b.judged) return;
   var d = tp - b.tContact;
   if (Math.abs(d) <= WIN_GOOD) {
-    if (side === b.side) hitBall(b, d, speed, now); else b.wrong = true;
+    if (side === b.side) hitBall(b, d, speed, lift, now); else b.wrong = true;
     return;
   }
   if (side === b.side && Math.abs(d) < 700 && (b.cand == null || Math.abs(d) < Math.abs(b.cand))) b.cand = d;
@@ -498,6 +595,10 @@ function drawZones(now) {
 
 function drawBall(b, now) {
   var p = ballPos(b, now);
+  if (b.kind === 'out' && b.sim) {
+    var tt = (now - b.tr) / 1000;
+    while (b.bounceIdx < b.sim.bounceTimes.length && tt >= b.sim.bounceTimes[b.bounceIdx]) { b.bounceIdx++; playBounce(b.bounceIdx === 1 ? 0.45 : 0.2); }
+  }
   b.trail.push(p); if (b.trail.length > 7) b.trail.shift();
   var sh = proj(p[0], p[1], 0), q = proj(p[0], p[1], p[2]), r = Math.max(3, 0.14 * q.s);
   ctx.beginPath(); ctx.ellipse(sh.x, sh.y, r * 1.1, r * 0.4, 0, 0, Math.PI * 2);
@@ -519,6 +620,87 @@ function drawBall(b, now) {
   return p;
 }
 
+/* ---------- Rackets ----------
+   Een spookracket op de plek waar je de bal moet raken, en je eigen racket dat meebeweegt met je telefoon. */
+function v3add(a, b, k) { return [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k]; }
+function v3norm(a) { var n = Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) || 1; return [a[0] / n, a[1] / n, a[2] / n]; }
+function v3cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+function v3dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+
+function drawRacket(H, yv, zv, mode) {
+  yv = v3norm(yv);
+  zv = v3norm(v3add(zv, yv, -v3dot(zv, yv)));
+  var xv = v3cross(yv, zv), k = RACKET_SCALE, sp = S.sport;
+  var hw = (sp === 'tennis' ? 0.135 : sp === 'pickleball' ? 0.10 : 0.13) * k;
+  var hl = (sp === 'tennis' ? 0.17 : sp === 'pickleball' ? 0.11 : 0.15) * k;
+  var handle = (sp === 'tennis' ? 0.2 : 0.14) * k;
+  var outline = [], shadow = [];
+  for (var i = 0; i < 28; i++) {
+    var a = i / 28 * Math.PI * 2, cx = Math.cos(a), sy = Math.sin(a);
+    var w = sp === 'pickleball' ? (Math.abs(cx) > 0.7 ? 0.98 : 1) : (sy < 0 ? 0.92 + 0.08 * (1 + sy) : 1); // padel/tennis iets smaller naar de hals
+    var P = v3add(v3add(H, xv, hw * cx * w), yv, hl * sy);
+    outline.push(proj.apply(null, P)); shadow.push(proj(P[0], P[1], 0));
+  }
+  var camDir = v3norm([CAM.x - H[0], CAM.y - H[1], CAM.z - H[2]]);
+  var facing = v3dot(zv, camDir) > 0;
+  var h0 = proj.apply(null, v3add(H, yv, -hl)), h1 = proj.apply(null, v3add(H, yv, -hl - handle));
+  ctx.lineCap = 'round';
+  if (mode === 'ghost' || mode === 'ghost-hot') {
+    var col = mode === 'ghost-hot' ? 'rgba(185,230,49,.95)' : 'rgba(255,255,255,.5)';
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath(); outline.forEach(function (q, j) { if (j) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
+    ctx.strokeStyle = col; ctx.lineWidth = Math.max(3, h0.s * 0.03); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(h0.x, h0.y); ctx.lineTo(h1.x, h1.y); ctx.stroke();
+    ctx.setLineDash([]);
+    return;
+  }
+  // eigen racket, met schaduw op de baan zodat je ziet waar hij is
+  ctx.beginPath(); shadow.forEach(function (q, j) { if (j) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
+  ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(h0.x, h0.y); ctx.lineTo(h1.x, h1.y);
+  ctx.strokeStyle = '#E8E8EA'; ctx.lineWidth = Math.max(4, h0.s * 0.05); ctx.stroke();
+  ctx.beginPath(); outline.forEach(function (q, j) { if (j) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
+  ctx.fillStyle = facing ? 'rgba(24,24,28,.88)' : 'rgba(70,70,76,.88)'; ctx.fill();
+  ctx.strokeStyle = '#B9E631'; ctx.lineWidth = Math.max(3, h0.s * 0.035); ctx.stroke();
+  if (sp === 'padel') { // gaatjes
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    for (var gx = -2; gx <= 2; gx++) for (var gy = -2; gy <= 2; gy++) {
+      if (gx * gx / 6 + gy * gy / 6 > 1) continue;
+      var q = proj.apply(null, v3add(v3add(H, xv, gx * hw * 0.32), yv, gy * hl * 0.32));
+      ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(1, q.s * 0.01), 0, Math.PI * 2); ctx.fill();
+    }
+  } else if (sp === 'tennis') { // snaren
+    ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1;
+    for (var sx = -3; sx <= 3; sx++) {
+      var f = sx / 4, hh = Math.sqrt(1 - f * f) * hl * 0.9;
+      var s1 = proj.apply(null, v3add(v3add(H, xv, f * hw), yv, -hh)), s2 = proj.apply(null, v3add(v3add(H, xv, f * hw), yv, hh));
+      ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
+    }
+  }
+}
+
+function drawGhost(now) {
+  var b = R && R.inc;
+  if (S.phase !== 'play' || !b || b.judged) return;
+  var left = (b.tContact - now) / 1000;
+  if (left > 1.3 || left < -WIN_GOOD / 1000) return;
+  var yv = v3norm([b.side * 1, 0.28, 0.12]);
+  var hot = Math.abs(left * 1000) <= WIN_PERFECT;
+  drawRacket(b.c, yv, [0, 1, 0], hot ? 'ghost-hot' : 'ghost');
+}
+
+var rkDraw = null;
+function drawLiveRacket(now) {
+  if (!S.rk || now - S.rk.t > 600 || S.demo || !(S.phase === 'play' || S.phase === 'countdown' || S.phase === 'done')) { rkDraw = null; return; }
+  var ty = v3norm(S.rk.y), tz = v3norm(S.rk.z);
+  if (!rkDraw) rkDraw = { y: ty, z: tz };
+  rkDraw.y = v3norm(v3add(rkDraw.y, [ty[0] - rkDraw.y[0], ty[1] - rkDraw.y[1], ty[2] - rkDraw.y[2]], 0.5));
+  rkDraw.z = v3norm(v3add(rkDraw.z, [tz[0] - rkDraw.z[0], tz[1] - rkDraw.z[1], tz[2] - rkDraw.z[2]], 0.5));
+  var yv = rkDraw.y, pivot = [0.25 * yv[0], 0.4, 1.05];
+  var H = v3add(pivot, yv, 0.95);
+  drawRacket(H, yv, rkDraw.z, 'live');
+}
+
 function drawParts(now) {
   parts = parts.filter(function (pt) { return now - pt.t < 600; });
   parts.forEach(function (pt) {
@@ -534,12 +716,12 @@ function frame(now) {
     if (R.balls < BALLS && (!R.inc || R.inc.judged) && now >= R.nextLaunch) launchBall(now);
     var b = R.inc;
     if (b && !b.judged && now > b.tContact + LATE_FINAL) finalizeMiss(b, now);
-    if (R.balls >= BALLS && R.inc && R.inc.judged && now > R.lastJudge + 1300) endRound();
+    if (R.balls >= BALLS && R.inc && R.inc.judged && R.pending === 0 && now > R.lastJudge + 1300) endRound();
   }
   // ballen opruimen
   balls = balls.filter(function (b) {
     if (b.kind === 'in') return now < b.t0 + b.Tf * 1000 + 900;
-    return now < b.tr + (b.Tr + 1.0) * 1000;
+    return now < b.tr + (b.sim.pts.length * b.sim.dt + 0.4) * 1000;
   });
 
   drawCourt();
@@ -548,7 +730,9 @@ function frame(now) {
   far.forEach(function (b) { drawBall(b, now); });
   drawNet();
   drawZones(now);
+  drawGhost(now);
   near.forEach(function (b) { drawBall(b, now); });
+  drawLiveRacket(now);
   drawParts(now);
   drawNearGlass();
   requestAnimationFrame(frame);
@@ -599,7 +783,9 @@ function onData(m) {
   } else if (m.type === 'again') {
     if (S.phase === 'done') startCountdown();
   } else if (m.type === 'swing') {
-    onSwing(sideFor(m.dir), +m.speed || 0, clamp(+m.lag || 0, 0, 400));
+    onSwing(sideFor(m.dir), +m.speed || 0, clamp(+m.lag || 0, 0, 400), (typeof m.lift === 'number') ? m.lift : null);
+  } else if (m.type === 'o') {
+    if (Array.isArray(m.y) && Array.isArray(m.z)) S.rk = { y: m.y, z: m.z, t: performance.now() };
   } else if (m.type === 'bye') {
     phoneGone();
   }
@@ -610,7 +796,7 @@ function phoneGone() {
   if (S.demo) return;
   R = null; balls = [];
   setPhase('pair');
-  setStatus('Verbinding met je telefoon verbroken. Vul de code opnieuw in om verder te spelen.', true);
+  setStatus('Verbinding met je telefoon verbroken. Tik de code opnieuw in om verder te spelen.', true);
 }
 
 /* ---------- Bediening op dit scherm ---------- */
@@ -626,7 +812,7 @@ function startDemo() { unlockAudio(); S.demo = true; startCountdown(); }
 
 document.addEventListener('keydown', function (e) {
   if (S.demo && S.phase === 'play' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-    e.preventDefault(); onSwing(e.key === 'ArrowLeft' ? -1 : 1, 55 + Math.random() * 25, 0); return;
+    e.preventDefault(); if (e.shiftKey) onSwing(e.key === 'ArrowLeft' ? -1 : 1, 40 + Math.random() * 12, 0, 32 + Math.random() * 10); else onSwing(e.key === 'ArrowLeft' ? -1 : 1, 50 + Math.random() * 30, 0, (Math.random() - 0.5) * 8); return;
   }
   if (S.demo && S.phase === 'done' && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); startCountdown(); return; }
   if (e.key === 'Escape' && S.demo) { S.demo = false; R = null; balls = []; setPhase(conn ? 'connected' : 'pair'); }

@@ -81,9 +81,11 @@ h3{font-size:15px;font-weight:600;color:var(--ink2);margin:28px 0 10px}
 
 /* Tab bar (glass) */
 .tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:4px;padding:6px;border-radius:99px;background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:20}
-.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:92px;padding:8px 14px;border-radius:99px;font-size:12px;font-weight:600;color:var(--ink2)}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:74px;padding:8px 10px;border-radius:99px;font-size:12px;font-weight:600;color:var(--ink2)}
 .tabbar svg{width:22px;height:22px}
 .tabbar button[aria-current="page"]{background:var(--track);color:var(--ink)}
+.tabbar button{position:relative}
+.tabdot{position:absolute;top:6px;right:18px;width:9px;height:9px;border-radius:50%;background:#FF3B30}
 
 /* Stats */
 .bars{display:flex;align-items:flex-end;gap:8px;height:150px;padding:18px 16px 12px;background:var(--surface);border-radius:24px}
@@ -180,8 +182,17 @@ details[open] summary::after{transform:rotate(225deg)}
 .keypad button{height:52px;border-radius:14px;background:var(--track);font-size:24px;font-weight:600;color:var(--ink)}
 .keypad button:active{background:var(--line)}
 .tv-row{display:grid;grid-template-columns:1fr;gap:0}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chips button{padding:12px 10px;border-radius:14px;background:var(--track);font-size:14px;font-weight:600;color:var(--ink2);text-align:left;line-height:1.25}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chips button:disabled{opacity:.45}
+.tv-sub.small{font-size:13px;margin-top:8px}
+#tvPlay .tv-lbl{text-align:left}
 .tv-big{font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:34px;line-height:1.1;text-align:center}
 .tv-sub{color:var(--ink2);font-size:15px;text-align:center;margin:12px 0 0}
+.ready-ill{width:110px;height:110px;align-self:center;margin-bottom:8px}
+.steady{height:10px;border-radius:99px;background:var(--track);overflow:hidden;margin:26px 20px 0}
+.steady i{display:block;height:100%;width:0;background:var(--lime);border-radius:99px;transition:width .1s linear}
 .dots{display:flex;gap:16px;justify-content:center;margin-top:28px}
 .dots i{width:22px;height:22px;border-radius:50%;background:var(--track);transition:background .2s,transform .2s}
 .dots i.on{background:var(--lime);transform:scale(1.15)}
@@ -190,10 +201,59 @@ details[open] summary::after{transform:rotate(225deg)}
 .tv-verdict.bad{color:var(--amber)}
 #tvPlay .textbtn{align-self:center;margin-top:26px}
 
+/* Profiel en accounts */
+.pf-note{background:var(--surface);border-radius:20px;padding:18px;font-size:15px;color:var(--ink2)}
+.pf-note b{color:var(--ink);display:block;margin-bottom:6px}
+.pf-note p{margin:0}
+.pf-intro{font-size:15px;color:var(--ink2);margin:0 4px 16px}
+.pf-form{margin-top:16px}
+.fld{display:block;margin-bottom:12px}
+.fld span{display:block;font-size:14px;font-weight:600;color:var(--ink2);margin:0 0 6px 4px}
+.fld input,.inline input{width:100%;padding:14px 16px;border-radius:14px;border:0;background:var(--surface);color:var(--ink);font:inherit;font-size:16px;box-shadow:0 0 0 1px var(--line)}
+.fld input:focus,.inline input:focus{outline:2px solid var(--ink);outline-offset:0}
+.pf-center{display:block;margin:14px auto 0}
+.pf-head{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.pf-headtxt{min-width:0}
+.pf-name{font-family:var(--num);font-variation-settings:"wdth" 112;font-weight:800;font-size:26px;line-height:1.1;word-break:break-word}
+.pf-code{margin-top:4px;padding:4px 10px;border-radius:99px;background:var(--track);font-size:14px;font-weight:600;color:var(--ink)}
+.pf-sync{font-size:13px;color:var(--ink3);margin-top:6px}
+.avatar{flex:none;width:40px;height:40px;border-radius:50%;background:var(--track) center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--ink2)}
+.avatar.big{width:72px;height:72px;font-size:26px}
+.selrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.sel{min-width:0;display:block}
+.sel span{display:block;font-size:13px;color:var(--ink2);margin:0 0 4px 2px}
+.sel select{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:10px 30px 10px 12px;border-radius:12px;border:0;background:var(--track) no-repeat right 11px center/12px 8px;color:var(--ink);font:inherit;font-size:15px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238E8E93' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.selrow > *{min-width:0}
+.board{margin:6px 0 4px}
+.brow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);color:var(--ink)}
+.brow:last-child{border-bottom:0}
+.brow .rank{width:22px;text-align:right;font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;color:var(--ink2)}
+.brow .who{flex:1;min-width:0}
+.brow .who div:first-child{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .who div+div{font-size:13px;color:var(--ink2)}
+.brow .val{font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:19px;white-space:nowrap}
+.brow.me{background:rgba(185,230,49,.16);border-radius:12px;padding-left:8px;padding-right:8px}
+.brow .acts{display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;justify-content:center;padding:11px 16px;border-radius:99px;background:var(--ink);color:var(--bg);font-size:15px;font-weight:600;white-space:nowrap;cursor:pointer}
+.pill.ghost{background:var(--track);color:var(--ink)}
+.pill.sm{padding:7px 12px;font-size:13px}
+.pill.photo{margin:12px 0 4px;background:var(--track);color:var(--ink)}
+#meLogout{margin-top:12px}
+.inline{display:flex;gap:8px;align-items:center}
+.inline input{flex:1}
+.pf-sub{font-weight:700;color:var(--ink);font-size:15px;margin:18px 0 6px}
+.pf-small{font-size:13px;color:var(--ink2);margin:0 0 8px}
+.start.small{padding:14px;font-size:16px;margin-top:4px}
+.badge{display:inline-block;min-width:20px;padding:1px 7px;margin-left:6px;border-radius:99px;background:#FF3B30;color:#fff;font-size:12px;font-weight:700;text-align:center}
+summary .badge{margin-right:auto}
+
 /* Sheet */
 .backdrop{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center}
 .sheet{width:100%;max-width:560px;background:var(--bg);border-radius:30px 30px 0 0;padding:26px 24px calc(env(safe-area-inset-bottom,0px) + 24px);max-height:92vh;overflow:auto}
 .sheet h2{margin-top:0}
+.sheet-p{font-size:16px;color:var(--ink2);margin:0 0 14px}
+.sheet-steps{margin:0 0 20px;padding-left:22px;font-size:16px;line-height:1.5}
 .how{display:flex;gap:16px;align-items:flex-start;margin-bottom:18px}
 .how svg{flex:none;width:52px;height:52px}
 .how p{margin:0;font-size:16px}
@@ -313,6 +373,7 @@ details[open] summary::after{transform:rotate(225deg)}
     <summary>Zo houd je je telefoon vast</summary>
     <div class="dbody">
       <p>Houd je telefoon vast zoals je racket. De bovenkant van de telefoon is de racketkop en het scherm is je slagvlak.</p>
+      <p>Begin elke slag vanuit de wachthouding: racket op navelhoogte voor je, recht naar voren en loodrecht op je buik, niet al in forehandpositie.</p>
       <p>Maak je slag zoals op het veld, met een vlotte zwaai door het raakpunt. Een duwende of trage beweging geeft geen slaggeluid.</p>
     </div>
   </details>
@@ -334,7 +395,108 @@ details[open] summary::after{transform:rotate(225deg)}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br>SwingLab versie 4</p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 7</span></p>
+</main>
+
+<!-- ============ PROFIEL ============ -->
+<main id="view-profile" class="view" aria-label="Profiel">
+  <h2>Profiel</h2>
+
+  <div id="pfNoConfig" class="pf-note" hidden>
+    <b>Accounts zijn nog niet ingesteld</b>
+    <p>Vul in het bestand config.js de gegevens van je Supabase-project in. Daarna kan iedereen hier een account maken. Zonder account werkt SwingLab gewoon verder.</p>
+  </div>
+
+  <div id="pfLoggedOut" hidden>
+    <p class="pf-intro">Met een account bewaar je je statistieken op al je toestellen, speel je tegen vrienden en zie je wie bovenaan staat. Zonder account werkt SwingLab gewoon verder.</p>
+    <div class="seg" role="group" aria-label="Inloggen of account maken" id="segAuth"><button type="button" data-auth="login">Inloggen</button><button type="button" data-auth="register">Account maken</button></div>
+    <form id="authForm" class="pf-form" novalidate>
+      <label class="fld" id="fldName"><span>Naam</span><input id="authName" type="text" autocomplete="nickname" maxlength="40" placeholder="Zoals anderen je zien"></label>
+      <label class="fld"><span>E-mail</span><input id="authEmail" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false"></label>
+      <label class="fld"><span>Wachtwoord</span><input id="authPass" type="password" autocomplete="current-password" placeholder="Minstens 6 tekens"></label>
+      <button type="submit" class="start" id="authSubmit">Inloggen</button>
+    </form>
+    <button type="button" class="textbtn pf-center" id="authForgot">Wachtwoord vergeten?</button>
+  </div>
+
+  <div id="pfRecover" hidden>
+    <p class="pf-intro">Kies een nieuw wachtwoord voor je account.</p>
+    <form id="recoverForm" class="pf-form" novalidate>
+      <label class="fld"><span>Nieuw wachtwoord</span><input id="recoverPass" type="password" autocomplete="new-password" placeholder="Minstens 6 tekens"></label>
+      <button type="submit" class="start">Wachtwoord opslaan</button>
+    </form>
+  </div>
+
+  <div id="pfLoggedIn" hidden>
+    <div class="pf-head">
+      <div class="avatar big" id="pfAvatar"></div>
+      <div class="pf-headtxt">
+        <div class="pf-name" id="pfName"></div>
+        <button type="button" class="pf-code" id="pfCode"></button>
+        <div class="pf-sync" id="pfSync"></div>
+      </div>
+    </div>
+
+    <details id="dBoard" open>
+      <summary>Klassement</summary>
+      <div class="dbody">
+        <div class="selrow">
+          <label class="sel"><span>Wat</span><select id="bdKind"><option value="tv">Tv-score</option><option value="week">Goede slagen, deze week</option></select></label>
+          <label class="sel"><span>Met wie</span><select id="bdScope"></select></label>
+        </div>
+        <div class="selrow" id="bdTvOpts">
+          <label class="sel"><span>Sport</span><select id="bdSport"><option value="padel">Padel</option><option value="tennis">Tennis</option><option value="pickleball">Pickleball</option></select></label>
+          <label class="sel"><span>Training</span><select id="bdDrill"></select></label>
+          <label class="sel"><span>Tempo</span><select id="bdLevel"><option value="rustig">Rustig</option><option value="normaal">Normaal</option><option value="snel">Snel</option></select></label>
+          <label class="sel"><span>Periode</span><select id="bdPeriod"><option value="week">Deze week</option><option value="all">Altijd</option></select></label>
+        </div>
+        <div class="board" id="bdList"></div>
+      </div>
+    </details>
+
+    <details id="dChal">
+      <summary>Uitdagingen <span class="badge" id="chBadge" hidden></span></summary>
+      <div class="dbody">
+        <div id="chList" class="board"></div>
+        <div class="pf-sub">Nieuwe uitdaging</div>
+        <p id="chWhat" class="pf-small"></p>
+        <div class="selrow"><label class="sel"><span>Tegen</span><select id="chFriend"></select></label></div>
+        <button type="button" class="start small" id="chSend">Daag uit</button>
+      </div>
+    </details>
+
+    <details id="dFriends">
+      <summary>Vrienden <span class="badge" id="frBadge" hidden></span></summary>
+      <div class="dbody">
+        <div id="frList" class="board"></div>
+        <div class="pf-sub">Vriend toevoegen</div>
+        <p class="pf-small">Vraag je vriend naar zijn vriendcode. Die staat bovenaan zijn profiel.</p>
+        <div class="inline"><input id="frCode" type="text" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="Vriendcode"><button type="button" class="pill" id="frAdd">Toevoegen</button></div>
+      </div>
+    </details>
+
+    <details id="dGroups">
+      <summary>Club of groep</summary>
+      <div class="dbody">
+        <div id="grList" class="board"></div>
+        <div class="pf-sub">Lid worden</div>
+        <div class="inline"><input id="grCode" type="text" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="Groepscode"><button type="button" class="pill" id="grJoin">Lid worden</button></div>
+        <div class="pf-sub">Nieuwe groep maken</div>
+        <div class="inline"><input id="grName" type="text" maxlength="60" placeholder="Naam, bijvoorbeeld je club"><button type="button" class="pill" id="grCreate">Maken</button></div>
+      </div>
+    </details>
+
+    <details id="dMe">
+      <summary>Profiel bewerken</summary>
+      <div class="dbody">
+        <div class="inline"><input id="meName" type="text" maxlength="40" placeholder="Naam"><button type="button" class="pill" id="meSave">Opslaan</button></div>
+        <label class="pill photo">Profielfoto kiezen<input id="mePhoto" type="file" accept="image/*" hidden></label>
+        <p class="pf-small" id="meEmail"></p>
+        <button type="button" class="pill ghost" id="meLogout">Uitloggen</button>
+        <button type="button" class="danger" id="meDelete">Account verwijderen</button>
+      </div>
+    </details>
+  </div>
 </main>
 
 <nav class="tabbar" aria-label="Hoofdmenu">
@@ -346,6 +508,9 @@ details[open] summary::after{transform:rotate(225deg)}
   </button>
   <button type="button" data-view="settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Instellingen
+  </button>
+  <button type="button" data-view="profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg>Profiel<i class="tabdot" id="tabDot" hidden></i>
   </button>
 </nav>
 
@@ -389,6 +554,10 @@ details[open] summary::after{transform:rotate(225deg)}
     <p class="iostip" id="iosTip" hidden>Zet SwingLab op je beginscherm via Delen en Zet op beginscherm, en open hem daar. In Safari kan iOS bij een zwaai "Herstel typen" tonen.</p>
     <p class="tv-lead">Open deze pagina op je tv of laptop:</p>
     <button type="button" class="urlbox" id="tvUrl" aria-label="Link kopiëren"></button>
+    <div class="tv-lbl" id="lblTvSport">Sport</div>
+    <div class="seg" role="group" aria-labelledby="lblTvSport" id="segTvSport"><button type="button" data-sport="padel">Padel</button><button type="button" data-sport="tennis">Tennis</button><button type="button" data-sport="pickleball">Pickleball</button></div>
+    <div class="tv-lbl" id="lblDrill">Training</div>
+    <div class="chips" role="group" aria-labelledby="lblDrill" id="tvDrills"></div>
     <div class="tv-row">
       <div><div class="tv-lbl" id="lblHand">Ik speel met</div>
         <div class="seg" role="group" aria-labelledby="lblHand" id="segHand"><button type="button" data-hand="right">Rechts</button><button type="button" data-hand="left">Links</button></div></div>
@@ -407,6 +576,17 @@ details[open] summary::after{transform:rotate(225deg)}
 
   <div class="tv-step" id="tvBusy" hidden><div class="tv-big">Verbinden…</div><p class="tv-sub">Even geduld.</p></div>
 
+  <div class="tv-step" id="tvReady" hidden>
+    <svg class="ready-ill" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+      <circle cx="60" cy="22" r="10"/><path d="M60 32v40M60 72l-14 30M60 72l14 30M60 44l-16 14h22"/>
+      <path d="M66 58h30" stroke="#B9E631" stroke-width="5"/><ellipse cx="104" cy="58" rx="9" ry="6" stroke="#B9E631"/>
+    </svg>
+    <div class="tv-big">Neem de wachthouding aan</div>
+    <p class="tv-sub">Houd je telefoon als je racket op navelhoogte voor je, recht naar voren naar de tv, loodrecht op je buik. Hou hem even stil.</p>
+    <div class="steady"><i id="tvSteady"></i></div>
+    <p class="tv-sub small" id="tvReadyHint">Begin ook elke slag vanuit deze houding.</p>
+  </div>
+
   <div class="tv-step" id="tvCalib" hidden>
     <div class="tv-big">Maak 2 forehands</div>
     <p class="tv-sub">Met het scherm naar voren, zoals bij een echte forehand. Zo weet SwingLab welke kant je forehand is.</p>
@@ -416,11 +596,29 @@ details[open] summary::after{transform:rotate(225deg)}
   <div class="tv-step" id="tvPlay" hidden>
     <div class="tv-verdict num" id="tvVerdict">Kijk naar je tv</div>
     <p class="tv-sub" id="tvSub">Het scherm is je forehandkant, de achterkant je backhand.</p>
-    <button type="button" class="textbtn" id="tvRecal">Opnieuw kalibreren</button>
+    <div class="tv-lbl" id="lblNextDrill">Training voor de volgende ronde</div>
+    <div class="chips" role="group" aria-labelledby="lblNextDrill" id="tvDrillsPlay"></div>
+    <p class="tv-sub small" id="tvDrillHint">Kiezen kan zodra de ronde voorbij is.</p>
+    <button type="button" class="textbtn" id="tvRecal">Wachthouding opnieuw instellen</button>
   </div>
 
   <button type="button" class="hold" id="tvStop" hidden><i></i><span>Houd ingedrukt om te stoppen</span></button>
 </section>
+
+<!-- ============ IPHONE: BEGINSCHERM ============ -->
+<div class="backdrop" id="installSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="inTitle">
+    <h2 id="inTitle">Open SwingLab vanaf je beginscherm</h2>
+    <p class="sheet-p">In Safari onthoudt je iPhone wat je eerder typte, bijvoorbeeld in de adresbalk of op een andere website. Bij een zwaai denkt hij dat je schudt, en vraagt hij of je dat typen wil herstellen. Als app op je beginscherm heeft SwingLab een eigen venster en gebeurt dat niet.</p>
+    <ol class="sheet-steps">
+      <li>Tik onderaan in Safari op <b>Delen</b>, het vierkantje met de pijl.</li>
+      <li>Kies <b>Zet op beginscherm</b> en tik op <b>Voeg toe</b>.</li>
+      <li>Sluit Safari en open SwingLab via het nieuwe icoon.</li>
+    </ol>
+    <button type="button" class="start" id="btnInstallOk">Begrepen</button>
+    <button type="button" class="textbtn" id="btnInstallSkip" style="display:block;margin:16px auto 0">Toch in Safari verdergaan</button>
+  </div>
+</div>
 
 <!-- ============ UITLEG (eerste keer) ============ -->
 <div class="backdrop" id="onboard" hidden>
@@ -438,12 +636,17 @@ details[open] summary::after{transform:rotate(225deg)}
       <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M26 6l18 8v12c0 10-8 17-18 20C16 43 8 36 8 26V14z"/><path d="M19 26l5 5 9-10"/></svg>
       <p><b>Houd hem stevig vast</b>Gebruik een hoesje met polskoord en houd twee meter vrije ruimte rondom je.</p>
     </div>
+    <div class="how">
+      <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="18" cy="10" r="5"/><path d="M18 15v18M18 33l-6 13M18 33l6 13M18 21l-6 7h10"/><path d="M22 28h18" stroke="#B9E631" stroke-width="3"/><ellipse cx="44" cy="28" rx="5" ry="3.5" stroke="#B9E631"/></svg>
+      <p><b>Start vanuit de wachthouding</b>Racket op navelhoogte voor je, recht naar voren, loodrecht op je buik. Niet al in forehandpositie.</p>
+    </div>
     <button type="button" class="start" id="btnOnboardOk">Begrepen</button>
   </div>
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
 
+<script src="config.js"></script>
 <script>
 (function () {
 'use strict';
@@ -473,12 +676,24 @@ var MODE_HINTS = {
   }
 };
 var ONSET_KMH = 15;
+/* Trainingen op de tv (zelfde ids als in tv.html) */
+var TV_DRILLS = {
+  padel:      [['basis', 'Slagen vanaf achter'], ['volley', 'Volleys aan het net'], ['bandeja', 'Bandeja en smash'], ['glas', 'Spelen met het glas'], ['mix', 'Mix van alles']],
+  tennis:     [['basis', 'Rally vanaf de baseline'], ['return', 'Return van service'], ['volley', 'Volleys aan het net'], ['smash', 'Smash op lobs'], ['mix', 'Mix van alles']],
+  pickleball: [['basis', 'Drives vanaf achter'], ['dink', 'Dinks aan de kitchen'], ['volley', 'Volleys aan de kitchen'], ['smash', 'Smash op lobs'], ['mix', 'Mix van alles']]
+};
+function curTvDrill() {
+  var sp = data.settings.sport, id = data.settings.drills[sp], l = TV_DRILLS[sp];
+  for (var i = 0; i < l.length; i++) if (l[i][0] === id) return id;
+  return 'basis';
+}
 
 function clone(o) { return JSON.parse(JSON.stringify(o)); }
 function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
 
 var DEFAULTS = {
-  settings: { sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, hand: 'right', level: 'normaal', thresholds: clone(DEFAULT_THRESHOLDS) },
+  settings: { sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, hand: 'right', level: 'normaal', drills: { padel: 'basis', tennis: 'basis', pickleball: 'basis' }, thresholds: clone(DEFAULT_THRESHOLDS) },
+  meta: { settingsAt: 0 },
   stats: { total: 0, hits: 0, timeMs: 0, perSport: { padel: 0, tennis: 0, pickleball: 0 }, best: { padel: 0, tennis: 0, pickleball: 0 }, days: {}, sessions: [] }
 };
 
@@ -505,12 +720,18 @@ function load() {
   if (!SPORTS[d.settings.sport]) d.settings.sport = 'padel';
   if (d.settings.mode !== 'power' && d.settings.mode !== 'control') d.settings.mode = 'power';
   if (d.settings.hand !== 'left') d.settings.hand = 'right';
+  if (!isObj(d.settings.drills)) d.settings.drills = { padel: 'basis', tennis: 'basis', pickleball: 'basis' };
   if (['rustig', 'normaal', 'snel'].indexOf(d.settings.level) < 0) d.settings.level = 'normaal';
   return d;
 }
 var data = load();
+var lastSettingsJson = JSON.stringify(data.settings);
+function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+  var sj = JSON.stringify(data.settings), settingsChanged = sj !== lastSettingsJson;
+  if (settingsChanged) { lastSettingsJson = sj; data.meta.settingsAt = Date.now(); }
+  saveLocal();
+  if (typeof ME !== 'undefined' && ME) { cloudSoon(); if (settingsChanged) { clearTimeout(save._st); save._st = setTimeout(cloudPushSettings, 1500); } }
 }
 
 function pad2(n) { return (n < 10 ? '0' : '') + n; }
@@ -628,7 +849,7 @@ function buzz(pattern) {
 }
 
 /* ---------- Weergave: Vandaag ---------- */
-function todayRec() { return data.stats.days[dayKey()] || { s: 0, h: 0 }; }
+function todayRec() { return VS().days[dayKey()] || { s: 0, h: 0 }; }
 
 function renderHome() {
   var s = data.settings, rec = todayRec();
@@ -638,12 +859,12 @@ function renderHome() {
   $('goalRing').setAttribute('stroke-dashoffset', String(339.3 * (1 - frac)));
   $('todayDone').hidden = rec.h < s.goal;
 
-  var st = streaks(data.stats.days);
+  var st = streaks(VS().days);
   $('factStreak').textContent = st.current;
   $('factStreakLbl').textContent = st.current === 1 ? 'dag op rij' : 'dagen op rij';
-  $('factBest').textContent = fmt(data.stats.best[s.sport] || 0);
+  $('factBest').textContent = fmt(VS().best[s.sport] || 0);
   $('factBestLbl').textContent = 'km/u record ' + SPORTS[s.sport].name.toLowerCase();
-  $('factTotal').textContent = fmt(data.stats.total);
+  $('factTotal').textContent = fmt(VS().total);
 
   Array.prototype.forEach.call(document.querySelectorAll('#segSport button'), function (b) {
     b.setAttribute('aria-pressed', String(b.getAttribute('data-sport') === s.sport));
@@ -665,7 +886,7 @@ function fmtDur(ms) {
   return Math.floor(m / 60) + ' u ' + pad2(m % 60);
 }
 function renderStats() {
-  var days = data.stats.days, goal = data.settings.goal, today = new Date(), vals = [], max = 1, i;
+  var days = VS().days, goal = data.settings.goal, today = new Date(), vals = [], max = 1, i;
   var names = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
   for (i = 6; i >= 0; i--) {
     var d = addDays(today, -i), r = days[dayKey(d)] || { s: 0, h: 0 };
@@ -679,18 +900,18 @@ function renderStats() {
   }).join('');
 
   var st = streaks(days), dayCount = Object.keys(days).filter(function (k) { return days[k].s > 0; }).length;
-  var ratio = data.stats.total ? Math.round(data.stats.hits / data.stats.total * 100) : 0;
+  var ratio = VS().total ? Math.round(VS().hits / VS().total * 100) : 0;
   $('totalsList').innerHTML =
-    rowHTML('Slagen', fmt(data.stats.hits) + ' goed (' + ratio + '%)', fmt(data.stats.total)) +
-    rowHTML('Trainingen', dayCount + (dayCount === 1 ? ' dag' : ' dagen') + ' getraind', fmt(data.stats.sessions.length)) +
+    rowHTML('Slagen', fmt(VS().hits) + ' goed (' + ratio + '%)', fmt(VS().total)) +
+    rowHTML('Trainingen', dayCount + (dayCount === 1 ? ' dag' : ' dagen') + ' getraind', fmt(VS().sessions.length)) +
     rowHTML('Reeks', 'Langste: ' + st.longest + (st.longest === 1 ? ' dag' : ' dagen'), st.current + '<small>dagen nu</small>') +
-    rowHTML('Trainingstijd', '', fmtDur(data.stats.timeMs));
+    rowHTML('Trainingstijd', '', fmtDur(VS().timeMs));
 
   $('sportList').innerHTML = Object.keys(SPORTS).map(function (k) {
-    return rowHTML(SPORTS[k].name, fmt(data.stats.perSport[k] || 0) + ' slagen', fmt(data.stats.best[k] || 0), 'km/u record');
+    return rowHTML(SPORTS[k].name, fmt(VS().perSport[k] || 0) + ' slagen', fmt(VS().best[k] || 0), 'km/u record');
   }).join('');
 
-  var ses = data.stats.sessions.slice(-8).reverse();
+  var ses = VS().sessions.slice(-8).reverse();
   $('sessionList').innerHTML = ses.length ? ses.map(function (x) {
     var d = new Date(x.t);
     var when = d.toLocaleDateString('nl-BE', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' +
@@ -727,7 +948,7 @@ function toast(msg, ms) {
 
 /* ---------- Navigatie ---------- */
 function showView(name) {
-  ['home', 'stats', 'settings'].forEach(function (v) {
+  ['home', 'stats', 'settings', 'profile'].forEach(function (v) {
     $('view-' + v).classList.toggle('active', v === name);
   });
   Array.prototype.forEach.call(document.querySelectorAll('.tabbar button'), function (b) {
@@ -736,6 +957,7 @@ function showView(name) {
   if (name === 'home') renderHome();
   if (name === 'stats') renderStats();
   if (name === 'settings') renderSettings();
+  if (name === 'profile') { renderProfile(); if (ME) cloudRefresh(); }
   window.scrollTo(0, 0);
 }
 
@@ -756,7 +978,12 @@ function requestMotion() {
   return Promise.resolve('ok');
 }
 
+var installSkipped = false, afterInstall = null;
+function needsInstall() { return isIOS() && !isStandalone() && !installSkipped; }
+function showInstall(next) { afterInstall = next; $('installSheet').hidden = false; }
 function startTraining() {
+  if (needsInstall()) { showInstall(startTraining); return; }
+  if (needsCleanReload()) { cleanReload('train'); return; }
   unlockAudio(); // moet binnen de tik gebeuren
   requestMotion().then(function (res) {
     if (res === 'denied') {
@@ -898,7 +1125,7 @@ function stopTraining() {
     data.stats.sessions.push({ t: T.start, sport: T.sport, mode: T.mode, swings: T.swings, hits: T.hits, peak: T.peak,
       avg: Math.round(T.sumPeak / T.swings), dur: dur });
     if (data.stats.sessions.length > 200) data.stats.sessions = data.stats.sessions.slice(-200);
-    save();
+    save(); cloudPushStats();
   }
   var summary = T.swings > 0 ? (T.hits + ' van ' + T.swings + ' slagen goed. Top: ' + T.peak + ' km/u.') : '';
   T = null;
@@ -985,15 +1212,28 @@ function toCourt(v, yaw) { var c = Math.cos(yaw), s = Math.sin(yaw); return [v[0
 function norm3(v) { var n = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); return n ? [v[0] / n, v[1] / n, v[2] / n] : null; }
 function dot3(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 
+function drillChips(el, enabled) {
+  var sp = data.settings.sport, cur = curTvDrill();
+  el.innerHTML = TV_DRILLS[sp].map(function (d) {
+    return '<button type="button" data-drill="' + d[0] + '" aria-pressed="' + (d[0] === cur) + '"' + (enabled ? '' : ' disabled') + '>' + d[1] + '</button>';
+  }).join('');
+}
+function renderPlayDrills() {
+  var ok = !!TVS && (TVS.tvPhase === 'done' || TVS.tvPhase === 'connected');
+  drillChips($('tvDrillsPlay'), ok);
+  $('tvDrillHint').textContent = ok ? 'Tik een training aan: de volgende ronde begint ermee.' : 'Kiezen kan zodra de ronde voorbij is.';
+}
 function renderTvSetup() {
   var s = data.settings;
+  Array.prototype.forEach.call(document.querySelectorAll('#segTvSport button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-sport') === s.sport)); });
+  drillChips($('tvDrills'), true);
   $('tvUrl').textContent = tvPageUrl().replace(/^https?:\/\//, '');
   Array.prototype.forEach.call(document.querySelectorAll('#segHand button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-hand') === s.hand)); });
   Array.prototype.forEach.call(document.querySelectorAll('#segLevel button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-level') === s.level)); });
 }
 function tvStep(n) {
-  ['Setup', 'Busy', 'Calib', 'Play'].forEach(function (k) { $('tv' + k).hidden = k.toLowerCase() !== n; });
-  var live = n === 'calib' || n === 'play';
+  ['Setup', 'Busy', 'Ready', 'Calib', 'Play'].forEach(function (k) { $('tv' + k).hidden = k.toLowerCase() !== n; });
+  var live = n === 'ready' || n === 'calib' || n === 'play';
   $('tvStop').hidden = !live;
   $('tvClose').hidden = live;
   if (TVS) TVS.step = n;
@@ -1001,6 +1241,8 @@ function tvStep(n) {
 function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
 function isStandalone() { return navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches); }
 function openTv() {
+  if (needsInstall()) { showInstall(openTv); return; }
+  if (needsCleanReload()) { cleanReload('tv'); return; }
   $('iosTip').hidden = !(isIOS() && !isStandalone());
   renderTvSetup();
   tvDigits = ''; tvRenderCode();
@@ -1044,7 +1286,7 @@ function tvConnect() {
 
 function tvStartSession(code) {
   var s = data.settings;
-  TVS = { code: code, peer: null, conn: null, step: 'busy', calib: [], calibRaw: [], pend: null, vec: null, sigma: 0, yaw: null, liftCal: null, R: null, lastO: 0, sport: s.sport, radius: SPORTS[s.sport].radius,
+  TVS = { code: code, peer: null, conn: null, step: 'busy', calib: [], calibRaw: [], pend: null, vec: null, sigma: 0, yaw: null, liftCal: null, R: null, lastO: 0, mode: '', readySince: 0, readyRef: null, readyTimer: 0, sigAcc: 0, prevRm: null, tvPhase: '', tauAcc: 0, vel: [0, 0, 0], pos: [0, 0, 0], lastAccT: 0, sport: s.sport, radius: SPORTS[s.sport].radius,
           start: Date.now(), swings: 0, hits: 0, peak: 0, sumPeak: 0, rounds: 0, wake: null, timeout: 0 };
   var me = TVS, peer;
   try { peer = new Peer(undefined, { debug: 0 }); } catch (e) { tvFail('Je browser ondersteunt geen rechtstreekse verbinding.'); return; }
@@ -1059,11 +1301,11 @@ function tvStartSession(code) {
     c.on('open', function () {
       if (TVS !== me) return;
       clearTimeout(me.timeout);
-      tvSend({ type: 'hello', v: 1, sport: s.sport, hand: s.hand, level: s.level });
+      tvSend(Object.assign({ type: 'hello', v: 1, sport: s.sport, hand: s.hand, level: s.level, drill: curTvDrill() }, tvPlayerInfo()));
       window.addEventListener('devicemotion', tvOnMotion);
       window.addEventListener('deviceorientation', tvOnOrient);
       if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(function (w) { if (TVS === me) me.wake = w; else w.release(); }, function () {});
-      tvBeginCalib();
+      tvBeginReady();
     });
     c.on('data', tvOnData);
     c.on('close', function () { if (TVS === me && me.step !== 'busy') tvEnd('Verbinding met de tv verbroken.'); });
@@ -1085,6 +1327,7 @@ function tvCleanup() {
   window.removeEventListener('deviceorientation', tvOnOrient);
   clearTimeout(me.timeout);
   if (me.pend) clearTimeout(me.pend.timer);
+  clearTimeout(me.readyTimer);
   if (me.wake) { try { me.wake.release(); } catch (e) {} }
   tvSend({ type: 'bye' });
   TVS = null;
@@ -1103,6 +1346,7 @@ function tvEnd(msg) {
     save();
   }
   tvCleanup();
+  cloudPushStats();
   $('tvplay').hidden = true;
   document.body.style.overflow = '';
   renderHome();
@@ -1110,10 +1354,47 @@ function tvEnd(msg) {
   if (msg || sum) toast((msg ? msg + ' ' : '') + sum, 5000);
 }
 
-function tvBeginCalib() {
+var LIFT_NEUTRAL = 5; // een gewone slag gaat van nature een beetje omhoog
+function tvBeginReady() {
   if (!TVS) return;
   if (TVS.pend) clearTimeout(TVS.pend.timer);
-  TVS.calib = []; TVS.calibRaw = []; TVS.pend = null; TVS.vec = null; TVS.sigma = 0; TVS.yaw = null; TVS.liftCal = null;
+  TVS.mode = ''; TVS.readySince = 0; TVS.readyRef = null; TVS.pend = null;
+  tvDet.reset();
+  $('tvSteady').style.width = '0%';
+  tvStep('ready');
+  // geen standgegevens van dit toestel? Dan kalibreren we zoals vroeger met twee forehands
+  clearTimeout(TVS.readyTimer);
+  TVS.readyTimer = setTimeout(function () { if (TVS && TVS.step === 'ready' && !TVS.R) tvBeginCalib(); }, 1500);
+}
+function tvReadyCheck(R) {
+  var y = [R[1], R[4], R[7]], now = performance.now();
+  var level = Math.abs(y[2]) < 0.6; // ongeveer horizontaal naar voren, niet naar boven of beneden
+  if (!level || !TVS.readyRef || dot3(y, TVS.readyRef) < 0.985) { TVS.readyRef = y; TVS.readySince = now; }
+  var f = level ? Math.min(1, (now - TVS.readySince) / 900) : 0;
+  $('tvSteady').style.width = Math.round(f * 100) + '%';
+  $('tvReadyHint').textContent = level ? 'Even stil houden…' : 'Richt je telefoon recht naar voren, naar de tv.';
+  if (f >= 1) tvCaptureReady(y);
+}
+function tvCaptureReady(y) {
+  TVS.yaw = heading(y);          // de telefoon wijst recht naar de tv: dat is "naar voren"
+  TVS.mode = 'ready';
+  TVS.liftCal = LIFT_NEUTRAL;
+  tvGoPlay();
+}
+function tvGoPlay() {
+  tvStep('play');
+  renderPlayDrills();
+  $('tvVerdict').textContent = 'Kijk naar je tv'; $('tvVerdict').className = 'tv-verdict num';
+  $('tvSub').textContent = 'Begin elke slag vanuit de wachthouding.';
+  tvSend(Object.assign({ type: 'config', sport: data.settings.sport, hand: data.settings.hand, level: data.settings.level, drill: curTvDrill() }, tvPlayerInfo()));
+  tvSend({ type: 'ready' });
+  buzz([30, 40, 30]);
+}
+function tvBeginCalib() {
+  if (!TVS) return;
+  TVS.mode = 'fh';
+  if (TVS.pend) clearTimeout(TVS.pend.timer);
+  TVS.calib = []; TVS.calibRaw = []; TVS.pend = null; TVS.vec = null; TVS.sigma = 0; TVS.liftCal = null;
   tvDet.reset();
   tvDots();
   tvStep('calib');
@@ -1129,17 +1410,53 @@ function tvOnMotion(e) {
   var wx = rr.beta || 0, wy = rr.gamma || 0, wz = rr.alpha || 0; // rond de x-, y- en z-as van het toestel
   var vec = [wx, wy, wz];
   if (TVS.R) vec = vec.concat(TVS.R);
+  tvTrack(e);
+  tvLearnSigma(wx, wy, wz);
   tvFeed(speedKmh(Math.sqrt(wx * wx + wy * wy + wz * wz), TVS.radius), performance.now(), vec);
+}
+/* Draairichting van dit toestel leren: vergelijk de gyroscoop met hoe de stand echt verandert */
+function tvLearnSigma(wx, wy, wz) {
+  var R = TVS.R, P = TVS.prevRm;
+  if (!R || R === P) return;
+  TVS.prevRm = R;
+  if (!P || Math.sqrt(wx * wx + wy * wy + wz * wz) < 150) return;
+  var dY = [R[1] - P[1], R[4] - P[4], R[7] - P[7]], v = mulRv(R, [-wz, 0, wx]);
+  var d = dot3(dY, v);
+  if (Math.abs(d) < 1e-6) return;
+  TVS.sigAcc = clampNum(TVS.sigAcc + (d > 0 ? 1 : -1), -30, 30);
+  if (Math.abs(TVS.sigAcc) >= 6 && TVS.mode === 'ready') TVS.sigma = TVS.sigAcc > 0 ? 1 : -1;
+}
+/* Verplaatsing: korte bewegingen van je telefoon (naar links, omhoog...) laten het racket ook meeschuiven.
+   Uit de versnelling, met demping zodat het racket altijd terugkeert naar het midden. */
+function tvTrack(e) {
+  var now = performance.now(), ag = e.accelerationIncludingGravity, acc = e.acceleration, R = TVS.R;
+  if (!R) return;
+  // sommige toestellen geven de versnelling met omgekeerd teken: controleer dat met de zwaartekracht
+  if (ag && ag.x != null) {
+    var gn = Math.sqrt(ag.x * ag.x + ag.y * ag.y + ag.z * ag.z);
+    if (Math.abs(gn - 9.81) < 1.2) { var d = (ag.x * R[6] + ag.y * R[7] + ag.z * R[8]) / gn; TVS.tauAcc = TVS.tauAcc * 0.97 + d * 0.03; }
+  }
+  var dt = TVS.lastAccT ? Math.min(0.05, (now - TVS.lastAccT) / 1000) : 0.016; TVS.lastAccT = now;
+  if (!acc || acc.x == null || TVS.yaw == null || Math.abs(TVS.tauAcc) < 0.5) return;
+  var tau = TVS.tauAcc > 0 ? 1 : -1;
+  var a = toCourt(mulRv(R, [tau * acc.x, tau * acc.y, tau * acc.z]), TVS.yaw);
+  for (var k = 0; k < 3; k++) {
+    TVS.vel[k] = (TVS.vel[k] + a[k] * dt) * 0.9;
+    TVS.pos[k] = clampNum((TVS.pos[k] + TVS.vel[k] * dt) * 0.965, -0.6, 0.6);
+  }
 }
 /* Stand van de telefoon: nodig voor lobs en om je racket op de tv te laten meebewegen */
 function tvOnOrient(e) {
   if (!TVS || e.beta == null) return;
-  TVS.R = rotMat(e.alpha, e.beta, e.gamma);
+  var R = TVS.R = rotMat(e.alpha, e.beta, e.gamma);
+  // voorlopige richting van de tv: terwijl je naar je scherm kijkt, wijst de achterkant naar de tv
+  if (TVS.yaw == null && TVS.conn && TVS.conn.open) TVS.yaw = heading([-R[2], -R[5], -R[8]]);
   var now = performance.now();
-  if (TVS.step === 'play' && TVS.yaw != null && now - TVS.lastO > 33) {
+  if (TVS.step === 'ready') tvReadyCheck(R);
+  if ((TVS.step === 'play' || TVS.step === 'calib' || TVS.step === 'ready') && TVS.yaw != null && now - TVS.lastO > 15) {
     TVS.lastO = now;
-    var R = TVS.R, r3 = function (v) { return [Math.round(v[0] * 1000) / 1000, Math.round(v[1] * 1000) / 1000, Math.round(v[2] * 1000) / 1000]; };
-    tvSend({ type: 'o', y: r3(toCourt([R[1], R[4], R[7]], TVS.yaw)), z: r3(toCourt([R[2], R[5], R[8]], TVS.yaw)) });
+    var r3 = function (v) { return [Math.round(v[0] * 1000) / 1000, Math.round(v[1] * 1000) / 1000, Math.round(v[2] * 1000) / 1000]; };
+    tvSend({ type: 'o', y: r3(toCourt([R[1], R[4], R[7]], TVS.yaw)), z: r3(toCourt([R[2], R[5], R[8]], TVS.yaw)), p: r3(TVS.pos) });
   }
 }
 function tvFeed(v, t, vec) {
@@ -1160,13 +1477,23 @@ function tvSwing(ev) {
     TVS.pend = ev; ev.timer = setTimeout(tvCalibTimer(ev), 700);
     return;
   }
-  if (TVS.step === 'play' && TVS.vec) {
-    var dir = dot3(ev.vec, TVS.vec) >= 0 ? 'fh' : 'bh';
+  if (TVS.step === 'play' && (TVS.vec || TVS.mode === 'ready')) {
+    var dir;
+    if (TVS.mode === 'ready' && ev.vec.length >= 12) {
+      // forehand of backhand: aan welke kant van je lichaam de racketkop is op het moment van de slag
+      var Rp = ev.vec.slice(3, 12), hs = data.settings.hand === 'left' ? -1 : 1;
+      var yc = toCourt([Rp[1], Rp[4], Rp[7]], TVS.yaw), score = hs * yc[0];
+      if (TVS.sigma) { // bij twijfel helpt de richting: een forehand gaat van je sterke kant naar je andere kant
+        var vc = norm3(toCourt(mulRv(Rp, [-TVS.sigma * ev.vec[2], 0, TVS.sigma * ev.vec[0]]), TVS.yaw));
+        if (vc) score -= hs * vc[0] * 0.5;
+      }
+      dir = score >= 0 ? 'fh' : 'bh';
+    } else dir = dot3(ev.vec, TVS.vec) >= 0 ? 'fh' : 'bh';
     var lift = swingLift(ev.vec, TVS.sigma), rel = (lift != null && TVS.liftCal != null) ? Math.round(lift - TVS.liftCal) : null;
     var msg = { type: 'swing', speed: Math.round(ev.peak), dir: dir, lag: Math.round(ev.at - ev.tPeak) };
     if (rel != null) msg.lift = rel;
     tvSend(msg);
-    $('tvSub').textContent = Math.round(ev.peak) + ' km/u, ' + (dir === 'fh' ? 'forehand' : 'backhand') + (rel != null && rel >= 20 ? ', omhoog' : '');
+    $('tvSub').textContent = Math.round(ev.peak) + ' km/u, ' + (dir === 'fh' ? 'forehand' : 'backhand') + (rel != null && rel >= 20 ? ', omhoog' : '') + '. Terug naar de wachthouding.';
   }
 }
 function tvCalibTimer(ev) {
@@ -1196,16 +1523,13 @@ function tvCalibCommit(ev) {
     TVS.yaw = Math.atan2(hx, hy);       // richting van het net
     TVS.liftCal = lsum / TVS.calibRaw.length;  // jouw gewone forehand = neutraal
   }
-  tvStep('play');
-  $('tvVerdict').textContent = 'Kijk naar je tv'; $('tvVerdict').className = 'tv-verdict num';
-  $('tvSub').textContent = 'Het scherm is je forehandkant, de achterkant je backhand.';
-  tvSend({ type: 'config', sport: data.settings.sport, hand: data.settings.hand, level: data.settings.level });
-  tvSend({ type: 'ready' });
-  buzz([30, 40, 30]);
+  tvGoPlay();
 }
 
 function tvOnData(m) {
   if (!TVS || !m || typeof m !== 'object') return;
+  if (m.type === 'phase') { TVS.tvPhase = m.phase; if (TVS.step === 'play') renderPlayDrills(); return; }
+  if (m.type === 'outcome') { if (m.text) $('tvSub').textContent = m.text + (m.points ? ', +' + m.points : ''); return; }
   if (m.type === 'result') {
     var el = $('tvVerdict');
     el.textContent = m.verdict;
@@ -1214,6 +1538,7 @@ function tvOnData(m) {
     if (m.hit) buzz(m.perfect ? [20, 30, 20] : 25);
   } else if (m.type === 'round') {
     TVS.rounds++;
+    cloudRound(m);
     $('tvVerdict').textContent = fmt(m.score) + ' punten';
     $('tvVerdict').className = 'tv-verdict num good';
     $('tvSub').textContent = (m.record ? 'Nieuw record. ' : '') + 'Zwaai om nog een ronde te spelen.';
@@ -1231,6 +1556,450 @@ function tvCommit(m) {
     if (v > (st.best[sp] || 0)) st.best[sp] = v;
   }
   save();
+}
+
+/* ---------- Accounts (Supabase) ----------
+   Alles is optioneel: zonder config.js of zonder account blijft de app volledig werken.
+   Statistieken: elk toestel bewaart zijn eigen rij in de cloud, de app telt alle toestellen op. */
+var SB = null, ME = null, RECOVERING = false;
+var CLOUD = { others: [], profiles: {}, friends: [], incoming: [], outgoing: [], groups: [], members: [], challenges: [], syncedAt: 0, busy: false };
+var ACTIVE_CH = null;
+try { ACTIVE_CH = JSON.parse(sessionStorage.getItem('swinglab.challenge') || 'null'); } catch (e) {}
+var DEVICE_ID = (function () {
+  try {
+    var d = localStorage.getItem('swinglab.device');
+    if (!d) { d = 'toestel-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem('swinglab.device', d); }
+    return d;
+  } catch (e) { return 'toestel-tijdelijk'; }
+})();
+
+function sbConfig() {
+  var c = window.SWINGLAB_SUPABASE;
+  return (c && /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(c.url || '') && (c.anonKey || '').length > 30) ? c : null;
+}
+function loadScript(src) {
+  return new Promise(function (res, rej) { var s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+}
+function sbInit() {
+  var c = sbConfig();
+  if (!c) return Promise.resolve(null);
+  if (SB) return Promise.resolve(SB);
+  return loadScript('supabase.js').then(function () {
+    SB = window.supabase.createClient(c.url.replace(/\/$/, ''), c.anonKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'swinglab.auth' }
+    });
+    SB.auth.onAuthStateChange(function (ev, session) { setTimeout(function () { onAuth(ev, session); }, 0); });
+    return SB.auth.getSession().then(function (r) { onAuth('INITIAL', r.data && r.data.session); return SB; });
+  }).catch(function () { SB = null; return null; });
+}
+function onAuth(ev, session) {
+  if (ev === 'PASSWORD_RECOVERY') RECOVERING = true;
+  var u = session && session.user;
+  if (u && (!ME || ME.id !== u.id)) { ME = { id: u.id, email: u.email, profile: null }; cloudAfterLogin(); }
+  else if (!u && ME) { ME = null; CLOUD.others = []; CLOUD.challenges = []; renderHome(); }
+  renderProfile();
+}
+
+/* Statistieken van alle toestellen samen (alleen voor weergave; schrijven gebeurt altijd in data.stats van dit toestel) */
+function combineStats(list) {
+  var out = clone(DEFAULTS.stats);
+  list.forEach(function (raw) {
+    var s = mergeDefaults(DEFAULTS.stats, raw);
+    out.total += s.total; out.hits += s.hits; out.timeMs += s.timeMs;
+    Object.keys(s.perSport).forEach(function (k) { out.perSport[k] = (out.perSport[k] || 0) + (s.perSport[k] || 0); });
+    Object.keys(s.best).forEach(function (k) { out.best[k] = Math.max(out.best[k] || 0, s.best[k] || 0); });
+    Object.keys(s.days).forEach(function (k) { var d = s.days[k] || {}, o = out.days[k] || (out.days[k] = { s: 0, h: 0 }); o.s += d.s || 0; o.h += d.h || 0; });
+    out.sessions = out.sessions.concat(s.sessions || []);
+  });
+  out.sessions.sort(function (a, b) { return a.t - b.t; });
+  out.sessions = out.sessions.slice(-200);
+  return out;
+}
+function VS() { return (ME && CLOUD.others.length) ? combineStats([data.stats].concat(CLOUD.others)) : data.stats; }
+
+function cloudErr(e) {
+  var m = (e && (e.message || e.error_description)) || '';
+  if (/Invalid login credentials/i.test(m)) return 'E-mail of wachtwoord klopt niet.';
+  if (/already registered|already exists/i.test(m)) return 'Er bestaat al een account met dit e-mailadres.';
+  if (/Password should be|at least 6/i.test(m)) return 'Kies een wachtwoord van minstens 6 tekens.';
+  if (/Email not confirmed/i.test(m)) return 'Bevestig eerst je e-mailadres via de link in je mailbox.';
+  if (/valid email|invalid format|Unable to validate email/i.test(m)) return 'Dit e-mailadres klopt niet.';
+  if (/code_not_found/.test(m)) return 'Die code bestaat niet. Controleer hem nog eens.';
+  if (/own_code/.test(m)) return 'Dat is je eigen vriendcode.';
+  if (/challenge_not_open/.test(m)) return 'Deze uitdaging is al afgelopen.';
+  if (/rate limit|too many/i.test(m)) return 'Even te veel pogingen. Probeer het over een minuutje opnieuw.';
+  if (/Failed to fetch|NetworkError|network/i.test(m)) return 'Geen verbinding. Controleer je internet.';
+  return 'Dat lukte niet. Probeer het opnieuw.';
+}
+function q(p) { return p.then(function (r) { if (r.error) throw r.error; return r.data; }); }
+
+function cloudAfterLogin() {
+  CLOUD.busy = true; renderProfile();
+  q(SB.from('profiles').select('*').eq('id', ME.id).maybeSingle()).then(function (prof) {
+    ME.profile = prof || { id: ME.id, display_name: 'Speler', settings: {}, settings_updated_at: new Date(0).toISOString() };
+    // instellingen: de nieuwste versie wint
+    var remoteAt = Date.parse(ME.profile.settings_updated_at || 0) || 0, rs = ME.profile.settings || {};
+    if (Object.keys(rs).length && remoteAt > (data.meta.settingsAt || 0)) {
+      data.settings = mergeDefaults(DEFAULTS.settings, rs); data.settings.onboarded = true;
+      data.meta.settingsAt = remoteAt; lastSettingsJson = JSON.stringify(data.settings); saveLocal();
+    } else if ((data.meta.settingsAt || 0) > remoteAt) cloudPushSettings();
+    return cloudSyncStats();
+  }).then(cloudLoadSocial).catch(function (e) { toast(cloudErr(e)); }).then(function () {
+    CLOUD.busy = false; renderHome(); renderProfile();
+  });
+}
+function cloudRefresh() {
+  if (!ME || CLOUD.busy) return;
+  if (Date.now() - CLOUD.syncedAt < 4000) { renderProfile(); return; }
+  CLOUD.busy = true;
+  cloudSyncStats().then(cloudLoadSocial).catch(function () {}).then(function () { CLOUD.busy = false; renderProfile(); renderHome(); });
+}
+function cloudSyncStats() {
+  var me = ME;
+  return q(SB.from('device_stats').upsert({ user_id: me.id, device_id: DEVICE_ID, stats: data.stats, updated_at: new Date().toISOString() }))
+    .then(function () { return q(SB.from('device_stats').select('device_id, stats').eq('user_id', me.id).neq('device_id', DEVICE_ID)); })
+    .then(function (rows) { if (ME === me) { CLOUD.others = (rows || []).map(function (r) { return r.stats; }); CLOUD.syncedAt = Date.now(); } });
+}
+function cloudPushStats() {
+  if (!ME || !SB) return;
+  SB.from('device_stats').upsert({ user_id: ME.id, device_id: DEVICE_ID, stats: data.stats, updated_at: new Date().toISOString() })
+    .then(function (r) { if (!r.error) CLOUD.syncedAt = Date.now(); });
+}
+function cloudPushSettings() {
+  if (!ME || !SB) return;
+  SB.from('profiles').update({ settings: data.settings, settings_updated_at: new Date(data.meta.settingsAt || Date.now()).toISOString() }).eq('id', ME.id).then(function () {});
+}
+var cloudTimer = 0;
+function cloudSoon() { if (!ME) return; clearTimeout(cloudTimer); cloudTimer = setTimeout(function () { cloudPushStats(); }, 2500); }
+
+function cloudLoadSocial() {
+  var me = ME;
+  return Promise.all([
+    q(SB.from('profiles').select('id, display_name, avatar_url, friend_code')),
+    q(SB.from('friendships').select('requester, addressee, status')),
+    q(SB.from('groups').select('id, name, code')),
+    q(SB.from('group_members').select('group_id, user_id')),
+    q(SB.from('challenges').select('*').order('created_at', { ascending: false }).limit(30))
+  ]).then(function (r) {
+    if (ME !== me) return;
+    CLOUD.profiles = {}; (r[0] || []).forEach(function (p) { CLOUD.profiles[p.id] = p; });
+    if (CLOUD.profiles[me.id]) me.profile = Object.assign(me.profile || {}, CLOUD.profiles[me.id]);
+    var fr = r[1] || [];
+    CLOUD.friends = fr.filter(function (f) { return f.status === 'accepted'; }).map(function (f) { return f.requester === me.id ? f.addressee : f.requester; });
+    CLOUD.incoming = fr.filter(function (f) { return f.status === 'pending' && f.addressee === me.id; }).map(function (f) { return f.requester; });
+    CLOUD.outgoing = fr.filter(function (f) { return f.status === 'pending' && f.requester === me.id; }).map(function (f) { return f.addressee; });
+    CLOUD.groups = r[2] || []; CLOUD.members = r[3] || []; CLOUD.challenges = r[4] || [];
+  });
+}
+
+/* Een tv-ronde is klaar: score bewaren voor het klassement en eventueel de uitdaging afronden */
+function cloudRound(m) {
+  if (!ME || !SB || !m) return;
+  var s = data.settings, drill = typeof m.drill === 'string' ? m.drill : curTvDrill();
+  var row = { user_id: ME.id, sport: s.sport, drill: drill, level: s.level, score: Math.max(0, Math.min(99999, Math.round(+m.score || 0))),
+              perfect: m.perfect | 0, good: m.good | 0, miss: m.miss | 0, outs: m.outs | 0, best_speed: Math.min(300, m.best | 0) };
+  var ch = ACTIVE_CH && ACTIVE_CH.sport === s.sport && ACTIVE_CH.drill === drill && ACTIVE_CH.level === s.level ? ACTIVE_CH : null;
+  if (ch) row.challenge_id = ch.id;
+  SB.from('scores').insert(row).then(function () {});
+  if (!ch) return;
+  setActiveChallenge(null);
+  q(SB.rpc('submit_challenge_score', { p_challenge: ch.id, p_score: row.score })).then(function (c) {
+    var mine = c.challenger === ME.id ? c.challenger_score : c.opponent_score, theirs = c.challenger === ME.id ? c.opponent_score : c.challenger_score;
+    var msg = theirs == null ? 'Uitdaging tegen ' + ch.vs + ': jouw ' + fmt(mine) + ' punten staan. Nu is het aan ' + ch.vs + '.'
+      : 'Uitdaging tegen ' + ch.vs + ': jij ' + fmt(mine) + ', ' + ch.vs + ' ' + fmt(theirs) + '. ' + (mine > theirs ? 'Gewonnen!' : mine === theirs ? 'Gelijkspel.' : 'Verloren, volgende keer beter.');
+    toast(msg, 6000);
+    $('tvSub').textContent = msg;
+    cloudLoadSocial().then(renderProfile);
+  }, function (e) { toast(cloudErr(e)); });
+}
+function setActiveChallenge(ch) {
+  ACTIVE_CH = ch;
+  try { if (ch) sessionStorage.setItem('swinglab.challenge', JSON.stringify(ch)); else sessionStorage.removeItem('swinglab.challenge'); } catch (e) {}
+}
+function tvPlayerInfo() {
+  var o = {};
+  if (ME && ME.profile) o.player = ME.profile.display_name;
+  if (ACTIVE_CH) o.challenge = { vs: ACTIVE_CH.vs, target: ACTIVE_CH.target };
+  return o;
+}
+
+/* ---------- Weergave: Profiel ---------- */
+var AUTH_MODE = 'login';
+function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function initials(n) { return esc(String(n || '?').trim().split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase()); }
+function avatarHTML(p, big) {
+  var url = p && p.avatar_url && /^https:\/\//.test(p.avatar_url) ? p.avatar_url : '';
+  return '<div class="avatar' + (big ? ' big' : '') + '"' + (url ? ' style="background-image:url(&quot;' + esc(url) + '&quot;)"' : '') + '>' + (url ? '' : initials(p && p.display_name)) + '</div>';
+}
+function nameOf(id) { var p = CLOUD.profiles[id]; return p ? p.display_name : 'Speler'; }
+function drillName(sport, id) { var l = TV_DRILLS[sport] || []; for (var i = 0; i < l.length; i++) if (l[i][0] === id) return l[i][1]; return id; }
+var LEVEL_NAMES = { rustig: 'rustig', normaal: 'normaal', snel: 'snel' };
+
+function renderProfile() {
+  var conf = !!sbConfig();
+  $('pfNoConfig').hidden = conf;
+  $('pfLoggedOut').hidden = !conf || !!ME || RECOVERING;
+  $('pfRecover').hidden = !RECOVERING;
+  $('pfLoggedIn').hidden = !ME || RECOVERING;
+  var openCh = ME ? CLOUD.challenges.filter(function (c) { return c.status === 'open' && ((c.challenger === ME.id && c.challenger_score == null) || (c.opponent === ME.id && c.opponent_score == null)); }).length : 0;
+  var badge = ME ? CLOUD.incoming.length + openCh : 0;
+  $('tabDot').hidden = !badge;
+  if (!ME) {
+    Array.prototype.forEach.call(document.querySelectorAll('#segAuth button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-auth') === AUTH_MODE)); });
+    $('fldName').hidden = AUTH_MODE !== 'register';
+    $('authSubmit').textContent = AUTH_MODE === 'register' ? 'Account maken' : 'Inloggen';
+    $('authPass').setAttribute('autocomplete', AUTH_MODE === 'register' ? 'new-password' : 'current-password');
+    return;
+  }
+  var p = ME.profile || {};
+  $('pfAvatar').outerHTML = avatarHTML(p, true).replace('<div class="avatar big"', '<div class="avatar big" id="pfAvatar"');
+  $('pfName').textContent = p.display_name || 'Speler';
+  $('pfCode').textContent = p.friend_code ? 'Vriendcode ' + p.friend_code : '';
+  $('pfSync').textContent = CLOUD.busy ? 'Bezig met synchroniseren…' : (CLOUD.syncedAt ? 'Statistieken van ' + (CLOUD.others.length + 1) + (CLOUD.others.length ? ' toestellen' : ' toestel') + ' samen' : '');
+  $('meEmail').textContent = 'Ingelogd als ' + (ME.email || '');
+  if (document.activeElement !== $('meName')) $('meName').value = p.display_name || '';
+  $('chBadge').hidden = !openCh; $('chBadge').textContent = openCh;
+  $('frBadge').hidden = !CLOUD.incoming.length; $('frBadge').textContent = CLOUD.incoming.length;
+  renderFriends(); renderGroups(); renderChallenges(); renderBoardControls(); loadBoard();
+}
+
+function renderFriends() {
+  var rows = CLOUD.incoming.map(function (id) {
+    return '<div class="brow">' + avatarHTML(CLOUD.profiles[id]) + '<div class="who"><div>' + esc(nameOf(id)) + '</div><div>wil je vriend worden</div></div>' +
+      '<div class="acts"><button type="button" class="pill sm" data-fr-accept="' + id + '">Aanvaarden</button><button type="button" class="pill sm ghost" data-fr-remove="' + id + '">Weigeren</button></div></div>';
+  }).concat(CLOUD.friends.map(function (id) {
+    return '<div class="brow">' + avatarHTML(CLOUD.profiles[id]) + '<div class="who"><div>' + esc(nameOf(id)) + '</div></div>' +
+      '<div class="acts"><button type="button" class="pill sm ghost" data-fr-remove="' + id + '" data-confirm="1">Verwijderen</button></div></div>';
+  })).concat(CLOUD.outgoing.map(function (id) {
+    return '<div class="brow">' + avatarHTML(CLOUD.profiles[id]) + '<div class="who"><div>' + esc(nameOf(id)) + '</div><div>verzoek verstuurd</div></div>' +
+      '<div class="acts"><button type="button" class="pill sm ghost" data-fr-remove="' + id + '">Annuleren</button></div></div>';
+  }));
+  $('frList').innerHTML = rows.length ? rows.join('') : '<div class="empty">Nog geen vrienden. Voeg iemand toe met zijn vriendcode.</div>';
+}
+function renderGroups() {
+  $('grList').innerHTML = CLOUD.groups.length ? CLOUD.groups.map(function (g) {
+    var n = CLOUD.members.filter(function (m) { return m.group_id === g.id; }).length;
+    return '<div class="brow"><div class="who"><div>' + esc(g.name) + '</div><div>' + n + (n === 1 ? ' lid' : ' leden') + ', code ' + esc(g.code) + '</div></div>' +
+      '<div class="acts"><button type="button" class="pill sm ghost" data-gr-code="' + esc(g.code) + '">Code kopiëren</button><button type="button" class="pill sm ghost" data-gr-leave="' + g.id + '">Verlaten</button></div></div>';
+  }).join('') : '<div class="empty">Je zit nog in geen groep. Maak er een voor je club, of word lid met een code.</div>';
+}
+function renderChallenges() {
+  var s = data.settings;
+  $('chWhat').textContent = 'Training: ' + SPORTS[s.sport].name + ', ' + drillName(s.sport, curTvDrill()).toLowerCase() + ', tempo ' + s.level + '. Dat pas je aan bij Speel op tv.';
+  $('chFriend').innerHTML = CLOUD.friends.length ? CLOUD.friends.map(function (id) { return '<option value="' + id + '">' + esc(nameOf(id)) + '</option>'; }).join('') : '<option value="">Nog geen vrienden</option>';
+  $('chSend').disabled = !CLOUD.friends.length;
+  var list = CLOUD.challenges.map(function (c) {
+    var iAmCh = c.challenger === ME.id, other = iAmCh ? c.opponent : c.challenger;
+    var mine = iAmCh ? c.challenger_score : c.opponent_score, theirs = iAmCh ? c.opponent_score : c.challenger_score;
+    var what = SPORTS[c.sport] ? SPORTS[c.sport].name + ', ' + drillName(c.sport, c.drill).toLowerCase() + ', ' + c.level : c.drill;
+    var status, acts = '';
+    if (c.status === 'declined') status = 'geweigerd';
+    else if (c.status === 'done') status = mine > theirs ? 'gewonnen, ' + fmt(mine) + ' tegen ' + fmt(theirs) : (mine === theirs ? 'gelijkspel, ' + fmt(mine) : 'verloren, ' + fmt(mine) + ' tegen ' + fmt(theirs));
+    else if (mine == null) {
+      status = theirs == null ? 'nog niemand gespeeld' : esc(nameOf(other)) + ' haalde ' + fmt(theirs);
+      acts = '<button type="button" class="pill sm" data-ch-play="' + c.id + '">Speel nu</button>' + (!iAmCh ? '<button type="button" class="pill sm ghost" data-ch-decline="' + c.id + '">Weigeren</button>' : '');
+    } else status = 'jij haalde ' + fmt(mine) + ', wacht op ' + esc(nameOf(other));
+    return '<div class="brow">' + avatarHTML(CLOUD.profiles[other]) + '<div class="who"><div>' + (iAmCh ? 'Jij tegen ' : '') + esc(nameOf(other)) + (iAmCh ? '' : ' daagt je uit') + '</div><div>' + esc(what) + '. ' + status + '</div></div><div class="acts">' + acts + '</div></div>';
+  });
+  $('chList').innerHTML = list.length ? list.join('') : '<div class="empty">Nog geen uitdagingen.</div>';
+}
+
+function renderBoardControls() {
+  var scope = $('bdScope'), cur = scope.value;
+  scope.innerHTML = '<option value="friends">Vrienden</option>' + CLOUD.groups.map(function (g) { return '<option value="g:' + g.id + '">' + esc(g.name) + '</option>'; }).join('');
+  if (cur && Array.prototype.some.call(scope.options, function (o) { return o.value === cur; })) scope.value = cur;
+  if (!$('bdSport').dataset.init) { $('bdSport').value = data.settings.sport; $('bdLevel').value = data.settings.level; $('bdSport').dataset.init = '1'; fillBoardDrills(curTvDrill()); }
+  $('bdTvOpts').hidden = $('bdKind').value !== 'tv';
+}
+function fillBoardDrills(sel) {
+  var sp = $('bdSport').value;
+  $('bdDrill').innerHTML = TV_DRILLS[sp].map(function (d) { return '<option value="' + d[0] + '">' + d[1] + '</option>'; }).join('');
+  if (sel) $('bdDrill').value = sel;
+  if (!$('bdDrill').value) $('bdDrill').selectedIndex = 0;
+}
+function weekStart() { var d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; }
+var boardSeq = 0;
+function loadBoard() {
+  if (!ME || !SB) return;
+  var seq = ++boardSeq, scope = $('bdScope').value || 'friends', ids;
+  if (scope.indexOf('g:') === 0) { var gid = scope.slice(2); ids = CLOUD.members.filter(function (m) { return m.group_id === gid; }).map(function (m) { return m.user_id; }); }
+  else ids = CLOUD.friends.concat([ME.id]);
+  if (ids.indexOf(ME.id) < 0) ids.push(ME.id);
+  var list = $('bdList');
+  if ($('bdKind').value === 'week') {
+    var ws = weekStart();
+    q(SB.from('device_stats').select('user_id, stats').in('user_id', ids)).then(function (rows) {
+      if (seq !== boardSeq) return;
+      var tot = {}; ids.forEach(function (id) { tot[id] = 0; });
+      (rows || []).forEach(function (r) {
+        var src = r.user_id === ME.id && r.stats ? r.stats : r.stats; // eigen toestel staat er ook in na de synchronisatie
+        var days = (src && src.days) || {};
+        Object.keys(days).forEach(function (k) { if (keyToDate(k) >= ws) tot[r.user_id] = (tot[r.user_id] || 0) + ((days[k] && days[k].h) || 0); });
+      });
+      drawBoard(ids.map(function (id) { return { id: id, v: tot[id] || 0 }; }), 'goede slagen');
+    }, function (e) { list.innerHTML = '<div class="empty">' + esc(cloudErr(e)) + '</div>'; });
+    return;
+  }
+  var qb = SB.from('scores').select('user_id, score, created_at').eq('sport', $('bdSport').value).eq('drill', $('bdDrill').value).eq('level', $('bdLevel').value).in('user_id', ids);
+  if ($('bdPeriod').value === 'week') qb = qb.gte('created_at', weekStart().toISOString());
+  q(qb.order('score', { ascending: false }).limit(300)).then(function (rows) {
+    if (seq !== boardSeq) return;
+    var best = {};
+    (rows || []).forEach(function (r) { if (!(r.user_id in best) || r.score > best[r.user_id]) best[r.user_id] = r.score; });
+    drawBoard(Object.keys(best).map(function (id) { return { id: id, v: best[id] }; }), 'punten', true);
+  }, function (e) { list.innerHTML = '<div class="empty">' + esc(cloudErr(e)) + '</div>'; });
+}
+function drawBoard(rows, unit, onlyPlayed) {
+  rows.sort(function (a, b) { return b.v - a.v; });
+  if (onlyPlayed && !rows.length) { $('bdList').innerHTML = '<div class="empty">Nog geen scores voor deze training. Speel een ronde op tv om de eerste te zijn.</div>'; return; }
+  $('bdList').innerHTML = rows.map(function (r, i) {
+    return '<div class="brow' + (r.id === ME.id ? ' me' : '') + '"><div class="rank">' + (i + 1) + '</div>' + avatarHTML(CLOUD.profiles[r.id] || (r.id === ME.id ? ME.profile : null)) +
+      '<div class="who"><div>' + esc(r.id === ME.id ? (ME.profile && ME.profile.display_name) || 'Jij' : nameOf(r.id)) + '</div></div><div class="val">' + fmt(r.v) + '</div></div>';
+  }).join('') + (rows.length < 2 && !CLOUD.friends.length ? '<div class="empty">Voeg vrienden toe of word lid van een groep om je te vergelijken.</div>' : '');
+}
+
+/* Foto verkleinen tot 256 pixels voor het uploaden */
+function shrinkPhoto(file) {
+  return new Promise(function (res, rej) {
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function () {
+      var s = 256, c = document.createElement('canvas'); c.width = s; c.height = s;
+      var k = Math.max(s / img.width, s / img.height), w = img.width * k, hh = img.height * k;
+      c.getContext('2d').drawImage(img, (s - w) / 2, (s - hh) / 2, w, hh);
+      URL.revokeObjectURL(url);
+      c.toBlob(function (b) { b ? res(b) : rej(new Error('foto')); }, 'image/jpeg', 0.85);
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('foto')); };
+    img.src = url;
+  });
+}
+
+/* iPhone: na typen in een tekstveld onthoudt iOS dat als iets om te "herstellen".
+   Voor we beginnen te zwaaien laden we de app even opnieuw, zodat die geschiedenis leeg is. */
+var TYPED = false;
+function needsCleanReload() { return TYPED && isIOS(); }
+function cleanReload(action) {
+  try { sessionStorage.setItem('swinglab.resume', action); } catch (e) {}
+  location.reload();
+}
+
+function bindProfile() {
+  document.addEventListener('input', function (e) { if (e.target && e.target.matches && e.target.matches('input[type=text], input[type=email], input[type=password]')) TYPED = true; }, true);
+  $('segAuth').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; AUTH_MODE = b.getAttribute('data-auth'); renderProfile(); });
+  $('authForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = $('authEmail').value.trim(), pass = $('authPass').value, name = $('authName').value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Vul een geldig e-mailadres in.'); return; }
+    if (pass.length < 6) { toast('Kies een wachtwoord van minstens 6 tekens.'); return; }
+    if (AUTH_MODE === 'register' && !name) { toast('Vul je naam in.'); return; }
+    var btn = $('authSubmit'); btn.disabled = true;
+    sbInit().then(function () {
+      if (!SB) throw new Error('Failed to fetch');
+      return AUTH_MODE === 'register'
+        ? q(SB.auth.signUp({ email: email, password: pass, options: { data: { display_name: name }, emailRedirectTo: location.origin + location.pathname } }))
+        : q(SB.auth.signInWithPassword({ email: email, password: pass }));
+    }).then(function (d) {
+      if (AUTH_MODE === 'register' && d && !d.session) toast('Account gemaakt. Bevestig je e-mailadres via de link in je mailbox en log daarna in.', 7000);
+      else toast(AUTH_MODE === 'register' ? 'Welkom bij SwingLab!' : 'Ingelogd.');
+      $('authPass').value = '';
+    }, function (err) { toast(cloudErr(err)); }).then(function () { btn.disabled = false; });
+  });
+  $('authForgot').addEventListener('click', function () {
+    var email = $('authEmail').value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Vul eerst je e-mailadres in.'); return; }
+    sbInit().then(function () { return q(SB.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname })); })
+      .then(function () { toast('Je krijgt een mail met een link om een nieuw wachtwoord te kiezen.', 6000); }, function (e) { toast(cloudErr(e)); });
+  });
+  $('recoverForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var pass = $('recoverPass').value;
+    if (pass.length < 6) { toast('Kies een wachtwoord van minstens 6 tekens.'); return; }
+    q(SB.auth.updateUser({ password: pass })).then(function () { RECOVERING = false; $('recoverPass').value = ''; toast('Nieuw wachtwoord opgeslagen.'); renderProfile(); }, function (e2) { toast(cloudErr(e2)); });
+  });
+  $('pfCode').addEventListener('click', function () {
+    var c = ME && ME.profile && ME.profile.friend_code;
+    if (c && navigator.clipboard) navigator.clipboard.writeText(c).then(function () { toast('Vriendcode gekopieerd.'); }, function () {});
+  });
+  $('frAdd').addEventListener('click', function () {
+    var code = $('frCode').value.trim();
+    if (!/^[0-9A-Fa-f]{6}$/.test(code)) { toast('Een vriendcode heeft 6 tekens.'); return; }
+    q(SB.rpc('add_friend', { p_code: code })).then(function (name) {
+      $('frCode').value = ''; toast('Verzoek gestuurd naar ' + name + '.'); return cloudLoadSocial();
+    }).then(renderProfile, function (e) { toast(cloudErr(e)); });
+  });
+  $('frList').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var acc = b.getAttribute('data-fr-accept'), rem = b.getAttribute('data-fr-remove');
+    if (rem && b.getAttribute('data-confirm') && !confirm(nameOf(rem) + ' verwijderen als vriend?')) return;
+    var call = acc ? SB.rpc('accept_friend', { p_requester: acc }) : SB.rpc('remove_friend', { p_other: rem });
+    q(call).then(cloudLoadSocial).then(renderProfile, function (e2) { toast(cloudErr(e2)); });
+  });
+  $('grJoin').addEventListener('click', function () {
+    var code = $('grCode').value.trim();
+    if (!/^[0-9A-Fa-f]{6}$/.test(code)) { toast('Een groepscode heeft 6 tekens.'); return; }
+    q(SB.rpc('join_group', { p_code: code })).then(function (name) { $('grCode').value = ''; toast('Je bent lid van ' + name + '.'); return cloudLoadSocial(); })
+      .then(renderProfile, function (e) { toast(cloudErr(e)); });
+  });
+  $('grCreate').addEventListener('click', function () {
+    var name = $('grName').value.trim();
+    if (!name) { toast('Geef je groep een naam.'); return; }
+    q(SB.rpc('create_group', { p_name: name })).then(function (code) { $('grName').value = ''; toast('Groep gemaakt. Deel de code ' + code + ' met je clubgenoten.', 6000); return cloudLoadSocial(); })
+      .then(renderProfile, function (e) { toast(cloudErr(e)); });
+  });
+  $('grList').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var code = b.getAttribute('data-gr-code'), leave = b.getAttribute('data-gr-leave');
+    if (code) { if (navigator.clipboard) navigator.clipboard.writeText(code).then(function () { toast('Groepscode gekopieerd.'); }, function () {}); return; }
+    if (leave && confirm('Deze groep verlaten?')) q(SB.rpc('leave_group', { p_group: leave })).then(cloudLoadSocial).then(renderProfile, function (e2) { toast(cloudErr(e2)); });
+  });
+  $('chSend').addEventListener('click', function () {
+    var opp = $('chFriend').value, s = data.settings;
+    if (!opp) return;
+    q(SB.from('challenges').insert({ challenger: ME.id, opponent: opp, sport: s.sport, drill: curTvDrill(), level: s.level }))
+      .then(function () { toast('Uitdaging gestuurd naar ' + nameOf(opp) + '. Speel jouw ronde wanneer je wil.'); return cloudLoadSocial(); })
+      .then(renderProfile, function (e) { toast(cloudErr(e)); });
+  });
+  $('chList').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var play = b.getAttribute('data-ch-play'), dec = b.getAttribute('data-ch-decline');
+    if (dec) { q(SB.rpc('decline_challenge', { p_challenge: dec })).then(cloudLoadSocial).then(renderProfile, function (e2) { toast(cloudErr(e2)); }); return; }
+    var c = CLOUD.challenges.filter(function (x) { return x.id === play; })[0]; if (!c) return;
+    var iAmCh = c.challenger === ME.id, other = iAmCh ? c.opponent : c.challenger, theirs = iAmCh ? c.opponent_score : c.challenger_score;
+    data.settings.sport = c.sport; data.settings.drills[c.sport] = c.drill; data.settings.level = c.level; save();
+    setActiveChallenge({ id: c.id, sport: c.sport, drill: c.drill, level: c.level, vs: nameOf(other), target: theirs });
+    showView('home'); openTv();
+  });
+  $('meSave').addEventListener('click', function () {
+    var n = $('meName').value.trim();
+    if (!n) { toast('Vul een naam in.'); return; }
+    q(SB.from('profiles').update({ display_name: n.slice(0, 40) }).eq('id', ME.id)).then(function () {
+      ME.profile.display_name = n.slice(0, 40); if (CLOUD.profiles[ME.id]) CLOUD.profiles[ME.id].display_name = n.slice(0, 40);
+      toast('Naam opgeslagen.'); renderProfile();
+    }, function (e) { toast(cloudErr(e)); });
+  });
+  $('mePhoto').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!f || !ME) return;
+    toast('Foto uploaden…');
+    shrinkPhoto(f).then(function (blob) {
+      var path = ME.id + '/avatar.jpg';
+      return q(SB.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' })).then(function () {
+        var url = SB.storage.from('avatars').getPublicUrl(path).data.publicUrl + '?v=' + Date.now();
+        return q(SB.from('profiles').update({ avatar_url: url }).eq('id', ME.id)).then(function () { ME.profile.avatar_url = url; if (CLOUD.profiles[ME.id]) CLOUD.profiles[ME.id].avatar_url = url; });
+      });
+    }).then(function () { toast('Profielfoto opgeslagen.'); renderProfile(); }, function (err) { toast(err && err.message === 'foto' ? 'Die foto kon niet gelezen worden.' : cloudErr(err)); });
+  });
+  $('meLogout').addEventListener('click', function () {
+    SB.auth.signOut().then(function () { toast('Uitgelogd. Je statistieken op dit toestel blijven bewaard.'); });
+  });
+  $('meDelete').addEventListener('click', function () {
+    if (!confirm('Je account, scores, vrienden en uitdagingen worden definitief verwijderd. De statistieken op dit toestel blijven. Doorgaan?')) return;
+    SB.storage.from('avatars').remove([ME.id + '/avatar.jpg']).then(function () {}, function () {}).then(function () {
+      return q(SB.rpc('delete_my_account'));
+    }).then(function () { return SB.auth.signOut(); }).then(function () { toast('Je account is verwijderd.'); }, function (e) { toast(cloudErr(e)); });
+  });
+  ['bdKind', 'bdScope', 'bdLevel', 'bdPeriod', 'bdDrill'].forEach(function (id) { $(id).addEventListener('change', function () { $('bdTvOpts').hidden = $('bdKind').value !== 'tv'; loadBoard(); }); });
+  $('bdSport').addEventListener('change', function () { fillBoardDrills(); loadBoard(); });
 }
 
 /* ---------- Gebeurtenissen ---------- */
@@ -1265,7 +2034,16 @@ function bind() {
   });
   $('segHand').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.hand = b.getAttribute('data-hand'); save(); renderTvSetup(); });
   $('segLevel').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.level = b.getAttribute('data-level'); save(); renderTvSetup(); });
-  $('tvRecal').addEventListener('click', function () { if (TVS) tvBeginCalib(); });
+  $('tvRecal').addEventListener('click', function () { if (TVS) tvBeginReady(); });
+  $('segTvSport').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.sport = b.getAttribute('data-sport'); save(); renderTvSetup(); });
+  $('tvDrills').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.drills[data.settings.sport] = b.getAttribute('data-drill'); save(); renderTvSetup(); });
+  $('tvDrillsPlay').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.disabled || !TVS) return;
+    data.settings.drills[data.settings.sport] = b.getAttribute('data-drill'); save();
+    if (ACTIVE_CH && ACTIVE_CH.drill !== curTvDrill()) setActiveChallenge(null);
+    tvSend(Object.assign({ type: 'config', sport: data.settings.sport, hand: data.settings.hand, level: data.settings.level, drill: curTvDrill() }, tvPlayerInfo()));
+    renderPlayDrills();
+  });
 
   $('goalMinus').addEventListener('click', function () { data.settings.goal = Math.max(10, data.settings.goal - 10); save(); $('goalOut').textContent = data.settings.goal; });
   $('goalPlus').addEventListener('click', function () { data.settings.goal = Math.min(1000, data.settings.goal + 10); save(); $('goalOut').textContent = data.settings.goal; });
@@ -1292,6 +2070,8 @@ function bind() {
     data.stats = clone(DEFAULTS.stats); save(); renderSettings(); toast('Alle gegevens gewist.');
   });
 
+  $('btnInstallOk').addEventListener('click', function () { $('installSheet').hidden = true; afterInstall = null; });
+  $('btnInstallSkip').addEventListener('click', function () { installSkipped = true; $('installSheet').hidden = true; var n = afterInstall; afterInstall = null; if (n) n(); });
   $('btnOnboardOk').addEventListener('click', function () {
     data.settings.onboarded = true; save(); $('onboard').hidden = true;
   });
@@ -1300,12 +2080,21 @@ function bind() {
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) return;
     if (T) stopTraining();
-    if (TVS && (TVS.step === 'calib' || TVS.step === 'play')) tvEnd('Gestopt omdat SwingLab naar de achtergrond ging.');
+    if (TVS && (TVS.step === 'ready' || TVS.step === 'calib' || TVS.step === 'play')) tvEnd('Gestopt omdat SwingLab naar de achtergrond ging.');
   });
 }
 
 /* ---------- Start ---------- */
 bind();
+bindProfile();
+renderProfile();
+sbInit();
+(function () {
+  var r = null; try { r = sessionStorage.getItem('swinglab.resume'); sessionStorage.removeItem('swinglab.resume'); } catch (e) {}
+  if (r === 'tv') setTimeout(openTv, 50);
+  if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
+})();
+$('versionLine').textContent = 'SwingLab versie 7, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 
@@ -1314,7 +2103,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 }
 
 /* alleen voor tests */
-window.__swinglab = { data: function () { return data; }, createDetector: createDetector, speedKmh: speedKmh, mergeDefaults: mergeDefaults, streaks: streaks, feed: function (v, t) { if (T) feed(v, t); }, tvFeed: function (v, t, vec) { if (TVS) tvFeed(v, t, vec); }, tvState: function () { return TVS && { step: TVS.step, calib: TVS.calib.length, vec: TVS.vec, sigma: TVS.sigma, yaw: TVS.yaw, liftCal: TVS.liftCal, swings: TVS.swings, hits: TVS.hits }; }, rotMat: rotMat, swingLift: swingLift, setR: function (R) { if (TVS) TVS.R = R; } };
+window.__swinglab = { data: function () { return data; }, createDetector: createDetector, speedKmh: speedKmh, mergeDefaults: mergeDefaults, streaks: streaks, feed: function (v, t) { if (T) feed(v, t); }, tvFeed: function (v, t, vec) { if (TVS) tvFeed(v, t, vec); }, cloud: function () { return { ME: ME, CLOUD: CLOUD, ACTIVE_CH: ACTIVE_CH }; }, VS: function () { return VS(); }, tvRound: function (m) { cloudRound(m); }, tvState: function () { return TVS && { mode: TVS.mode, tvPhase: TVS.tvPhase, pos: TVS.pos, step: TVS.step, calib: TVS.calib.length, vec: TVS.vec, sigma: TVS.sigma, yaw: TVS.yaw, liftCal: TVS.liftCal, swings: TVS.swings, hits: TVS.hits }; }, rotMat: rotMat, swingLift: swingLift, setR: function (R) { if (TVS) TVS.R = R; } };
 })();
 </script>
 </body>

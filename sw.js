@@ -1,7 +1,7 @@
 /* SwingLab service worker: werkt offline na het eerste bezoek.
    Verhoog CACHE bij elke nieuwe versie zodat oude bestanden opgeruimd worden. */
-const CACHE = 'swinglab-v4';
-const ASSETS = ['./', './index.html', './tv.html', './manifest.webmanifest', './peerjs.min.js',
+const CACHE = 'swinglab-v7';
+const ASSETS = ['./', './index.html', './tv.html', './manifest.webmanifest', './peerjs.min.js', './supabase.js', './591.supabase.js',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
 self.addEventListener('install', (e) => {
@@ -22,6 +22,13 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(fetch(req).then((res) => {
       const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); return res;
     }).catch(() => caches.match(req).then((hit) => hit || caches.match('./index.html'))));
+    return;
+  }
+  // Supabase zelf nooit uit de cache, en config.js altijd vers ophalen (zodat aanpassingen meteen werken)
+  const url = new URL(req.url);
+  if (url.hostname.endsWith('.supabase.co')) return;
+  if (url.pathname.endsWith('/config.js')) {
+    e.respondWith(fetch(req).then((res) => { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); return res; }).catch(() => caches.match(req)));
     return;
   }
   // Rest (iconen, lettertype): eerst uit de cache, anders online ophalen en bewaren

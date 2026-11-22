@@ -644,7 +644,7 @@ function simulateShot(p0, speedKmh, elDeg, azDeg, dr) {
         }
       }
       if (Math.abs(x) > W2 && (x > 0 ? vx > 0 : vx < 0)) {
-        var dEnd = Math.min(y, L - y), hWall = dEnd < 2 ? 4 : 3, glassH = dEnd < 2 ? 3 : (dEnd < 4 ? 2 : 0);
+        var dEnd = Math.min(y, L - y), hWall = dEnd < 2 ? 4 : 3, glassH = 3;   // panoramisch: glas rondom
         if (z < hWall) {
           if (y > nY && !bounces && !outcome) { outcome = 'out'; tEvent = t; }
           x = (x > 0 ? 1 : -1) * W2; vx = -(z < glassH ? 0.7 : 0.3) * vx; vy *= 0.9;
@@ -665,6 +665,41 @@ function simulateShot(p0, speedKmh, elDeg, azDeg, dr) {
   }
   if (!outcome) { outcome = 'out'; tEvent = t; }
   return { pts: pts, dt: 4 / 240, outcome: outcome, tEvent: tEvent, apex: apex, land: land, el: elDeg, bounceTimes: bounceTimes, netX: netX, tNet: tNet, wallHits: wallHits };
+}
+
+/* Een bal vanaf een willekeurige positie en snelheid verder laten vliegen: stuitsen, net, en bij padel overal het glas.
+   Zo vliegt een gemiste bal gewoon door, kaatst tegen de wand en komt terug. */
+function simulateVel(p0, v0, maxT) {
+  var c = court(), L = c.L, nY = L / 2, W2 = c.Wd / 2, dt = 1 / 240, t = 0;
+  var x = p0[0], y = p0[1], z = Math.max(0, p0[2]), vx = v0[0], vy = v0[1], vz = v0[2];
+  var pts = [[x, y, z]], bounces = 0, bounceTimes = [], wallHits = [], apex = z;
+  for (var i = 1; t < (maxT || 3); i++) {
+    var sp = Math.sqrt(vx * vx + vy * vy + vz * vz);
+    vx -= DRAG * sp * vx * dt; vy -= DRAG * sp * vy * dt; vz -= (G + DRAG * sp * vz) * dt;
+    var py = y; x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
+    if (z > apex) apex = z;
+    if ((py - nY) * (y - nY) < 0 && z < netTop(x) + 0.03) { y = py; vy = -0.15 * vy; vx *= 0.3; }
+    if (c.glass) {
+      if ((y > L && vy > 0) || (y < 0 && vy < 0)) { if (z < 4) { y = y > L ? L : 0; vy = -(z < 3 ? 0.7 : 0.3) * vy; vx *= 0.9; wallHits.push({ t: t, p: [x, y, z], glass: z < 3 }); } }
+      if (Math.abs(x) > W2 && (x > 0 ? vx > 0 : vx < 0)) { var dEnd = Math.min(y, L - y); if (z < (dEnd < 2 ? 4 : 3)) { x = (x > 0 ? 1 : -1) * W2; vx = -(z < 3 ? 0.7 : 0.3) * vx; vy *= 0.9; wallHits.push({ t: t, p: [x, y, z], glass: z < 3 }); } }
+    }
+    if (z <= 0 && vz < 0) { z = 0; bounces++; bounceTimes.push(t); vz = -0.66 * vz; vx *= 0.85; vy *= 0.85; if (bounces >= 5) break; }
+    if (i % 4 === 0) pts.push([x, y, z]);
+  }
+  return { pts: pts, dt: 4 / 240, bounceTimes: bounceTimes, wallHits: wallHits, outcome: 'out', tEvent: 0, apex: apex, land: null, el: 0 };
+}
+function ballVel(b, now) {
+  var t = (now - b.t0) / 1000, w = b.wps, i = 0;
+  while (i < w.length - 2 && t > w[i + 1].t) i++;
+  var a = w[i], e = w[i + 1], T = e.t - a.t, u = t - a.t;
+  return [(e.p[0] - a.p[0]) / T, (e.p[1] - a.p[1]) / T, a.vz - G * u];
+}
+/* na het raakmoment, als je (nog) niet raakte: de bal vliegt vanaf hier met echte fysica verder.
+   Je kan hem binnen de timing nog steeds raken. */
+function continueBall(b, now) {
+  if (!b || b.kind !== 'in' || b.cont) return;
+  var p = ballPos(b, now), v = ballVel(b, now);
+  b.cont = true; b.kind = 'out'; b.sim = simulateVel(p, v, 3); b.tr = now; b.trail = []; b.bounceIdx = 0; b.wallIdx = 0;
 }
 
 /* Hoek waarbij een neutrale zwaai (zonder opwaartse beweging) het net ruim haalt.
@@ -703,7 +738,7 @@ function heightAtNet(p0, speedKmh, elDeg, dr) {
 }
 
 function hitBall(b, d, speed, lift, now, otherSide, faceAz, chosenSide) {
-  var c = court(), perfect = !otherSide && Math.abs(d) <= winP(), nY = c.L / 2;
+  var c = court(), perfect = !b.block && !otherSide && Math.abs(d) <= winP(), nY = c.L / 2;
   var p = ballPos(b, now);
   b.judged = true; b.kind = 'out'; b.tr = now; b.trail = []; b.bounceIdx = 0;
   var el0 = neutralElevation(p, speed, b.dr);
@@ -741,12 +776,12 @@ function hitBall(b, d, speed, lift, now, otherSide, faceAz, chosenSide) {
 
   playHit(speed / 60); if (perfect) playPerfect();
   burst(p, perfect);
-  showVerdict(perfect ? 'Perfect' : 'Goed', perfect ? 'perfect' : 'good');
+  showVerdict(b.block ? 'Blok' : (perfect ? 'Perfect' : 'Goed'), perfect ? 'perfect' : 'good');
   $('hudShot').className = 'shot';
   $('hudSpeed').textContent = Math.round(speed) + ' km/u';
   $('hudSpeedLbl').textContent = (b.dr.type === 'overhead' ? 'boven je hoofd' : ((chosenSide != null ? chosenSide : b.side) === sideFor('fh') ? 'forehand' : 'backhand')) + (hasLift ? ', ' + (lift >= 0 ? '+' : '') + Math.round(lift) + '° omhoog' : '');
   updateHud();
-  send({ type: 'result', verdict: perfect ? 'Perfect' : 'Goed', hit: true, swung: true, perfect: perfect, points: 0, speed: Math.round(speed) });
+  send({ type: 'result', verdict: b.block ? 'Blok' : (perfect ? 'Perfect' : 'Goed'), hit: true, swung: true, perfect: perfect, points: 0, speed: Math.round(speed) });
   // langere slagen (lobs) krijgen meer tijd voor de volgende bal komt
   R.nextLaunch = Math.max(R.nextLaunch, now + b.sim.tEvent * 1000 + 500);
   setTimeout(function () { resolveShot(b, perfect, speed, timingPts); }, b.sim.tEvent * 1000);
@@ -800,6 +835,33 @@ function finalizeMiss(b, now) {
   send({ type: 'result', verdict: v, hit: false, swung: b.wrong || b.cand != null, points: 0, speed: 0 });
 }
 
+/* Blokkeren bij een volley: houd je racket stil voor je met het blad naar het net, dan kaatst de bal terug.
+   Geen slag nodig. Het blad bepaalt de richting (links/rechts) en de hoogte (open of gesloten blad). */
+function racketStill(hist, now) {
+  if (!hist || hist.length < 3) return false;
+  var cur = hist[hist.length - 1], old = hist[0];
+  for (var i = hist.length - 1; i >= 0; i--) if (cur.t - hist[i].t >= 140) { old = hist[i]; break; }
+  var a = v3norm(cur.y), b = v3norm(old.y), c = clamp(a[0] * b[0] + a[1] * b[1] + a[2] * b[2], -1, 1);
+  return Math.acos(c) < 0.45;   // minder dan zo'n 25 graden bewogen: dat is blokkeren, geen zwaai
+}
+function blockPose(pl, mir, now) {
+  var rk = pl && pl.rk; if (!rk || now - rk.t > 250) return null;
+  var y = v3norm(rk.y), z = v3norm(rk.z);
+  if (mir) { y = [-y[0], -y[1], y[2]]; z = [-z[0], -z[1], z[2]]; }
+  if (z[1] < 0) z = [-z[0], -z[1], -z[2]];              // forehand- of backhandkant van het blad: allebei goed
+  if (z[1] < 0.55 || y[2] < -0.35 || !racketStill(pl.rkHist, now)) return null;
+  return { az: clamp(Math.atan2(z[0], z[1]) * 180 / Math.PI, -30, 30), lift: clamp(Math.asin(clamp(z[2], -1, 1)) * 180 / Math.PI * 0.8, -15, 30), dir: y[0] >= 0 ? 'fh' : 'bh' };
+}
+function incomingSpeed(b) { var w = b.wps, A = w[w.length - 2], B = w[w.length - 1]; return dist2(A.p, B.p) / Math.max(0.1, B.t - A.t); }
+function blockSpeed(b) { return clamp(incomingSpeed(b) * 3.6 * 0.35, 12, 32); }   // een blok vangt de vaart van de bal op
+function isBlockable(b) { return b && b.wps && (b.volley ? !b.overhead : (b.dr && b.dr.type === 'volley')); }
+function tryBlockTraining(b, now) {
+  var hp = hostPlayer(); if (!hp) return false;
+  var bp = blockPose(hp, false, now); if (!bp) return false;
+  b.block = true;
+  hitBall(b, 0, blockSpeed(b), bp.lift, now, false, bp.az, sideFor(bp.dir));
+  return true;
+}
 function sideFor(dir) {
   var fh = S.hand === 'left' ? -1 : 1;
   return dir === 'fh' ? fh : -fh;
@@ -1342,25 +1404,25 @@ function liveDetails(E, now) {
 }
 /* ---------- Ondergrond: kunstgras met zand, gras met maaistroken, gravel met korrel of hardcourt ---------- */
 var surfCache = { key: '', cv: null };
-function surfaceType(E) {
-  if (E && E.surface) return E.surface;
-  if (S.sport === 'padel') return 'turf';
-  if (S.sport === 'pickleball') return 'hard';
-  var n = parseInt(((E && E.court) || '#2f6c8f').slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
-  if (g > r && g > b) return 'grass';
-  if (r > 150 && g < 140 && b < 100) return 'clay';
-  return 'hard';
-}
+/* het terrein is overal hetzelfde per sport (zoals op de foto's); de omgeving eromheen verschilt per locatie */
+var COURT_STYLE = {
+  padel:      { court: '#1d56b2', out: null },
+  tennis:     { court: '#2356a2', out: '#4a87c9' },
+  pickleball: { court: '#2a5fae', out: '#2f6abb', kitchen: '#f08a33' }
+};
+function courtCol(E) { var st = COURT_STYLE[S.sport] || {}; return { court: st.court, out: st.out || (E ? E.out : court().out), kitchen: st.kitchen || null }; }
+function surfaceType(E) { return S.sport === 'padel' ? 'turf' : 'hard'; }
 function surfaceTexture(E) {
-  var c = court(), hw = c.Wd / 2, L = c.L, key = (E ? E.city + E.venue : 'x') + S.sport;
+  var c = court(), hw = c.Wd / 2, L = c.L, key = (E ? E.city + E.venue : 'x') + S.sport + 'v23';
   if (surfCache.key === key && surfCache.cv) return surfCache.cv;
   var ppm = 36, X0 = -hw - 3, X1 = hw + 3, Y0 = -2, Y1 = L + 3;
   var cv2 = document.createElement('canvas'); cv2.width = Math.round((X1 - X0) * ppm); cv2.height = Math.round((Y1 - Y0) * ppm);
   var t = cv2.getContext('2d'), type = surfaceType(E), rnd = mulberry(hashStr(key + 'surf'));
   function X(x) { return (x - X0) * ppm; } function Y(y) { return (Y1 - y) * ppm; }
-  t.fillStyle = E ? E.out : c.out; t.fillRect(0, 0, cv2.width, cv2.height);
-  t.fillStyle = E ? E.court : c.court; t.fillRect(X(-hw), Y(L), 2 * hw * ppm, L * ppm);
-  if (E && E.kitchen && S.sport === 'pickleball' && E.kitchen !== E.court) { t.fillStyle = E.kitchen; t.fillRect(X(-hw), Y(L / 2 + 2.13), 2 * hw * ppm, 4.26 * ppm); }
+  var cc = courtCol(E);
+  t.fillStyle = cc.out; t.fillRect(0, 0, cv2.width, cv2.height);
+  t.fillStyle = cc.court; t.fillRect(X(-hw), Y(L), 2 * hw * ppm, L * ppm);
+  if (cc.kitchen && S.sport === 'pickleball') { t.fillStyle = cc.kitchen; t.fillRect(X(-hw), Y(L / 2 + 2.13), 2 * hw * ppm, 4.26 * ppm); }
   var Wp = cv2.width, Hp = cv2.height, i;
   if (type === 'turf') {
     // kunstgras: duizenden vezels en zand ertussen
@@ -1517,13 +1579,10 @@ function drawCage(part) {
   for (var x = -hw; x <= hw + 0.01; x += 2) cagePost(x, yb, 4, far ? 1 : (Math.abs(x) > hw - 0.1 ? 0.5 : 0.12));
   // zijwanden: 2 m glas van 3 m hoog, 2 m glas van 2 m hoog, dan gaas met een deur bij het net
   [-hw, hw].forEach(function (xs) {
-    cagePanel(xs, Y(0), xs, Y(2), 0, 3, 'glass', fade);
+    cagePanel(xs, Y(0), xs, Y(nY - 1.7), 0, 3, 'glass', fade);
     cagePanel(xs, Y(0), xs, Y(2), 3, 4, 'mesh', fade);
-    cagePanel(xs, Y(2), xs, Y(4), 0, 2, 'glass', fade);
-    cagePanel(xs, Y(2), xs, Y(4), 2, 3, 'mesh', fade);
-    cagePanel(xs, Y(4), xs, Y(nY - 1.7), 0, 3, 'mesh', fade);
-    cagePanel(xs, Y(nY - 0.9), xs, Y(nY), 0, 3, 'mesh', fade);
-    cagePanel(xs, Y(nY - 1.7), xs, Y(nY - 0.9), 2.1, 3, 'mesh', fade);   // boven de deur
+    cagePanel(xs, Y(nY - 0.9), xs, Y(nY), 0, 3, 'glass', fade);
+    cagePanel(xs, Y(nY - 1.7), xs, Y(nY - 0.9), 2.1, 3, 'glass', fade);   // boven de deur
     [0, 2, 4, 6, 8, nY - 1.7, nY - 0.9].forEach(function (d) { if (d <= nY) cagePost(xs, Y(d), d < 2.01 ? 4 : 3, fade); });
     var t0 = proj(xs, Y(0), 4), t1 = proj(xs, Y(2), 4), t2 = proj(xs, Y(2), 3), t3 = proj(xs, Y(nY), 3);
     ctx.strokeStyle = 'rgba(18,20,24,' + (0.9 * fade) + ')'; ctx.lineWidth = Math.max(2, t0.s * 0.05);
@@ -1854,6 +1913,8 @@ function drawFrame(now) {
   else if (R && S.phase === 'play') {
     if (R.balls < BALLS && (!R.inc || R.inc.judged) && now >= R.nextLaunch) launchBall(now);
     var b = R.inc;
+    if (b && !b.judged && isBlockable(b) && now >= b.tContact + 40 && now <= b.tContact + 220) tryBlockTraining(b, now);
+    if (b && !b.judged && b.kind === 'in' && now > b.tContact + 45) continueBall(b, now);
     if (b && !b.judged && now > b.tContact + Math.max(LATE_FINAL, winG() + 350)) finalizeMiss(b, now);
     if (R.balls >= BALLS && R.inc && R.inc.judged && R.pending === 0 && now > R.lastJudge + 1300) endRound();
   }
@@ -2024,6 +2085,7 @@ function handleData(m, pl) {
   } else if (m.type === 'o') {
     if (Array.isArray(m.y) && Array.isArray(m.z)) {
       pl.rk = { y: m.y, z: m.z, p: Array.isArray(m.p) ? m.p : null, t: performance.now() };
+      (pl.rkHist || (pl.rkHist = [])).push({ t: pl.rk.t, y: m.y }); if (pl.rkHist.length > 24) pl.rkHist.shift();
       if (pl.host) S.rk = pl.rk;
     }
   } else if (m.type === 'bye') {
@@ -2098,6 +2160,17 @@ function startMatch() {
   startCountdown();
   updateMatchHud();
 }
+/* vlot bewegen zoals een mens: versnellen, afremmen bij aankomst, en op tijd bij de bal zijn */
+function moveRunner(w, tx, ty, dt, now) {
+  var dx = tx - w.x, dy = ty - w.y, d = Math.sqrt(dx * dx + dy * dy);
+  var vmax = 6.2, want = Math.min(vmax, d * 3.2);
+  if (w.cT && w.cT > now) want = Math.min(8.5, Math.max(want, d / Math.max(0.12, (w.cT - now) / 1000 - 0.1)));
+  var tvx = d > 0.01 ? dx / d * want : 0, tvy = d > 0.01 ? dy / d * want : 0, k = 1 - Math.exp(-dt * 7);
+  w.vx = (w.vx || 0) + (tvx - (w.vx || 0)) * k; w.vy = (w.vy || 0) + (tvy - (w.vy || 0)) * k;
+  w.x += w.vx * dt; w.y += w.vy * dt;
+  var sp = Math.sqrt(w.vx * w.vx + w.vy * w.vy);
+  w.spd = sp; w.runPh = (w.runPh || 0) + sp * dt * 3.3;
+}
 /* waar staat een team: achteraan of aan het net */
 function zoneY(team, zone) {
   var C = court(), L = C.L, nY = L / 2;
@@ -2151,6 +2224,7 @@ function buildPath(wps) {
   return wps;
 }
 function inCageX(v) { var C = court(), lim = C.glass ? C.Wd / 2 - 0.35 : MS.hwIn + 0.6; return clamp(v, -lim, lim); }
+function inCageXT(v) { var C = court(), lim = C.glass ? C.Wd / 2 - 0.35 : C.Wd / 2 + 1.5; return clamp(v, -lim, lim); }
 function inCageY(v) { var C = court(); return C.glass ? clamp(v, 0.35, C.L - 0.35) : v; }
 function launchShot(hitter, from, land, recv, vh, now, firstT, kind) {
   var C = court(), L = C.L, nY = L / 2, toNear = recv.team === 0, wps, cx, cy, cz = 1.0, glass = false;
@@ -2201,8 +2275,14 @@ function launchShot(hitter, from, land, recv, vh, now, firstT, kind) {
   // aan welke kant van de ontvanger komt de bal: forehand of backhand?
   var rel = (cx - recv.x) * (recv.team === 0 ? 1 : -1), right = rel >= 0;
   b.expDir = (recv.hand === 'left') ? (right ? 'bh' : 'fh') : (right ? 'fh' : 'bh');
-  b.side = cx >= recv.x ? 1 : -1;
-  recv.tx = cx; recv.ty = cy; recv.cT = b.tContact; recv.sk = cz > 1.8 ? 'over' : b.expDir;
+  // naast de bal gaan staan, op een armlengte: de bal komt dan aan je forehand- of backhandkant langs
+  var face = recv.team === 0 ? 1 : -1, relx = (cx - recv.x) * face, sideR = relx >= 0 ? 1 : -1;
+  if (Math.abs(relx) < 0.35) sideR = recv.hand === 'left' ? -1 : 1;     // recht op het lijf: forehand
+  var reach = cz > 1.8 ? 0.25 : 0.78;
+  b.side = sideR * face;
+  recv.tx = inCageX(cx - sideR * face * reach); recv.ty = inCageY(cy - face * 0.25); recv.cT = b.tContact;
+  recv.sk = cz > 1.8 ? 'over' : ((sideR > 0) === (recv.hand !== 'left') ? 'fh' : 'bh');
+  b.expDir = recv.sk === 'bh' ? 'bh' : 'fh';
   balls.push(b);
   MS.ball = b; MS.receiver = recv; MS.state = 'rally';
   if (R) R.inc = recv.kind === 'human' ? b : null;
@@ -2227,21 +2307,22 @@ function serve(now) {
 function matchTick(now) {
   if (!MS || S.phase !== 'play') return;
   var dt = MS.lastT ? clamp((now - MS.lastT) / 1000, 0.001, 0.05) : 0.016; MS.lastT = now;
-  MS.who.forEach(function (w) {
-    var ty = w.ty != null ? w.ty : w.y0, dx = w.tx - w.x, dy = ty - w.y, d = Math.sqrt(dx * dx + dy * dy);
-    var vmax = 5.5; if (w.cT && w.cT > now) vmax = clamp(d / Math.max(0.15, (w.cT - now) / 1000 - 0.08), 2, 8.5);
-    var step = Math.min(d, vmax * dt);
-    if (d > 0.004) { w.x += dx / d * step; w.y += dy / d * step; }
-    w.spd = (w.spd || 0) * 0.8 + (step / dt) * 0.2; w.runPh = (w.runPh || 0) + step * 3.3;
-  });
+  MS.who.forEach(function (w) { moveRunner(w, w.tx, w.ty != null ? w.ty : w.y0, dt, now); });
   if (MS.state === 'start') { MS.state = 'wait'; MS.after = 'serve'; MS.nextAt = now + 700; }
   if (MS.state === 'wait' && now >= MS.nextAt) {
     if (MS.after === 'serve') { MS.who.forEach(function (w) { w.tx = w.x0; }); serve(now); }
     else if (MS.after === 'end') endMatch();
   }
   var b = MS.ball;
+  if (MS.state === 'rally' && b && !b.judged && b.kind === 'in' && MS.receiver && MS.receiver.kind === 'human' && now > b.tContact + 45 &&
+      !(isBlockable(b) && now <= b.tContact + 220 && MS.receiver.p && blockPose(MS.receiver.p, MS.receiver.team === 1, now))) continueBall(b, now);
   if (MS.state === 'rally' && b && !b.judged) {
     if (MS.receiver.kind === 'bot') { if (now >= b.tContact - 15) botHit(b, now); }
+    else if (isBlockable(b) && now >= b.tContact + 40 && now <= b.tContact + 220 && MS.receiver.p && blockPose(MS.receiver.p, MS.receiver.team === 1, now)) {
+      var bp = blockPose(MS.receiver.p, MS.receiver.team === 1, now);
+      b.block = true;
+      onMatchSwing(MS.receiver.p, { type: 'swing', speed: blockSpeed(b), dir: bp.dir, lift: bp.lift, az: bp.az, lag: 0, block: true });
+    }
     else if (now > b.tContact + Math.max(LATE_FINAL, winG() + 350)) {
       b.judged = true;
       sendTo(MS.receiver.p, { type: 'result', verdict: 'Gemist', hit: false, swung: false });
@@ -2294,10 +2375,10 @@ function showOutBall(sim, mir, now) {
 function onMatchSwing(pl, m) {
   var b = MS.ball, w = MS.receiver;
   if (!b || b.judged || !w || w.kind !== 'human' || w.p !== pl) return;
-  var now = performance.now(), tp = now - clamp(+m.lag || 0, 0, 400) - NET_MS, d = tp - b.tContact;
+  var now = performance.now(), tp = now - clamp(+m.lag || 0, 0, 400) - NET_MS, d = m.block ? 0 : tp - b.tContact;
   if (Math.abs(d) > winG()) return;  // te vroeg of te laat: telt niet
   b.judged = true; w.swingT = now;
-  var C = court(), L = C.L, perfect = Math.abs(d) <= winP();
+  var C = court(), L = C.L, perfect = !m.block && Math.abs(d) <= winP();
   w.sk = b.overhead ? 'over' : (m.dir === 'bh' ? 'bh' : 'fh');   // je eigen keuze
   var speed = clamp(+m.speed || 0, 0, 160), lift = typeof m.lift === 'number' ? m.lift : null, faceAz = typeof m.az === 'number' ? clamp(m.az, -35, 35) : null;
   var p = ballPos(b, now), mir = w.team === 1, ph = mir ? [-p[0], L - p[1], p[2]] : p;
@@ -2313,7 +2394,7 @@ function onMatchSwing(pl, m) {
   w.st.swings++; if (speed > w.st.best) w.st.best = Math.round(speed);
   playHit(speed / 60); if (perfect) playPerfect();
   burst(p, perfect);
-  var verdict = perfect ? 'Perfect' : 'Goed';
+  var verdict = m.block ? 'Blok' : (perfect ? 'Perfect' : 'Goed');
   if (sim.outcome === 'in') {
     w.st.hits++; if (perfect) w.st.perfect++;
     var land = mir ? [-sim.land[0], L - sim.land[1]] : sim.land, opp = 1 - w.team;
@@ -2412,6 +2493,7 @@ function init3D() {
     var sun = new THREE.DirectionalLight(0xffffff, 1.3); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
     var sc = sun.shadow.camera; sc.left = -18; sc.right = 18; sc.top = 22; sc.bottom = -22; sc.near = 1; sc.far = 120; sun.shadow.bias = -0.0006;
     scene.add(sun); scene.add(sun.target);
+    var rim = new THREE.DirectionalLight(0xfff2e2, 0.6); rim.position.set(0, 14, -60); scene.add(rim);   // tegenlicht: contouren van de spelers
     var catcher = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ opacity: 0.4 }));
     catcher.rotation.x = -Math.PI / 2; catcher.receiveShadow = true; scene.add(catcher);
     G3 = { r: r, scene: scene, cam: cam, hemi: hemi, sun: sun, catcher: catcher, humans: [], balls: [], net: null, cage: null, sport: null, venue: null,
@@ -2445,19 +2527,35 @@ function shirtTex(kind, sport) {
   if (kind === 'pro') return canvasTex('pro' + sport, 64, 64, function (c, w, h2) { c.fillStyle = sc; c.fillRect(0, 0, w, h2); c.fillStyle = '#ffffff'; c.fillRect(0, 0, w * 0.12, h2); c.fillRect(w * 0.5, 0, w * 0.12, h2); });
   return null;
 }
+function latheY(profile, seg) { return new THREE.LatheGeometry(profile.map(function (q) { return new THREE.Vector2(q[1], q[0]); }), seg || 18); }
+function athleteGeo() {
+  if (G3.ath) return G3.ath;
+  G3.ath = {
+    armU: latheY([[-0.5, 0.06], [-0.38, 0.066], [-0.12, 0.068], [0.12, 0.061], [0.36, 0.049], [0.5, 0.045]]),
+    fore: latheY([[-0.5, 0.048], [-0.3, 0.054], [0, 0.047], [0.3, 0.036], [0.5, 0.031]]),
+    thigh: latheY([[-0.5, 0.095], [-0.3, 0.098], [0, 0.088], [0.25, 0.075], [0.45, 0.06], [0.5, 0.057]]),
+    calf: latheY([[-0.5, 0.052], [-0.32, 0.064], [-0.12, 0.061], [0.2, 0.044], [0.42, 0.033], [0.5, 0.031]]),
+    torso: latheY([[-0.5, 0.82], [-0.34, 0.74], [-0.1, 0.8], [0.15, 0.95], [0.32, 1.0], [0.42, 0.93], [0.5, 0.5]], 24),
+    shortsLeg: latheY([[-0.5, 0.108], [-0.1, 0.106], [0.5, 0.1]]),
+    sleeve: latheY([[-0.5, 0.074], [0.5, 0.07]]),
+    shoe: (function () { var g2 = new THREE.SphereGeometry(1, 16, 10); return g2; })()
+  };
+  return G3.ath;
+}
 function makeHuman3D() {
-  var g = new THREE.Group(), geo = G3.geo;
-  var mat = { skin: M3('#e0ac85', { roughness: 0.55 }), shirt: M3('#2f7bff'), shorts: M3('#16181c'), shoe: M3('#f4f4f4', { roughness: 0.5 }), hair: M3('#5a3a22', { roughness: 0.95 }),
+  var g = new THREE.Group(), geo = G3.geo, A = athleteGeo();
+  var mat = { skin: new THREE.MeshPhysicalMaterial({ color: new THREE.Color('#e0ac85'), roughness: 0.46, sheen: 0.6, sheenRoughness: 0.45, sheenColor: new THREE.Color('#ffc8a8'), clearcoat: 0.08, clearcoatRoughness: 0.6 }), shirt: M3('#2f7bff'), shorts: M3('#16181c'), shoe: M3('#f4f4f4', { roughness: 0.5 }), hair: M3('#5a3a22', { roughness: 0.95 }),
               eye: M3('#111111', { roughness: 0.3 }), acc: M3('#2f7bff'), gold: M3('#e6b53a', { metalness: 0.85, roughness: 0.3 }), sole: M3('#dddddd') };
   function part(gg, m, shadow) { var mesh = new THREE.Mesh(gg, m); mesh.castShadow = shadow !== false; g.add(mesh); return mesh; }
   var P = {
-    thighU: [part(geo.cyl, mat.shorts), part(geo.cyl, mat.shorts)], thighL: [part(geo.cyl, mat.skin), part(geo.cyl, mat.skin)],
-    knee: [part(geo.sph, mat.skin), part(geo.sph, mat.skin)], shin: [part(geo.cyl, mat.skin), part(geo.cyl, mat.skin)],
-    sock: [part(geo.cyl, mat.sole), part(geo.cyl, mat.sole)], foot: [part(geo.box, mat.shoe), part(geo.box, mat.shoe)],
-    hipJ: [part(geo.sph, mat.shorts), part(geo.sph, mat.shorts)], pelvis: part(geo.sph, mat.shorts), torso: part(geo.torso, mat.shirt),
-    shoulder: [part(geo.sph, mat.shirt), part(geo.sph, mat.shirt)], armU: [part(geo.cyl, mat.shirt), part(geo.cyl, mat.shirt)],
-    armM: [part(geo.cyl, mat.skin), part(geo.cyl, mat.skin)], elbow: [part(geo.sph, mat.skin), part(geo.sph, mat.skin)],
-    fore: [part(geo.cyl, mat.skin), part(geo.cyl, mat.skin)], hand: [part(geo.sph, mat.skin), part(geo.sph, mat.skin)],
+    thighU: [part(A.shortsLeg, mat.shorts), part(A.shortsLeg, mat.shorts)], thighL: [part(A.thigh, mat.skin), part(A.thigh, mat.skin)],
+    knee: [part(geo.sph, mat.skin), part(geo.sph, mat.skin)], shin: [part(A.calf, mat.skin), part(A.calf, mat.skin)],
+    sock: [part(geo.cyl, mat.sole), part(geo.cyl, mat.sole)], foot: [part(A.shoe, mat.shoe), part(A.shoe, mat.shoe)], sole: [part(geo.box, mat.sole), part(geo.box, mat.sole)],
+    hipJ: [part(geo.sph, mat.shorts), part(geo.sph, mat.shorts)], pelvis: part(geo.sph, mat.shorts), torso: part(A.torso, mat.shirt),
+    shoulder: [part(geo.sph, mat.shirt), part(geo.sph, mat.shirt)], armU: [part(A.sleeve, mat.shirt), part(A.sleeve, mat.shirt)],
+    armM: [part(A.armU, mat.skin), part(A.armU, mat.skin)], elbow: [part(geo.sph, mat.skin), part(geo.sph, mat.skin)],
+    fore: [part(A.fore, mat.skin), part(A.fore, mat.skin)], hand: [part(geo.sph, mat.skin), part(geo.sph, mat.skin)],
+    jaw: part(geo.sph, mat.skin), ears: [part(geo.sph, mat.skin, false), part(geo.sph, mat.skin, false)], trap: part(geo.sph, mat.shirt),
     neck: part(geo.cyl, mat.skin), head: part(geo.sph, mat.skin), hairCap: part(geo.cap, mat.hair), tail: part(geo.cyl, mat.hair), knot: part(geo.sph, mat.hair),
     curls: [0, 1, 2, 3, 4, 5].map(function () { return part(geo.sph, mat.hair); }), mohawk: part(geo.box, mat.hair),
     eyes: [part(geo.sph, mat.eye, false), part(geo.sph, mat.eye, false)], nose: part(geo.sph, mat.skin, false),
@@ -2498,7 +2596,8 @@ function computePose(w, now, live) {
     var toe = [ank[0], ank[1] + 0.17, Math.max(0.04, ank[2] - 0.05)];
     return { hip: Wd(hip), knee: Wd(knee), ank: Wd(ank), toe: Wd(toe), mid: Wd(lerp3(hip, knee, 0.42)) };
   });
-  var shR = rot([0.2, 0.02, 1.43 - cr]), shL = rot([-0.2, 0.02, 1.43 - cr]), domSh = hs > 0 ? shR : shL, offSh = hs > 0 ? shL : shR;
+  var leanS = clamp(spd / 6, 0, 1) * 0.09 + cr * 0.25;
+  var shR = rot([0.21, 0.02 + leanS, 1.44 - cr]), shL = rot([-0.21, 0.02 + leanS, 1.44 - cr]), domSh = hs > 0 ? shR : shL, offSh = hs > 0 ? shL : shR;
   var wristW, ry, rz;
   if (live) {
     ry = v3norm(live.y); rz = v3norm(live.z);
@@ -2511,33 +2610,43 @@ function computePose(w, now, live) {
   if (!live) { var eD = v3norm([wristW[0] - arm.e[0], wristW[1] - arm.e[1], wristW[2] - arm.e[2]]); ry = v3norm([eD[0], eD[1], eD[2] + (kind === 'over' && p > 0.1 ? 0.6 : 0.45)]); rz = [0, fs, 0]; }
   var offW = live ? Wd([-hs * 0.3, 0.3, 1.15 - cr]) : Wd(p < 0.3 ? [hs * -0.02, 0.4, 1.05 - cr] : [-hs * 0.42, 0.22, 1.2 - cr]);
   var arm2 = armIK(Wd(offSh), offW, 0.3, 0.28, [-hs * fs * 0.6, 0, -0.8]);
-  return { fs: fs, hs: hs, legs: legs, pelvis: Wd([0, 0, 0.96 - cr]), chest: Wd([0, 0.05, 1.38 - cr]), neckA: Wd([0, 0.06, 1.46 - cr]), neckB: Wd([0, 0.07, 1.56 - cr]),
-    head: Wd([0, 0.07, 1.67 - cr]), shD: Wd(domSh), shO: Wd(offSh), shL: Wd(shL), shR: Wd(shR), elD: arm.e, wrD: wristW, elO: arm2.e, wrO: arm2.w, ry: ry, rz: rz };
+  var lean = clamp(spd / 6, 0, 1) * 0.09 + cr * 0.25;
+  return { fs: fs, hs: hs, legs: legs, pelvis: Wd([0, 0, 0.96 - cr]), chest: Wd([0, 0.05 + lean, 1.38 - cr]), neckA: Wd([0, 0.06 + lean, 1.47 - cr]), neckB: Wd([0, 0.07 + lean * 1.2, 1.57 - cr]),
+    head: Wd([0, 0.07 + lean * 1.3, 1.68 - cr]), shD: Wd(domSh), shO: Wd(offSh), shL: Wd(shL), shR: Wd(shR), elD: arm.e, wrD: wristW, elO: arm2.e, wrO: arm2.w, ry: ry, rz: rz };
 }
 function updateHuman3D(H3, w, now, live) {
   var P = H3.P, q = computePose(w, now, live), F = [0, q.fs, 0];
   applyAvatar3D(H3, w.av || botAvatar(w), S.sport);
   q.legs.forEach(function (L, i) {
-    setLimb(P.thighU[i], L.hip, L.mid, 0.085); setLimb(P.thighL[i], L.mid, L.knee, 0.07); setSph(P.knee[i], L.knee, 0.058);
-    var sockTop = lerp3(L.knee, L.ank, 0.8);
-    setLimb(P.shin[i], L.knee, sockTop, 0.055); setLimb(P.sock[i], sockTop, L.ank, 0.045); setSph(P.hipJ[i], L.hip, 0.088);
-    // schoen: blok van enkel naar teen
-    var A = T3([L.ank[0], L.ank[1], L.ank[2] - 0.04]), B = T3(L.toe), d = B.clone().sub(A), len = d.length() || 0.1;
+    // gespierde dij en kuit, met de broek over het bovenste deel van de dij
+    setLimb(P.thighL[i], L.hip, L.knee, 1); setLimb(P.thighU[i], L.hip, lerp3(L.hip, L.knee, 0.48), 1); setSph(P.knee[i], L.knee, 0.056);
+    var sockTop = lerp3(L.knee, L.ank, 0.84);
+    setLimb(P.shin[i], L.knee, L.ank, 1); setLimb(P.sock[i], sockTop, L.ank, 0.037); setSph(P.hipJ[i], L.hip, 0.1);
+    // sportschoen: afgeronde schoen met witte zool, van hiel tot teen
+    var A = T3([L.ank[0], L.ank[1] - 0.05 * (L.toe[1] > L.ank[1] ? 1 : -1), L.ank[2] - 0.045]), B = T3([L.toe[0], L.toe[1], L.toe[2] - 0.01]), d = B.clone().sub(A), len = d.length() || 0.1;
     var Y = d.clone().divideScalar(len), Xv = new THREE.Vector3(1, 0, 0).addScaledVector(Y, -Y.x).normalize(), Zv = new THREE.Vector3().crossVectors(Xv, Y);
-    setBasis(P.foot[i], A.clone().addScaledVector(d, 0.5), Xv, Y, Zv, 0.1, len + 0.08, 0.08);
+    var C = A.clone().addScaledVector(d, 0.5);
+    setBasis(P.foot[i], C, Xv, Y, Zv, 0.052, len * 0.62 + 0.05, 0.05);
+    setBasis(P.sole[i], C.clone().addScaledVector(Zv.y >= 0 ? Zv : Zv.clone().negate(), -0.035), Xv, Y, Zv, 0.1, len + 0.1, 0.022);
   });
-  setSph(P.pelvis, q.pelvis, 0.17, 1.05, 0.75, 0.75);
+  setSph(P.pelvis, q.pelvis, 0.175, 1.05, 0.72, 0.78);
   // romp: as van bekken naar nek, gedraaid met de schouders
   var Ab = T3(q.pelvis), At = T3(q.neckA), Yt = At.clone().sub(Ab), lt = Yt.length(); Yt.divideScalar(lt);
   var Xt = T3(q.shR).sub(T3(q.shL)); Xt.addScaledVector(Yt, -Xt.dot(Yt)).normalize(); var Zt = new THREE.Vector3().crossVectors(Xt, Yt);
-  setBasis(P.torso, Ab.clone().addScaledVector(Yt, lt * 0.5), Xt, Yt, Zt, 0.2, lt, 0.125);
+  // V-vormige romp: brede schouders en borst, smalle taille
+  setBasis(P.torso, Ab.clone().addScaledVector(Yt, lt * 0.5), Xt, Yt, Zt, 0.215, lt, 0.135);
+  setBasis(P.trap, At.clone().addScaledVector(Yt, -0.03), Xt, Yt, Zt, 0.13, 0.06, 0.08);
   [[q.shD, q.elD, q.wrD], [q.shO, q.elO, q.wrO]].forEach(function (a, i) {
-    var mid = lerp3(a[0], a[1], 0.5);
-    setSph(P.shoulder[i], a[0], 0.07); setLimb(P.armU[i], a[0], mid, 0.066); setLimb(P.armM[i], mid, a[1], 0.052);
-    setSph(P.elbow[i], a[1], 0.047); setLimb(P.fore[i], a[1], a[2], 0.045); setSph(P.hand[i], a[2], 0.048);
+    setSph(P.shoulder[i], a[0], 0.078, 1, 0.9, 1);                                   // schouderspier onder de mouw
+    setLimb(P.armM[i], a[0], a[1], 1); setLimb(P.armU[i], a[0], lerp3(a[0], a[1], 0.4), 1);
+    setSph(P.elbow[i], a[1], 0.046); setLimb(P.fore[i], a[1], a[2], 1); setSph(P.hand[i], a[2], 0.047, 0.9, 1.1, 0.8);
   });
-  setLimb(P.neck, q.neckA, q.neckB, 0.05);
-  setSph(P.head, q.head, 0.112, 0.92, 1.05, 1);
+  setLimb(P.neck, q.neckA, q.neckB, 0.055);
+  setSph(P.head, q.head, 0.108, 0.9, 1.08, 1);
+  var fw0 = [0, q.fs, 0], sd0 = [q.fs, 0, 0];
+  setSph(P.jaw, [q.head[0], q.head[1] + fw0[1] * 0.03, q.head[2] - 0.055], 0.075, 1.05, 0.7, 1);
+  setSph(P.ears[0], [q.head[0] + sd0[0] * 0.1, q.head[1], q.head[2] - 0.005], 0.022, 0.6, 1.2, 1);
+  setSph(P.ears[1], [q.head[0] - sd0[0] * 0.1, q.head[1], q.head[2] - 0.005], 0.022, 0.6, 1.2, 1);
   // gezicht en haar
   var fwd = [0, q.fs, 0], side = [q.fs, 0, 0];
   setSph(P.eyes[0], [q.head[0] + side[0] * 0.04 + fwd[0] * 0.095, q.head[1] + fwd[1] * 0.095, q.head[2] + 0.015], 0.013);
@@ -2662,14 +2771,21 @@ function buildCage3D() {
     for (var x = -hw; x <= hw + 0.01; x += 2) if (!near || Math.abs(x) > hw - 0.1) post(x, yb, 4);
     rail(-hw, yb, hw, yb, 4); rail(-hw, yb, hw, yb, 3);
     [-hw, hw].forEach(function (xs) {
-      panel(xs, Y(0), xs, Y(2), 0, 3, 'glass', near); panel(xs, Y(0), xs, Y(2), 3, 4, 'mesh', near);
-      panel(xs, Y(2), xs, Y(4), 0, 2, 'glass', near); panel(xs, Y(2), xs, Y(4), 2, 3, 'mesh', near);
-      panel(xs, Y(4), xs, Y(nY - 1.7), 0, 3, 'mesh', near); panel(xs, Y(nY - 0.9), xs, Y(nY), 0, 3, 'mesh', near);
-      panel(xs, Y(nY - 1.7), xs, Y(nY - 0.9), 2.1, 3, 'mesh', near);
+      // panoramisch: glas over de hele zijkant, gaas alleen in de hoeken boven 3 m, een deur bij het net
+      panel(xs, Y(0), xs, Y(nY - 1.7), 0, 3, 'glass', near); panel(xs, Y(0), xs, Y(2), 3, 4, 'mesh', near);
+      panel(xs, Y(nY - 0.9), xs, Y(nY), 0, 3, 'glass', near);
+      panel(xs, Y(nY - 1.7), xs, Y(nY - 0.9), 2.1, 3, 'glass', near);
       [0, 2, 4, 6, 8, nY - 1.7, nY - 0.9].forEach(function (d) { post(xs, Y(d), d < 2.01 ? 4 : 3); });
-      rail(xs, Y(0), xs, Y(2), 4); rail(xs, Y(2), xs, Y(nY), 3);
+      rail(xs, Y(0), xs, Y(2), 4); rail(xs, Y(2), xs, Y(nY), 3); rail(xs, Y(0), xs, Y(nY), 0.03);
     });
   });
+  // vier lichtmasten langs de kooi, zoals op de foto
+  [-1, 1].forEach(function (sd) { [L * 0.22, L * 0.78].forEach(function (yy) {
+    var x = sd * (hw + 0.7), pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 6.6, 10), steel);
+    pole.position.copy(T3([x, yy, 3.3])); pole.castShadow = true; g.add(pole);
+    var head = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.32, 0.12), steel); head.position.copy(T3([x - sd * 0.25, yy, 6.65])); head.rotation.z = sd * 0.5; g.add(head);
+    var lamp = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.24), new THREE.MeshBasicMaterial({ color: 0xfff8e8 })); lamp.position.copy(T3([x - sd * 0.29, yy, 6.6])); lamp.rotation.set(-Math.PI / 2 + 0.6, 0, 0); g.add(lamp);
+  }); });
   G3.cage = g; G3.scene.add(g);
 }
 /* licht per locatie: de zon buiten overdag, schijnwerpers binnen en 's avonds */
@@ -2686,8 +2802,16 @@ function trainingParticipant(now) {
   if (MS || S.demo || !(S.phase === 'play' || S.phase === 'countdown' || S.phase === 'done' || S.phase === 'connected')) return null;
   var hp = hostPlayer(); if (!hp) return null;
   var bb = R && R.inc, P = (S.phase === 'play' && bb) ? bb.c[1] : (curDrill().P || 1);
-  trainW = trainW || { team: 0, idx: 0, kind: 'human', spd: 0 };
-  trainW.x = 0.15; trainW.y = P - 0.5; trainW.name = hp.name; trainW.hand = hp.hand; trainW.p = hp; trainW.av = hp.av || botAvatar({ name: hp.name, team: 0, idx: 0 });
+  trainW = trainW || { team: 0, idx: 0, kind: 'human', spd: 0, x: 0.15, y: P - 0.5, lastT: now };
+  var dt = clamp((now - trainW.lastT) / 1000, 0.001, 0.05); trainW.lastT = now;
+  var tx = 0.15, ty = P - 0.5;
+  if (S.phase === 'play' && bb && !bb.judged && bb.c) {
+    // naast de bal: op een armlengte aan de kant waar hij aankomt
+    var sd = bb.c[0] >= trainW.x ? 1 : -1; if (Math.abs(bb.c[0] - trainW.x) < 0.3) sd = hp.hand === 'left' ? -1 : 1;
+    tx = bb.c[0] - sd * (bb.c[2] > 1.8 ? 0.25 : 0.78); ty = bb.c[1] - 0.25; trainW.cT = bb.tContact;
+  }
+  moveRunner(trainW, inCageXT(tx), ty, dt, now);
+  trainW.name = hp.name; trainW.hand = hp.hand; trainW.p = hp; trainW.av = hp.av || botAvatar({ name: hp.name, team: 0, idx: 0 });
   return trainW;
 }
 function liveOf(w, now) {
@@ -2950,7 +3074,7 @@ init3D();
 requestAnimationFrame(frame);
 startPeer();
 
-window.__tv = { use3d: function () { return USE3D; }, sim: function (a, b, c, d) { return simulateShot(a, b, c, d, null); }, netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
+window.__tv = { blockPose: function (pl, mir) { return blockPose(pl, mir, performance.now()); }, use3d: function () { return USE3D; }, sim: function (a, b, c, d) { return simulateShot(a, b, c, d, null); }, netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
 })();
 </script>
 </body>

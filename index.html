@@ -475,6 +475,7 @@ summary .badge{margin-right:auto}
       <p><b>Lob</b>: zwaai van laag naar hoog. Hoe meer omhoog, hoe hoger de bal.</p>
       <p><b>Smash of bandeja</b>: zwaai van boven naar onder als de bal hoog bij je komt.</p>
       <p><b>Korte bal</b>: sla zacht. Speel je kort, dan loopt je speler naar het net en volley je daar.</p>
+      <p><b>Volley blokken</b>: aan het net hoef je niet te slaan. Houd je racket stil voor je met het blad naar de tv, dan kaatst de bal er gewoon tegen terug. Kantel je het blad een beetje, dan stuur je de bal naar links, rechts of hoger.</p>
       <p>Bij <b>padel</b> kaatst de bal via het glas terug: wacht tot hij van de wand komt en sla dan.</p>
     </div>
   </details>
@@ -525,7 +526,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 21</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 23</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -754,7 +755,7 @@ summary .badge{margin-right:auto}
   <div class="tv-step" id="tvPlay" hidden>
     <div class="scoreline" id="tvScore" hidden></div>
     <div class="tv-verdict num" id="tvVerdict">Kijk naar je tv</div>
-    <p class="tv-sub" id="tvSub">Het scherm is je forehandkant, de achterkant je backhand.</p>
+    <p class="tv-sub" id="tvSub">Raak de bal: forehand of backhand kies je zelf. Je speler gaat naast de bal staan.</p>
     <p class="tv-sub small">Mist het een beetje? Neem de wachthouding aan en tik 3 keer snel op het scherm.</p>
     <div class="tv-lbl" id="lblNextDrill">Training voor de volgende ronde</div>
     <div class="chips" role="group" aria-labelledby="lblNextDrill" id="tvDrillsPlay"></div>
@@ -2740,7 +2741,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 21, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 23, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 

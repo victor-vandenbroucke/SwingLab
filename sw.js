@@ -1,6 +1,6 @@
 /* SwingLab service worker: werkt offline na het eerste bezoek.
    Verhoog CACHE bij elke nieuwe versie zodat oude bestanden opgeruimd worden. */
-const CACHE = 'swinglab-v11';
+const CACHE = 'swinglab-v15';
 const ASSETS = ['./', './index.html', './tv.html', './manifest.webmanifest', './peerjs.min.js', './supabase.js', './591.supabase.js',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 

@@ -47,7 +47,12 @@ button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
 #connected p{font-size:3.4vh;color:var(--ink2);margin:0;max-width:110vh}
 
 /* Aftellen */
-#countdown .num{font-size:34vh;line-height:1}
+#countdown .num{font-size:30vh;line-height:1;text-shadow:0 .6vh 3vh rgba(0,0,0,.6)}
+#countdown{background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.15) 60%,rgba(0,0,0,.4))}
+.venue{margin-bottom:2vh;text-shadow:0 .4vh 2vh rgba(0,0,0,.7)}
+.v-tier{display:inline-block;padding:.6vh 1.8vh;border-radius:99px;background:var(--lime);color:#000;font-weight:800;font-size:2.6vh;margin-bottom:1.6vh}
+.v-city{font-family:var(--num);font-variation-settings:"wdth" 118;font-weight:800;font-size:8vh;line-height:1}
+.v-name{font-size:3vh;color:rgba(255,255,255,.8);margin-top:1vh}
 
 /* HUD */
 #hud{position:fixed;inset:0;pointer-events:none}
@@ -122,7 +127,10 @@ button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
   <p id="connectedMsg">Neem de wachthouding aan: racket op navelhoogte voor je, recht naar voren naar de tv, loodrecht op je buik. Hou even stil om te starten.</p>
 </section>
 
-<section id="countdown" class="layer" hidden><div class="num" id="countNum">3</div></section>
+<section id="countdown" class="layer" hidden>
+  <div class="venue" id="venueBox"><div class="v-tier" id="vTier"></div><div class="v-city" id="vCity"></div><div class="v-name" id="vName"></div></div>
+  <div class="num" id="countNum">3</div>
+</section>
 
 <section id="hud" hidden>
   <div class="hud-top">
@@ -203,6 +211,72 @@ var DRILLS = {
   ]
 };
 var LF = { rustig: 1.25, normaal: 1.0, snel: 0.8 }; // tempo: hoe lang ballen onderweg zijn
+
+/* ---------- Toernooien en omgevingen ----------
+   Elke ronde speel je op een willekeurige locatie van de gekozen sport. Alles is zelf getekend, naar voorbeeld van echte toernooien.
+   sky: lucht (buiten) of hal (binnen), court/out: veld en vloer eromheen, stand/crowd: tribunes en publiek,
+   accent: kleur van ledborden en licht, roof: dak, deco: herkenbare details. */
+var NIGHT = ['#03050a', '#0b1424'], HALL = ['#050608', '#0d1016'], DUSK = ['#1b2a52', '#f08a4b'], DAY = ['#5b9ce0', '#cfe4f7'];
+var CROWD = ['#2c3e66', '#5a6b8f', '#c9ccd6', '#7a3b3b', '#d9a066', '#3d5c4b', '#efefef', '#8a8fa0'];
+var VENUES = {
+  padel: [
+    { city: 'Riyad', land: 'Saoedi-Arabië', venue: 'Paddel Rasj Arena', tier: 'P1', outdoor: true, sky: NIGHT, court: '#2a62b8', out: '#5a5f68', floor: '#2b2f36', stand: '#1d2433', crowd: 0.9, accent: '#3ad0ff', roof: 'none', deco: ['beams', 'cranes', 'lightstring'] },
+    { city: 'Gijón', land: 'Spanje', venue: 'Palasio de Deportes de La Gia', tier: 'P2', sky: HALL, court: '#2d6fc4', out: '#3b3f46', floor: '#24272c', stand: '#5a2e30', crowd: 0.8, accent: '#e63b3b', roof: 'truss', deco: ['screens'] },
+    { city: 'Cancún', land: 'Mexico', venue: 'Rafa Nadaal Tennis Senter Kosta Muheres', tier: 'P2', outdoor: true, sky: DUSK, court: '#2c5fc0', out: '#2d3036', floor: '#3a3d42', stand: '#6d7177', crowd: 0.35, accent: '#ffb35c', roof: 'none', deco: ['sunset', 'trees'] },
+    { city: 'Miami', land: 'Verenigde Staten', venue: 'Majami Biesj Konvensjen Senter', tier: 'P1', sky: HALL, court: '#2a66c8', out: '#30343b', floor: '#1d2026', stand: '#1c2a4a', crowd: 0.55, accent: '#ff3d5a', roof: 'truss', deco: ['colorlights'] },
+    { city: 'Gizeh', land: 'Egypte', venue: 'Njoe Giza Sports Klub', tier: 'P2', outdoor: true, sky: ['#04060c', '#1a1220'], court: '#2c63c2', out: '#c8322b', floor: '#a02822', stand: '#2b2f3a', crowd: 0.6, accent: '#3ab8ff', roof: 'none', deco: ['pyramids', 'beams'] },
+    { city: 'Brussel', land: 'België', venue: 'Gaar Maritiem, Toer en Taksie', tier: 'P2', sky: ['#2a2420', '#5a4a3c'], court: '#1b1c1f', out: '#8a6e52', floor: '#6e5741', stand: '#4a3d33', crowd: 0.95, accent: '#d8d0c0', roof: 'iron', deco: ['skylight'] },
+    { city: 'Asunción', land: 'Paraguay', venue: 'Wejno Es-En-Dee Arena', tier: 'P2', sky: HALL, court: '#2f6fd0', out: '#33373d', floor: '#202328', stand: '#7a2a2e', crowd: 0.4, accent: '#ffd23a', roof: 'truss', deco: ['yellowlights', 'screens'] },
+    { city: 'Buenos Aires', land: 'Argentinië', venue: 'Estadio Merie Teran de Wajs', tier: 'P1', sky: HALL, court: '#2d5fc0', out: '#2c3036', floor: '#1e2126', stand: 'rainbow', crowd: 0.45, accent: '#ffffff', roof: 'dome', deco: ['screens'] },
+    { city: 'Rome', land: 'Italië', venue: 'Foro Italiko', tier: 'Major', outdoor: true, sky: ['#2b3f73', '#e9a36a'], court: '#2c64c4', out: '#2f3237', floor: '#3b3e44', stand: '#5f6672', crowd: 0.85, accent: '#2ecc71', roof: 'none', deco: ['pines', 'floodlights'] },
+    { city: 'Valencia', land: 'Spanje', venue: 'Rotsj Arena', tier: 'P1', sky: HALL, court: '#2b63c6', out: '#262a30', floor: '#16191d', stand: '#123a48', crowd: 0.45, accent: '#2fe6ff', roof: 'truss', deco: ['screens', 'cyanlights'] },
+    { city: 'Valladolid', land: 'Spanje', venue: 'Plasa Majoor', tier: 'P2', outdoor: true, sky: DAY, court: '#2d5fc8', out: '#cf3a2e', floor: '#a8a29a', stand: '#2b55a8', crowd: 0.35, accent: '#ffffff', roof: 'none', deco: ['facade'] },
+    { city: 'Bordeaux', land: 'Frankrijk', venue: 'Arkeja Arena', tier: 'P2', sky: ['#14080a', '#3a1418'], court: '#5c6068', out: '#2b2d31', floor: '#1b1c1f', stand: '#5a1f26', crowd: 0.9, accent: '#ff3b55', roof: 'truss', deco: ['screens', 'redlights'] },
+    { city: 'Málaga', land: 'Spanje', venue: 'Palasio de Deportes Martien Karpena', tier: 'P1', sky: HALL, court: '#2a62c8', out: '#2a2e34', floor: '#17191d', stand: '#1d3a6a', crowd: 0.5, accent: '#3ad8ff', roof: 'truss', deco: ['screens'] },
+    { city: 'Pretoria', land: 'Zuid-Afrika', venue: 'Sannbet Arena, Tajm Skwèr', tier: 'P1', sky: HALL, court: '#3a7ad8', out: '#4a4f57', floor: '#2a2d33', stand: '#20242c', crowd: 0.3, accent: '#ffffff', roof: 'truss', deco: ['secondcourt', 'screens'] },
+    { city: 'Londen', land: 'Verenigd Koninkrijk', venue: 'Koppur Boks Arena', tier: 'P1', sky: ['#120a24', '#3a2a5a'], court: '#4a5f7a', out: '#d8dbe2', floor: '#1d3fae', stand: '#2a2f45', crowd: 0.25, accent: '#ff4fd8', roof: 'arch', deco: ['screens'] },
+    { city: 'Madrid', land: 'Spanje', venue: 'Wiezink Senter', tier: 'P1', sky: ['#020305', '#07090d'], court: '#2c66cc', out: '#22252a', floor: '#0f1114', stand: '#141c2e', crowd: 0.3, accent: '#2fd6ff', roof: 'truss', deco: ['spotlight', 'screens'] },
+    { city: 'Parijs', land: 'Frankrijk', venue: 'Rolan Garos, Koer Fielip Sjatrië', tier: 'Major', outdoor: true, sky: ['#7fb6e8', '#fde9c4'], court: '#2a5fd0', out: '#2c2f35', floor: '#34373d', stand: '#6a6f78', crowd: 0.95, accent: '#2a7a4a', roof: 'none', deco: ['sun', 'bigstadium'] },
+    { city: 'Rotterdam', land: 'Nederland', venue: 'Rotterdam Ahooi', tier: 'P2', sky: ['#0c0604', '#2a140a'], court: '#2c6ad0', out: '#2b2e33', floor: '#1a1c20', stand: '#7a3a14', crowd: 0.95, accent: '#ff8a2a', roof: 'truss', deco: ['orangeglow'] },
+    { city: 'Düsseldorf', land: 'Duitsland', venue: 'Kastello Duusseldorf', tier: 'P2', sky: ['#14081c', '#3a1440'], court: '#2a5ed0', out: '#2c2f36', floor: '#1d1f25', stand: '#4a1a50', crowd: 0.7, accent: '#ff3bd0', roof: 'truss', deco: ['screens'] },
+    { city: 'Milaan', land: 'Italië', venue: 'Allieans Klaud', tier: 'P1', sky: ['#0a0614', '#241440'], court: '#2f6ad8', out: '#2a2d33', floor: '#191b20', stand: '#1d2c5a', crowd: 0.6, accent: '#b04bff', roof: 'truss', deco: ['purplelights', 'screens'] },
+    { city: 'Koeweit-Stad', land: 'Koeweit', venue: 'Die Arena Koeweit', tier: 'Major', sky: ['#02040a', '#0a1428'], court: '#2b66d0', out: '#1f2d4a', floor: '#121a2a', stand: '#0f1a30', crowd: 0.3, accent: '#2a9dff', roof: 'truss', deco: ['ringlights', 'screens'] },
+    { city: 'Dubai', land: 'Verenigde Arabische Emiraten', venue: 'Doebai Djoetie Frie Tennis Stadium', tier: 'P1', outdoor: true, sky: NIGHT, court: '#3a76d4', out: '#4a4e56', floor: '#33363c', stand: '#2a2f3a', crowd: 1.0, accent: '#4ab8ff', roof: 'none', deco: ['floodlights', 'bigstadium'] },
+    { city: 'Acapulco', land: 'Mexico', venue: 'Arena Gee-Een-Pee Segoeros', tier: 'Major', outdoor: true, sky: ['#08041a', '#2a1452'], court: '#2a2f8a', out: '#1d1a3a', floor: '#151230', stand: '#2a2050', crowd: 0.8, accent: '#c45cff', roof: 'none', deco: ['palms', 'beams', 'purplelights'] },
+    { city: 'Barcelona', land: 'Spanje', venue: 'Palau Sant Sjordi', tier: 'Fienals', sky: ['#0a0705', '#2a1c10'], court: '#2a62c8', out: '#2c2f34', floor: '#1b1d21', stand: '#5a3a1a', crowd: 0.95, accent: '#ffc24a', roof: 'dome', deco: ['screens', 'ringlights'] }
+  ],
+  tennis: [
+    { city: 'Monte-Carlo', land: 'Monaco', venue: 'Monte-Karlo Kantrie Klub, Koer Renje III', tier: 'Mastus 1000', outdoor: true, sky: ['#4a8fd8', '#cfe6f7'], court: '#c8622f', out: '#c05b2b', floor: '#2f6a3a', stand: '#5f6a70', crowd: 0.95, accent: '#1f7a3a', roof: 'none', deco: ['sea', 'hotel', 'hillside'] },
+    { city: 'Rome', land: 'Italië', venue: 'Foro Italiko, Stadio Nikola Pietrandzjeli', tier: 'Mastus 1000', outdoor: true, sky: ['#5a9ee0', '#dcecf7'], court: '#b8592b', out: '#c9c6bd', floor: '#4f8a3f', stand: '#dcdad3', crowd: 0.04, standH: 0.55, accent: '#d8d5cc', roof: 'none', deco: ['statues', 'pines', 'whiteroof'] },
+    { city: 'Gstaad', land: 'Zwitserland', venue: 'Roj Emmerson Arena', tier: 'Ee-Tee-Pee 250', outdoor: true, sky: ['#4a8fe0', '#d6e9f8'], court: '#cd6a33', out: '#c4612e', floor: '#5a5f66', stand: '#3a4f8a', crowd: 0.75, accent: '#2a5ad0', roof: 'none', deco: ['alps', 'chalets'], mtn: '#4f7f45' },
+    { city: 'Indian Wells', land: 'Verenigde Staten', venue: 'Indien Wels Tennis Gaarden, Stedium Wan', tier: 'Mastus 1000', outdoor: true, sky: ['#6aa6e0', '#f2dcb4'], court: '#4a58a6', out: '#56a052', floor: '#3a3f46', stand: '#5a5560', crowd: 1.0, accent: '#2a7a3a', roof: 'none', deco: ['mountains', 'bigstadium', 'floodlights'], mtn: '#8a5f4a' },
+    { city: 'Londen', land: 'Verenigd Koninkrijk', venue: 'Die Kwiens Klub', tier: 'Ee-Tee-Pee 500', outdoor: true, sky: ['#3f86d8', '#d6e9f8'], court: '#5c9a42', out: '#538f3a', floor: '#5a2a6a', stand: '#4a3a52', crowd: 0.9, accent: '#8a2aa8', roof: 'none', deco: ['clubhouse'], lines: '#f4f4ee' },
+    { city: 'Barcelona', land: 'Spanje', venue: 'Reaal Kloeb de Tenis Barselona, Piesta Rafa Nadaal', tier: 'Ee-Tee-Pee 500', outdoor: true, sky: ['#4a8fd8', '#d6e9f8'], court: '#c65f2e', out: '#bf592b', floor: '#3a4f7a', stand: '#2f4f8a', crowd: 0.95, accent: '#2a5ad0', roof: 'none', deco: ['floodlights', 'trees', 'flats'] },
+    { city: 'Umag', land: 'Kroatië', venue: 'Ie-Tee-See Stella Maries', tier: 'Ee-Tee-Pee 250', outdoor: true, sky: ['#2a2f5a', '#f2894a'], court: '#c9632f', out: '#c05a2b', floor: '#2a3a6a', stand: '#2f4a8a', crowd: 0.85, accent: '#2a5ad0', roof: 'none', deco: ['sunset', 'trees', 'floodlights', 'sea'] },
+    { city: 'Acapulco', land: 'Mexico', venue: 'Arena Gee-Een-Pee Segoeros', tier: 'Ee-Tee-Pee 500', outdoor: true, sky: NIGHT, court: '#2a6ad0', out: '#3ec0e0', floor: '#2a2f3a', stand: '#7a7f88', crowd: 0.4, accent: '#3a2ab8', roof: 'none', deco: ['domes', 'floodlights', 'redseats'] }
+  ],
+  pickleball: [
+    { city: 'Barcelona', land: 'Spanje', venue: 'Tennis Despie', tier: 'Pee-Pee-Ee Toer Joerop', outdoor: true, sky: ['#4a8fe0', '#d8eaf8'], court: '#4f93d8', kitchen: '#5fa3e2', out: '#6a6f76', floor: '#8a8e94', stand: '#6a6f76', crowd: 0.3, standH: 0.5, accent: '#1f5a46', roof: 'none', deco: ['tennisbg', 'tents'] },
+    { city: 'Lille', land: 'Frankrijk', venue: 'Djoko Pikkelbal', tier: 'Open', sky: ['#cfd4d8', '#eef0f2'], court: '#e8742a', kitchen: '#e8742a', out: '#2f8e8c', floor: '#2a8584', walls: '#e6e8ea', accent: '#111111', roof: 'iron', roofCol: 'rgba(90,70,60,.9)', crowd: 0, deco: ['skylight', 'multicourt'] },
+    { city: 'Portorož', land: 'Slovenië', venue: 'Sjportnie Sentur Portorozj', tier: 'Pee-Pee-Ee Toer Joerop', outdoor: true, sky: DAY, court: '#2a58a8', kitchen: '#3a8ad8', out: '#3f9a5a', floor: '#8a3a2a', stand: '#3a3f46', crowd: 0.9, standH: 0.6, accent: '#3a8ad8', roof: 'none', deco: ['trees', 'multicourt'] },
+    { city: 'Brisbane', land: 'Australië', venue: 'Kwiensland Tennis Sentur, Pet Raftur Arena', tier: 'Pee-Pee-Ee Toer Ostreelja', outdoor: true, sky: ['#4a8fe0', '#e0eef8'], court: '#2f62c0', kitchen: '#2f62c0', out: '#4a9a4a', floor: '#d8d6cc', stand: '#3a3f46', crowd: 0.85, standH: 0.45, accent: '#2f62c0', roof: 'none', deco: ['multicourt', 'tents'] },
+    { city: 'Ho Chi Minhstad', land: 'Vietnam', venue: 'Glooball Sittie', tier: 'Pee-Pee-Ee Toer Eezja', sky: ['#e6e2d8', '#f6f2ea'], court: '#2c5fa0', kitchen: '#2c5fa0', out: '#3a6ab0', floor: '#345f9a', walls: '#ece6d8', accent: '#2a2f3a', roof: 'arch', archFill: true, crowd: 0, deco: ['bigscreen'] },
+    { city: 'Hongkong', land: 'China', venue: 'Kaj Tak Arena', tier: 'Pee-Pee-Ee Toer Eezja', sky: ['#06080c', '#12161e'], court: '#2a6ad8', kitchen: '#2a6ad8', out: '#2462c8', floor: '#1d2a44', walls: '#14181f', accent: '#1d2a5a', roof: 'truss', crowd: 0, deco: ['multicourt'] },
+    { city: 'Toronto', land: 'Canada', venue: 'Pikkelpleks Sosjel Klub Daunsvjoe', tier: 'Open', sky: ['#2a2a3a', '#4a4a5a'], court: '#3a2a8a', kitchen: '#e8742a', out: '#b8bcc2', floor: '#a8acb2', walls: '#3a2a7a', accent: '#1d1d24', roof: 'truss', crowd: 0, deco: ['pillars', 'multicourt'] },
+    { city: 'Vancouver', land: 'Canada', venue: 'Die Nest Sports', tier: 'Open', sky: ['#d8dce2', '#f0f2f4'], court: '#3e5f8e', kitchen: '#8a7a5c', out: '#4a6a96', floor: '#3e5f8e', walls: '#eceef0', accent: '#16181c', roof: 'steel', crowd: 0, deco: ['curtains', 'multicourt'] }
+  ]
+};
+function mulberry(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashStr(s) { var x = 2166136261; for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+var lastVenue = {};
+function pickVenue() {
+  var list = VENUES[S.sport] || VENUES.padel, i;
+  do { i = Math.floor(Math.random() * list.length); } while (list.length > 1 && list[i] === lastVenue[S.sport]);
+  lastVenue[S.sport] = list[i];
+  S.venue = list[i]; envCache.key = '';
+}
+function env() { return (S.venue && (VENUES[S.sport] || []).indexOf(S.venue) >= 0) ? S.venue : null; }
+
 
 var S = { phase: 'pair', sport: 'padel', hand: 'right', level: 'normaal', drill: 'basis', demo: false };
 function drillList() { return DRILLS[S.sport] || DRILLS.padel; }
@@ -304,11 +378,16 @@ function setPhase(p) {
 }
 
 function startCountdown() {
+  pickVenue();
   setCamera();
+  var E = env();
+  $('vTier').textContent = E ? E.tier : ''; $('vTier').hidden = !E;
+  $('vCity').textContent = E ? E.city + ', ' + E.land : '';
+  $('vName').textContent = E ? E.venue : '';
   balls = []; parts = [];
   R = { balls: 0, score: 0, streak: 0, perfect: 0, good: 0, miss: 0, outs: 0, best: 0, inc: null, nextLaunch: 0, lastJudge: 0, endAt: 0, pending: 0 };
   updateHud();
-  $('hudDrill').textContent = SPORTNAME() + ', ' + curDrill().name.toLowerCase() + playerLine();
+  $('hudDrill').textContent = (env() ? env().city + ' (' + env().tier + ')\n' : '') + SPORTNAME() + ', ' + curDrill().name.toLowerCase() + playerLine();
   $('hudSpeed').textContent = ''; $('hudSpeedLbl').textContent = '';
   setPhase('countdown');
   var n = 3;
@@ -332,12 +411,12 @@ function endRound() {
   $('donePerfect').textContent = R.perfect; $('doneGood').textContent = R.good;
   $('doneMiss').textContent = R.miss; $('doneOut').textContent = R.outs; $('doneBest').textContent = R.best;
   $('doneRecord').hidden = !rec;
-  $('doneDrill').textContent = SPORTNAME() + ', ' + curDrill().name.toLowerCase() + (S.challenge ? '. Uitdaging tegen ' + S.challenge.vs + (S.challenge.target != null ? (R.score > S.challenge.target ? ': gewonnen!' : R.score === S.challenge.target ? ': gelijkspel.' : ': verloren.') : ': je score is verstuurd.') : '');
+  $('doneDrill').textContent = (env() ? env().city + ', ' + env().venue + '. ' : '') + SPORTNAME() + ', ' + curDrill().name.toLowerCase() + (S.challenge ? '. Uitdaging tegen ' + S.challenge.vs + (S.challenge.target != null ? (R.score > S.challenge.target ? ': gewonnen!' : R.score === S.challenge.target ? ': gelijkspel.' : ': verloren.') : ': je score is verstuurd.') : '');
   if (S.challenge) S.challenge = null; // een uitdaging telt voor één ronde
   $('doneAgain').textContent = S.demo ? 'Spatie: nog een ronde. 1 tot 5: andere training. Esc: stoppen.' : 'Zwaai om nog een ronde te spelen, of kies op je telefoon een andere training';
   R.endAt = performance.now();
   setPhase('done');
-  send({ type: 'round', drill: S.drill, score: R.score, perfect: R.perfect, good: R.good, miss: R.miss, outs: R.outs, best: R.best, balls: R.balls, record: rec });
+  send({ type: 'round', venue: env() ? env().city : '', drill: S.drill, score: R.score, perfect: R.perfect, good: R.good, miss: R.miss, outs: R.outs, best: R.best, balls: R.balls, record: rec });
 }
 
 /* ---------- Ballen ---------- */
@@ -654,19 +733,315 @@ function poly(pts, fill, stroke, lw) {
   if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw || 1; ctx.stroke(); }
 }
 function line(x1, y1, x2, y2, w) {
-  var a = proj(x1, y1, 0), b = proj(x2, y2, 0);
+  var a = proj(x1, y1, 0), b = proj(x2, y2, 0), E = env();
   ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-  ctx.lineWidth = Math.max(1, w * (a.s + b.s) / 2); ctx.strokeStyle = 'rgba(255,255,255,.88)'; ctx.stroke();
+  ctx.lineWidth = Math.max(1, w * (a.s + b.s) / 2); ctx.strokeStyle = (E && E.lines) || 'rgba(255,255,255,.88)'; ctx.stroke();
+}
+
+
+/* ---------- Omgeving tekenen ----------
+   Lucht of hal, decor in de verte, tribunes met publiek, dak en lichten. Dit verandert alleen als de camera beweegt,
+   dus het wordt één keer in een apart beeld getekend en daarna hergebruikt. */
+var envCache = { cv: null, key: '' };
+function envColorAt(st, i) {
+  if (st !== 'rainbow') return st;
+  var rb = ['#c43b3b', '#e08a2a', '#e6c83a', '#3aa85a', '#2a7ad0', '#7a3ac8'];
+  return rb[i % rb.length];
+}
+function shadeHex(hex, f) {
+  var n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  return 'rgb(' + Math.round(clamp(r * f, 0, 255)) + ',' + Math.round(clamp(g * f, 0, 255)) + ',' + Math.round(clamp(b * f, 0, 255)) + ')';
+}
+function quad(c, a, b, d, e) { c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.lineTo(d.x, d.y); c.lineTo(e.x, e.y); c.closePath(); }
+function glow(c, x, y, r, col, a) {
+  var g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)');
+  c.globalAlpha = a == null ? 1 : a; c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2); c.globalAlpha = 1;
+}
+/* een schuine tribune: van (x0,y0,z0) naar (x1,y1,z1) over de breedte (dirW), met rijen publiek */
+function stand(c, E, rnd, P0, P1, W0, W1, rows, along) {
+  for (var r = 0; r < rows; r++) {
+    var f0 = r / rows, f1 = (r + 1) / rows;
+    var a = [P0[0] + (P1[0] - P0[0]) * f0, P0[1] + (P1[1] - P0[1]) * f0, P0[2] + (P1[2] - P0[2]) * f0];
+    var b = [P0[0] + (P1[0] - P0[0]) * f1, P0[1] + (P1[1] - P0[1]) * f1, P0[2] + (P1[2] - P0[2]) * f1];
+    var A0 = proj(a[0] + W0[0], a[1] + W0[1], a[2]), A1 = proj(a[0] + W1[0], a[1] + W1[1], a[2]);
+    var B0 = proj(b[0] + W0[0], b[1] + W0[1], b[2]), B1 = proj(b[0] + W1[0], b[1] + W1[1], b[2]);
+    quad(c, A0, A1, B1, B0);
+    c.fillStyle = E.stand === 'rainbow' ? shadeHex(envColorAt('rainbow', Math.floor(r / 2)), 0.55) : shadeHex(E.stand, r % 2 ? 0.8 : 0.95);
+    c.fill();
+    if (!E.crowd) continue;
+    var n = along, mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2 + 0.35];
+    for (var k = 0; k < n; k++) {
+      if (rnd() > E.crowd) { rnd(); continue; }
+      var t = (k + 0.5) / n, px = mid[0] + W0[0] + (W1[0] - W0[0]) * t, py = mid[1] + W0[1] + (W1[1] - W0[1]) * t;
+      var q = proj(px, py, mid[2]), s = Math.max(1, q.s * 0.22);
+      c.fillStyle = CROWD[Math.floor(rnd() * CROWD.length)];
+      c.fillRect(q.x - s / 2, q.y - s, s, s * 1.1);
+    }
+  }
+}
+function drawEnvironment(c, E) {
+  var C = court(), hw = C.Wd / 2, L = C.L, m = 3.2, far = 300;
+  // lucht of hal
+  var g = c.createLinearGradient(0, 0, 0, H * 0.62);
+  g.addColorStop(0, E.sky[0]); g.addColorStop(1, E.sky[1]);
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  var hz = proj(0, L + far, 0).y; // horizon
+  var deco = E.deco || [], has = function (d) { return deco.indexOf(d) >= 0; }, rnd = mulberry(hashStr(E.city + E.venue));
+
+  // decor in de verte
+  if (has('sunset') || has('sun')) {
+    var sx = W * (has('sun') ? 0.78 : 0.62), sy = has('sun') ? H * 0.06 : hz - H * 0.02;
+    glow(c, sx, sy, H * 0.35, has('sun') ? 'rgba(255,240,200,.9)' : 'rgba(255,170,90,.85)');
+    c.fillStyle = has('sun') ? '#fffbe8' : '#ffd08a'; c.beginPath(); c.arc(sx, sy, H * 0.03, 0, Math.PI * 2); c.fill();
+  }
+  if (E.outdoor && E.sky === NIGHT) for (var st = 0; st < 60; st++) { c.fillStyle = 'rgba(255,255,255,' + (0.3 + rnd() * 0.5) + ')'; c.fillRect(rnd() * W, rnd() * hz * 0.9, 1.5, 1.5); }
+  if (has('mountains') || has('hills')) {
+    c.beginPath(); c.moveTo(0, hz);
+    for (var mx = -200; mx <= 200; mx += 20) { var p = proj(mx, L + 240, (has('hills') ? 18 : 35) * (0.5 + 0.5 * Math.abs(Math.sin(mx * 0.05 + 1.3)))); c.lineTo(p.x, p.y); }
+    c.lineTo(W, hz); c.closePath(); c.fillStyle = has('hills') ? '#5a7a6a' : (E.mtn || '#8a6a6a'); c.fill();
+  }
+  if (has('sea')) { var s1 = proj(0, L + 200, 0).y; c.fillStyle = '#2a6aa8'; c.fillRect(0, s1 - H * 0.025, W, H * 0.03); c.fillStyle = 'rgba(255,255,255,.25)'; for (var w2 = 0; w2 < 30; w2++) c.fillRect(rnd() * W, s1 - H * 0.02 + rnd() * H * 0.02, 12, 1); }
+  if (has('skyline')) {
+    for (var b = -14; b <= 14; b++) {
+      var bh = 20 + rnd() * 60, bx = b * 9, p0 = proj(bx - 3.5, L + 160, 0), p1 = proj(bx + 3.5, L + 160, bh);
+      c.fillStyle = E.sky === NIGHT || E.outdoor === undefined ? '#0d1220' : '#5a6a80'; c.fillRect(p0.x, p1.y, p1.x - p0.x, p0.y - p1.y);
+      c.fillStyle = 'rgba(255,220,140,.6)';
+      for (var wy = p1.y + 3; wy < p0.y - 3; wy += 5) for (var wx = p0.x + 2; wx < p1.x - 2; wx += 4) if (rnd() < 0.35) c.fillRect(wx, wy, 1.5, 2);
+    }
+  }
+  if (has('pyramids')) {
+    [[-95, 230, 30], [10, 260, 38], [110, 240, 26]].forEach(function (py) {
+      var base = 1.6 * py[2], A = proj(py[0] - base, L + py[1], 0), B = proj(py[0] + base, L + py[1], 0), T = proj(py[0], L + py[1], py[2] * 1.4);
+      var gp = c.createLinearGradient(A.x, 0, B.x, 0); gp.addColorStop(0, '#c99a52'); gp.addColorStop(0.55, '#8a6234'); gp.addColorStop(1, '#4a3420');
+      c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(T.x, T.y); c.lineTo(B.x, B.y); c.closePath(); c.fillStyle = gp; c.fill();
+      glow(c, T.x, (T.y + A.y) / 2, (B.x - A.x) * 0.6, 'rgba(255,200,120,.18)');
+    });
+  }
+  if (has('facade')) {
+    var f0 = proj(-70, L + 60, 0), f1 = proj(70, L + 60, 20);
+    c.fillStyle = '#c4703a'; c.fillRect(f0.x, f1.y, f1.x - f0.x, f0.y - f1.y);
+    c.fillStyle = '#f2e6d0';
+    for (var fy = 0; fy < 4; fy++) for (var fx = -66; fx <= 66; fx += 6) { var wq = proj(fx, L + 60, 3 + fy * 4.2), wq2 = proj(fx + 2.2, L + 60, 5.5 + fy * 4.2); c.fillRect(wq.x, wq2.y, wq2.x - wq.x, wq.y - wq2.y); }
+    var t0 = proj(-6, L + 60, 20), t1 = proj(6, L + 60, 36); c.fillStyle = '#e8dcc4'; c.fillRect(t0.x, t1.y, t1.x - t0.x, t0.y - t1.y);
+    var ck = proj(0, L + 60, 30); c.fillStyle = '#fff'; c.beginPath(); c.arc(ck.x, ck.y, Math.max(3, (t1.x - t0.x) * 0.22), 0, Math.PI * 2); c.fill();
+  }
+  if (has('alps')) {
+    // groene bergen met wat sneeuw op de toppen
+    [[230, 55, '#3f6a3a'], [180, 38, E.mtn || '#4f7f45']].forEach(function (lay) {
+      c.beginPath(); var first = true;
+      for (var ax = -260; ax <= 260; ax += 13) {
+        var ah = lay[1] * (0.45 + 0.55 * Math.abs(Math.sin(ax * 0.021 + lay[1]))), ap = proj(ax, L + lay[0], ah);
+        if (first) { c.moveTo(ap.x, hz + 2); first = false; } c.lineTo(ap.x, ap.y);
+      }
+      c.lineTo(W + 10, hz + 2); c.closePath(); c.fillStyle = lay[2]; c.fill();
+    });
+    for (var sp2 = -2; sp2 <= 2; sp2++) { var spk = proj(sp2 * 70 + 20, L + 230, 55 * (0.45 + 0.55 * Math.abs(Math.sin((sp2 * 70 + 20) * 0.021 + 55)))); c.fillStyle = 'rgba(255,255,255,.85)'; c.beginPath(); c.moveTo(spk.x - 9, spk.y + 6); c.lineTo(spk.x, spk.y); c.lineTo(spk.x + 9, spk.y + 6); c.closePath(); c.fill(); }
+  }
+  if (has('chalets')) {
+    for (var ch = -5; ch <= 5; ch++) {
+      var cx0 = ch * 15 + (rnd() - 0.5) * 4, cy0 = L + 34 + rnd() * 8, cw = 5 + rnd() * 3, chh = 7 + rnd() * 4;
+      var q0 = proj(cx0 - cw, cy0, 0), q1 = proj(cx0 + cw, cy0, chh), qr = proj(cx0, cy0, chh + cw * 0.7);
+      c.fillStyle = '#6a4428'; c.fillRect(q0.x, q1.y, q1.x - q0.x, q0.y - q1.y);
+      c.fillStyle = '#3a2618'; c.beginPath(); c.moveTo(q0.x - 3, q1.y); c.lineTo(qr.x, qr.y); c.lineTo(q1.x + 3, q1.y); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(255,255,255,.75)'; for (var bl = 1; bl <= 2; bl++) { var by = q1.y + (q0.y - q1.y) * bl / 3; c.fillRect(q0.x, by, q1.x - q0.x, Math.max(1, (q0.y - q1.y) * 0.04)); }
+    }
+  }
+  if (has('hotel')) {
+    var ho0 = proj(-95, L + 70, 6), ho1 = proj(-45, L + 70, 22);
+    c.fillStyle = '#c87a4a'; c.fillRect(ho0.x, ho1.y, ho1.x - ho0.x, ho0.y - ho1.y);
+    c.fillStyle = '#f0dcc4'; for (var hy = 0; hy < 4; hy++) for (var hx = -92; hx <= -48; hx += 4) { var hq = proj(hx, L + 70, 8 + hy * 3.6), hq2 = proj(hx + 1.6, L + 70, 9.8 + hy * 3.6); c.fillRect(hq.x, hq2.y, hq2.x - hq.x, hq.y - hq2.y); }
+  }
+  if (has('hillside')) { c.beginPath(); var hs0 = proj(-160, L + 90, 0); c.moveTo(hs0.x, hz + 4); for (var hx2 = -160; hx2 <= -20; hx2 += 10) { var hp = proj(hx2, L + 90, 14 * (1 - (hx2 + 160) / 140) + 3); c.lineTo(hp.x, hp.y); } var hs1 = proj(-20, L + 90, 0); c.lineTo(hs1.x, hz + 4); c.closePath(); c.fillStyle = '#3f5f3a'; c.fill(); }
+  if (has('clubhouse')) {
+    var cb0 = proj(-40, L + 30, 0), cb1 = proj(10, L + 30, 11), crf = proj(-15, L + 30, 15);
+    c.fillStyle = '#9a4a32'; c.fillRect(cb0.x, cb1.y, cb1.x - cb0.x, cb0.y - cb1.y);
+    c.fillStyle = '#5a3a2a'; c.beginPath(); c.moveTo(cb0.x - 4, cb1.y); c.lineTo(crf.x, crf.y); c.lineTo(cb1.x + 4, cb1.y); c.closePath(); c.fill();
+    c.fillStyle = '#f2ecd8'; for (var wy2 = 0; wy2 < 2; wy2++) for (var wx2 = -37; wx2 <= 6; wx2 += 5) { var cw0 = proj(wx2, L + 30, 2.5 + wy2 * 4), cw1 = proj(wx2 + 2, L + 30, 5 + wy2 * 4); c.fillRect(cw0.x, cw1.y, cw1.x - cw0.x, cw0.y - cw1.y); }
+    var cb2 = proj(15, L + 30, 0), cb3 = proj(60, L + 30, 8); c.fillStyle = '#7a3a28'; c.fillRect(cb2.x, cb3.y, cb3.x - cb2.x, cb2.y - cb3.y);
+  }
+  if (has('flats')) for (var fl2 = -4; fl2 <= 4; fl2++) { var fa = proj(fl2 * 18 - 4, L + 55, 0), fb2 = proj(fl2 * 18 + 6, L + 55, 14 + (fl2 % 3) * 5); c.fillStyle = ['#d8b48a', '#e8d8c0', '#c89a72'][(fl2 + 9) % 3]; c.fillRect(fa.x, fb2.y, fb2.x - fa.x, fa.y - fb2.y); c.fillStyle = 'rgba(60,50,40,.35)'; for (var fw = fb2.y + 3; fw < fa.y - 2; fw += 5) c.fillRect(fa.x + 2, fw, fb2.x - fa.x - 4, 1.2); }
+  if (has('whiteroof')) { c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 3; c.beginPath(); for (var wr = 0; wr <= 30; wr++) { var wa = wr / 30, wq3 = proj(-40 + 80 * wa, L + 110, 16 + Math.sin(wa * Math.PI) * 3); if (wr) c.lineTo(wq3.x, wq3.y); else c.moveTo(wq3.x, wq3.y); } c.stroke(); c.lineWidth = 1; for (var wr2 = 0; wr2 <= 12; wr2++) { var wb = proj(-40 + wr2 * 80 / 12, L + 110, 10), wt = proj(-40 + wr2 * 80 / 12, L + 110, 16 + Math.sin(wr2 / 12 * Math.PI) * 3); c.beginPath(); c.moveTo(wb.x, wb.y); c.lineTo(wt.x, wt.y); c.stroke(); } }
+  if (has('cranes')) { c.strokeStyle = '#c43b3b'; c.lineWidth = 3; var cr0 = proj(-60, L + 60, 0), cr1 = proj(-60, L + 60, 45), cr2 = proj(-20, L + 60, 45); c.beginPath(); c.moveTo(cr0.x, cr0.y); c.lineTo(cr1.x, cr1.y); c.lineTo(cr2.x, cr2.y); c.stroke(); }
+
+  // vloer rond het veld
+  var fl = [proj(-hw - 60, -8, 0), proj(hw + 60, -8, 0), proj(hw + 60, L + 30, 0), proj(-hw - 60, L + 30, 0)];
+  quad(c, fl[0], fl[1], fl[2], fl[3]); c.fillStyle = E.floor; c.fill();
+
+  // velden ernaast (trainingshallen en grote pickleballcomplexen)
+  if (has('multicourt')) {
+    var kc = E.kitchen || E.court, nYc = L / 2, offs = [-(C.Wd + 7), C.Wd + 7, -2 * (C.Wd + 7), 2 * (C.Wd + 7)];
+    offs.forEach(function (ox) {
+      [0, L + 6].forEach(function (oy) {
+        if (oy && Math.abs(ox) > C.Wd + 8) return;
+        var p0 = [[ox - hw - 1.5, oy - 1.5], [ox + hw + 1.5, oy - 1.5], [ox + hw + 1.5, oy + L + 1.5], [ox - hw - 1.5, oy + L + 1.5]].map(function (q) { return proj(q[0], q[1], 0.01); });
+        quad(c, p0[0], p0[1], p0[2], p0[3]); c.fillStyle = E.out; c.fill();
+        var p1 = [[ox - hw, oy], [ox + hw, oy], [ox + hw, oy + L], [ox - hw, oy + L]].map(function (q) { return proj(q[0], q[1], 0.02); });
+        quad(c, p1[0], p1[1], p1[2], p1[3]); c.fillStyle = E.court; c.fill();
+        var k1 = [[ox - hw, oy + nYc - 2.13], [ox + hw, oy + nYc - 2.13], [ox + hw, oy + nYc + 2.13], [ox - hw, oy + nYc + 2.13]].map(function (q) { return proj(q[0], q[1], 0.03); });
+        quad(c, k1[0], k1[1], k1[2], k1[3]); c.fillStyle = kc; c.fill();
+        c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 1; quad(c, p1[0], p1[1], p1[2], p1[3]); c.stroke();
+        var n0 = proj(ox - hw - 0.3, oy + nYc, 0.9), n1 = proj(ox + hw + 0.3, oy + nYc, 0.9); c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 2; c.beginPath(); c.moveTo(n0.x, n0.y); c.lineTo(n1.x, n1.y); c.stroke();
+      });
+    });
+  }
+  if (has('tennisbg')) {
+    for (var tb = -2; tb <= 2; tb++) { var tq = [[tb * 14 - 5.5, L + 26], [tb * 14 + 5.5, L + 26], [tb * 14 + 5.5, L + 50], [tb * 14 - 5.5, L + 50]].map(function (q) { return proj(q[0], q[1], 0.01); }); quad(c, tq[0], tq[1], tq[2], tq[3]); c.fillStyle = '#4a7ac8'; c.fill(); c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 1; c.stroke(); }
+    var fe0 = proj(-80, L + 24, 3), fe1 = proj(80, L + 24, 3), fe2 = proj(80, L + 24, 0), fe3 = proj(-80, L + 24, 0); quad(c, fe0, fe1, fe2, fe3); c.fillStyle = 'rgba(40,70,60,.55)'; c.fill();
+  }
+  if (has('tents')) [[-1, L + 14], [1, L + 18]].forEach(function (tp) { var tx3 = tp[0] * (hw + 18), a0 = proj(tx3 - 4, tp[1], 0), a1 = proj(tx3 + 4, tp[1], 2.6), ap = proj(tx3, tp[1], 4.2); c.fillStyle = '#f4f4f2'; c.fillRect(a0.x, a1.y, a1.x - a0.x, a0.y - a1.y); c.beginPath(); c.moveTo(a0.x - 3, a1.y); c.lineTo(ap.x, ap.y); c.lineTo(a1.x + 3, a1.y); c.closePath(); c.fill(); });
+  if (E.walls) {
+    // hal zonder tribunes: achtermuur en zijmuren
+    var wz = 9, wy = L + m + 9, wx = hw + m + 16;
+    var aw = [proj(-wx, wy, 0), proj(wx, wy, 0), proj(wx, wy, wz), proj(-wx, wy, wz)]; quad(c, aw[0], aw[1], aw[2], aw[3]); c.fillStyle = E.walls; c.fill();
+    [-1, 1].forEach(function (sd) { var sw = [proj(sd * wx, -6, 0), proj(sd * wx, wy, 0), proj(sd * wx, wy, wz), proj(sd * wx, -6, wz)]; quad(c, sw[0], sw[1], sw[2], sw[3]); c.fillStyle = shadeHex(E.walls.length === 7 ? E.walls : '#cccccc', 0.88); c.fill(); });
+    if (has('curtains')) { var cu = [proj(-wx, wy - 0.2, 0), proj(wx, wy - 0.2, 0), proj(wx, wy - 0.2, 3), proj(-wx, wy - 0.2, 3)]; quad(c, cu[0], cu[1], cu[2], cu[3]); c.fillStyle = '#111316'; c.fill(); [-1, 1].forEach(function (sd) { var cs = [proj(sd * (wx - 0.2), -6, 0), proj(sd * (wx - 0.2), wy, 0), proj(sd * (wx - 0.2), wy, 3), proj(sd * (wx - 0.2), -6, 3)]; quad(c, cs[0], cs[1], cs[2], cs[3]); c.fillStyle = '#16181c'; c.fill(); }); }
+  }
+  if (has('pillars')) for (var pl = 0; pl < 6; pl++) [-1, 1].forEach(function (sd) { var px2 = sd * (hw + 6), py2 = -2 + pl * 6.5, b0 = proj(px2 - 0.5, py2, 0), t1 = proj(px2 + 0.5, py2, 8); c.fillStyle = '#e8622a'; c.fillRect(b0.x, t1.y, t1.x - b0.x, b0.y - t1.y); c.fillStyle = 'rgba(0,0,0,.18)'; c.fillRect(b0.x + (t1.x - b0.x) * 0.6, t1.y, (t1.x - b0.x) * 0.4, b0.y - t1.y); });
+  if (has('bigscreen')) { var bs0 = proj(-8, L + m + 5, 1), bs1 = proj(8, L + m + 5, 6); c.fillStyle = '#10141c'; c.fillRect(bs0.x, bs1.y, bs1.x - bs0.x, bs0.y - bs1.y); c.fillStyle = '#e8f0ff'; for (var bl2 = 0; bl2 < 3; bl2++) c.fillRect(bs0.x + (bs1.x - bs0.x) * (0.3 + bl2 * 0.12), bs1.y + (bs0.y - bs1.y) * 0.25, (bs1.x - bs0.x) * 0.08, (bs0.y - bs1.y) * 0.5); glow(c, (bs0.x + bs1.x) / 2, (bs0.y + bs1.y) / 2, bs1.x - bs0.x, 'rgba(120,170,255,.25)'); }
+
+  // tribunes: achteraan en langs beide kanten (hoger bij grote stadions)
+  if (E.crowd === 0 && E.walls) { /* geen tribunes in deze hal */ } else {
+  var big = (has('bigstadium') ? 1.45 : 1) * (E.standH || 1), rows = 10, top = 5.5 * big;
+  stand(c, E, rnd, [0, L + m + 2.5, 0.4], [0, L + m + 15 * big, top], [-hw - m - 16 * big, 0], [hw + m + 16 * big, 0], rows, 54);
+  [-1, 1].forEach(function (sd) {
+    stand(c, E, rnd, [sd * (hw + m + 3.5), 0, 0.4], [sd * (hw + m + 17 * big), 0, top], [0, -4], [0, L + m + 2.5], rows, 40);
+  });
+  }
+  if (has('redseats')) { var rs0 = proj(-hw - m - 6, L + m + 6, 2.2), rs1 = proj(hw + m + 6, L + m + 6, 2.2), rs2 = proj(hw + m + 6, L + m + 9, 3.3), rs3 = proj(-hw - m - 6, L + m + 9, 3.3); quad(c, rs0, rs1, rs2, rs3); c.fillStyle = 'rgba(200,40,50,.75)'; c.fill(); }
+  if (has('domes')) for (var dm = -2; dm <= 2; dm++) { var dc = proj(dm * 7, L + m + 16, 6.2), dr2 = Math.max(4, dc.s * 2.6); c.fillStyle = '#e8e6e0'; c.beginPath(); c.arc(dc.x, dc.y, dr2, Math.PI, 0); c.fill(); c.fillStyle = '#b8b4aa'; c.fillRect(dc.x - dr2, dc.y, dr2 * 2, Math.max(2, dr2 * 0.5)); }
+  if (has('statues')) {
+    // witte marmeren beelden op sokkels rond het veld
+    var spots = [];
+    [-1, 1].forEach(function (sd) { for (var sy3 = -2; sy3 <= L + 2; sy3 += 6) spots.push([sd * (hw + m + 2.2), sy3]); });
+    for (var sx3 = -hw - m; sx3 <= hw + m; sx3 += 5) spots.push([sx3, L + m + 1.6]);
+    spots.forEach(function (sp3) {
+      var pb = proj(sp3[0], sp3[1], 0), pt = proj(sp3[0], sp3[1], 1.2), hd = proj(sp3[0], sp3[1], 3.1), sw2 = Math.max(2, pb.s * 0.45);
+      c.fillStyle = '#cfccc4'; c.fillRect(pb.x - sw2, pt.y, sw2 * 2, pb.y - pt.y);
+      c.fillStyle = '#f2f0ea'; c.fillRect(pt.x - sw2 * 0.35, hd.y + sw2 * 0.6, sw2 * 0.7, pt.y - hd.y - sw2 * 0.6);
+      c.beginPath(); c.arc(hd.x, hd.y + sw2 * 0.35, sw2 * 0.35, 0, Math.PI * 2); c.fill();
+    });
+  }
+  if (has('secondcourt')) { var sc = [proj(hw + 4, 2, 0.02), proj(hw + 14, 2, 0.02), proj(hw + 14, L - 2, 0.02), proj(hw + 4, L - 2, 0.02)]; quad(c, sc[0], sc[1], sc[2], sc[3]); c.fillStyle = shadeHex(E.court, 0.85); c.fill(); }
+  if (has('trees') || has('pines') || has('palms') || has('ivy')) {
+    for (var tr = -8; tr <= 8; tr++) {
+      var tx = tr * 11 + (rnd() - 0.5) * 4, ty = L + 30 + rnd() * 12, th = 10 + rnd() * 7, base = proj(tx, ty, 0), topp = proj(tx, ty, th);
+      if (has('palms')) {
+        c.strokeStyle = '#3a2a1a'; c.lineWidth = Math.max(1, base.s * 0.3); c.beginPath(); c.moveTo(base.x, base.y); c.quadraticCurveTo(base.x + 4, (base.y + topp.y) / 2, topp.x, topp.y); c.stroke();
+        c.strokeStyle = '#1f4a2a'; c.lineWidth = Math.max(1, base.s * 0.25);
+        for (var fr = 0; fr < 7; fr++) { var an = fr / 7 * Math.PI * 2; c.beginPath(); c.moveTo(topp.x, topp.y); c.quadraticCurveTo(topp.x + Math.cos(an) * base.s * 2.2, topp.y - base.s * 1.2, topp.x + Math.cos(an) * base.s * 3.4, topp.y + Math.abs(Math.sin(an)) * base.s * 1.4); c.stroke(); }
+      } else if (has('ivy')) {
+        // klimop op de muren van een oud stadion
+      } else {
+        c.fillStyle = '#3a2a1a'; c.fillRect(base.x - 1, topp.y, 2, base.y - topp.y);
+        c.fillStyle = has('pines') ? '#24402a' : '#1d3a22';
+        c.beginPath(); c.ellipse(topp.x, topp.y, base.s * (has('pines') ? 3.4 : 2.6), base.s * (has('pines') ? 1.1 : 2.2), 0, 0, Math.PI * 2); c.fill();
+      }
+    }
+  }
+
+  // dak, lichten en schermen (binnen)
+  if (E.roof === 'truss' || E.roof === 'dome') {
+    c.strokeStyle = 'rgba(160,170,190,.25)'; c.lineWidth = 1.5;
+    for (var ty2 = 2; ty2 <= L + 30; ty2 += 5) { var a1 = proj(-hw - 40, ty2, 12.5), a2 = proj(hw + 40, ty2, 12.5); c.beginPath(); c.moveTo(a1.x, a1.y); c.lineTo(a2.x, a2.y); c.stroke(); }
+    for (var tx2 = -hw - 40; tx2 <= hw + 40; tx2 += 8) { var b1 = proj(tx2, 2, 12.5), b2 = proj(tx2, L + 30, 12.5); c.beginPath(); c.moveTo(b1.x, b1.y); c.lineTo(b2.x, b2.y); c.stroke(); }
+  }
+  if (E.roof === 'dome') { c.strokeStyle = 'rgba(200,200,220,.18)'; c.lineWidth = 2; for (var dr = 1; dr <= 4; dr++) { c.beginPath(); for (var da = 0; da <= 40; da++) { var aa = da / 40 * Math.PI, pp = proj(Math.cos(aa) * 40, L + 10 + dr * 6, 6 + Math.sin(aa) * 12); if (da) c.lineTo(pp.x, pp.y); else c.moveTo(pp.x, pp.y); } c.stroke(); } }
+  if (E.roof === 'arch') {
+    if (E.archFill) { var af = []; for (var k5 = 0; k5 <= 30; k5++) { var a5 = k5 / 30 * Math.PI; af.push(proj(Math.cos(a5) * 34, L + 40, 4 + Math.sin(a5) * 14)); } c.beginPath(); c.moveTo(0, 0); af.forEach(function (q) { c.lineTo(q.x, q.y); }); c.lineTo(W, 0); c.closePath(); var gf = c.createLinearGradient(0, 0, 0, H * 0.3); gf.addColorStop(0, '#f4efe4'); gf.addColorStop(1, '#ddd6c6'); c.fillStyle = gf; c.fill(); }
+    c.strokeStyle = E.archFill ? 'rgba(160,150,135,.8)' : 'rgba(220,210,255,.45)'; c.lineWidth = 3;
+    for (var ay = 2; ay <= L + 40; ay += 7) { c.beginPath(); for (var k2 = 0; k2 <= 40; k2++) { var a3 = k2 / 40 * Math.PI, q3 = proj(Math.cos(a3) * 34, ay, 4 + Math.sin(a3) * 14); if (k2) c.lineTo(q3.x, q3.y); else c.moveTo(q3.x, q3.y); } c.stroke(); }
+    c.strokeStyle = 'rgba(220,210,255,.2)'; c.lineWidth = 1;
+    for (var aa2 = 1; aa2 < 12; aa2++) { var an2 = aa2 / 12 * Math.PI; c.beginPath(); var s0 = proj(Math.cos(an2) * 34, 2, 4 + Math.sin(an2) * 14), s9 = proj(Math.cos(an2) * 34, L + 40, 4 + Math.sin(an2) * 14); c.moveTo(s0.x, s0.y); c.lineTo(s9.x, s9.y); c.stroke(); }
+  }
+  if (E.roof === 'steel') {
+    // stalen vakwerk zoals in een sporttent
+    c.strokeStyle = 'rgba(150,155,165,.8)'; c.lineWidth = 1.5;
+    for (var sy4 = 2; sy4 <= L + 30; sy4 += 6) {
+      var s1 = proj(-hw - 22, sy4, 0), s2 = proj(-hw - 22, sy4, 9), s3 = proj(0, sy4, 13), s4 = proj(hw + 22, sy4, 9), s5 = proj(hw + 22, sy4, 0);
+      c.beginPath(); c.moveTo(s1.x, s1.y); c.lineTo(s2.x, s2.y); c.lineTo(s3.x, s3.y); c.lineTo(s4.x, s4.y); c.lineTo(s5.x, s5.y); c.stroke();
+      var s2b = proj(-hw - 22, sy4 + 3, 9), s4b = proj(hw + 22, sy4 + 3, 9); c.beginPath(); c.moveTo(s2.x, s2.y); c.lineTo(s3.x, s3.y); c.lineTo(s4b.x, s4b.y); c.moveTo(s2b.x, s2b.y); c.lineTo(s3.x, s3.y); c.stroke();
+    }
+    for (var sl = 0; sl < 8; sl++) { var sq = proj(-hw - 12 + sl * ((2 * hw + 24) / 7), L * 0.6, 11.5); c.fillStyle = 'rgba(255,255,255,.9)'; c.fillRect(sq.x - 8, sq.y - 1.5, 16, 3); }
+  }
+  if (E.roof === 'iron') {
+    c.strokeStyle = E.roofCol || 'rgba(40,30,22,.9)'; c.lineWidth = 4;
+    for (var iy = 2; iy <= L + 40; iy += 6) {
+      var c1 = proj(-hw - 22, iy, 0), c2 = proj(-hw - 22, iy, 9), c3 = proj(0, iy, 15), c4 = proj(hw + 22, iy, 9), c5 = proj(hw + 22, iy, 0);
+      c.beginPath(); c.moveTo(c1.x, c1.y); c.lineTo(c2.x, c2.y); c.lineTo(c3.x, c3.y); c.lineTo(c4.x, c4.y); c.lineTo(c5.x, c5.y); c.stroke();
+    }
+    if (has('skylight')) { var k1 = proj(-4, 2, 14.6), k3 = proj(4, 2, 14.6), k4 = proj(4, L + 40, 14.6), k5 = proj(-4, L + 40, 14.6); quad(c, k1, k3, k4, k5); c.fillStyle = 'rgba(255,240,210,.18)'; c.fill(); }
+  }
+  // lichten in de hal
+  var lightCol = has('yellowlights') ? '#ffe27a' : has('purplelights') ? '#c47aff' : has('cyanlights') ? '#7af0ff' : has('redlights') ? '#ff6a7a' : has('colorlights') ? null : '#e8f0ff';
+  if (E.roof && E.roof !== 'none') {
+    for (var li = 0; li < 18; li++) {
+      var lx = -hw - 22 + li * ((2 * hw + 44) / 17), ly = L * 0.35 + (li % 3) * L * 0.3, lq = proj(lx, ly, 12);
+      var col = lightCol || (li % 2 ? '#ff4a6a' : '#4a8aff');
+      glow(c, lq.x, lq.y, Math.max(6, lq.s * 1.6), col, 0.8); c.fillStyle = '#fff'; c.fillRect(lq.x - 1.5, lq.y - 1.5, 3, 3);
+    }
+  }
+  if (has('ringlights')) for (var rl = 0; rl < 40; rl++) { var ra = rl / 40 * Math.PI * 2, rq = proj(Math.cos(ra) * 22, L * 0.7 + Math.sin(ra) * 14, 11); glow(c, rq.x, rq.y, Math.max(4, rq.s * 1), E.accent, 0.7); }
+  if (has('lightstring')) { c.strokeStyle = 'rgba(255,220,140,.5)'; c.lineWidth = 1; for (var ls = -2; ls <= 2; ls++) { c.beginPath(); for (var lk = 0; lk <= 20; lk++) { var lq2 = proj(-hw - 30 + lk * (2 * hw + 60) / 20, L * 0.6 + ls * 8, 12 - Math.sin(lk / 20 * Math.PI) * 3); if (lk) c.lineTo(lq2.x, lq2.y); else c.moveTo(lq2.x, lq2.y); if (lk % 2 === 0) glow(c, lq2.x, lq2.y, 6, 'rgba(255,220,140,.9)', 0.8); } c.stroke(); } }
+  if (has('orangeglow')) glow(c, W / 2, hz + H * 0.05, W * 0.6, 'rgba(255,120,40,.22)');
+  if (has('floodlights')) [[-1, 2], [1, 2], [-1, L + 14], [1, L + 14]].forEach(function (fpos) { var fb = proj(fpos[0] * (hw + 20), fpos[1], 0), ft = proj(fpos[0] * (hw + 20), fpos[1], 16); c.strokeStyle = '#2a2d33'; c.lineWidth = 2; c.beginPath(); c.moveTo(fb.x, fb.y); c.lineTo(ft.x, ft.y); c.stroke(); glow(c, ft.x, ft.y, Math.max(10, ft.s * 4), 'rgba(255,255,240,.95)'); });
+  if (has('screens')) {
+    // scorebord boven het veld
+    var s0q = proj(-6, L + 10, 10.5), s1q = proj(6, L + 10, 7);
+    c.fillStyle = '#05070a'; c.fillRect(s0q.x, s0q.y, s1q.x - s0q.x, s1q.y - s0q.y);
+    c.fillStyle = shadeHex(E.accent.length === 7 ? E.accent : '#3ad0ff', 0.9);
+    for (var sr = 0; sr < 3; sr++) c.fillRect(s0q.x + (s1q.x - s0q.x) * 0.08, s0q.y + (s1q.y - s0q.y) * (0.2 + sr * 0.25), (s1q.x - s0q.x) * (0.4 + rnd() * 0.45), Math.max(2, (s1q.y - s0q.y) * 0.1));
+    glow(c, (s0q.x + s1q.x) / 2, (s0q.y + s1q.y) / 2, (s1q.x - s0q.x), E.accent, 0.15);
+  }
+  if (has('spotlight')) glow(c, proj(0, L / 2, 0).x, proj(0, L / 2, 0).y, W * 0.32, 'rgba(255,255,255,.12)');
+  // ledborden rond het veld
+  var bh2 = 0.9, bd = [[-hw - m + 0.4, L + m - 0.4], [hw + m - 0.4, L + m - 0.4]];
+  var fb0 = proj(bd[0][0], bd[0][1], 0), fb1 = proj(bd[1][0], bd[1][1], 0), ft0 = proj(bd[0][0], bd[0][1], bh2), ft1 = proj(bd[1][0], bd[1][1], bh2);
+  quad(c, fb0, fb1, ft1, ft0); c.fillStyle = '#07090c'; c.fill();
+  c.fillStyle = E.accent; c.globalAlpha = 0.85;
+  for (var sg = 0; sg < 10; sg++) { var u0 = (sg + 0.15) / 10, u1 = (sg + 0.7) / 10; c.fillRect(fb0.x + (fb1.x - fb0.x) * u0, ft0.y + (fb0.y - ft0.y) * 0.35, (fb1.x - fb0.x) * (u1 - u0), Math.max(1.5, (fb0.y - ft0.y) * 0.3)); }
+  c.globalAlpha = 1;
+  [-1, 1].forEach(function (sd) {
+    var x = sd * (hw + m - 0.4), b0 = proj(x, -3, 0), b1 = proj(x, L + m - 0.4, 0), t0 = proj(x, -3, bh2), t1 = proj(x, L + m - 0.4, bh2);
+    quad(c, b0, b1, t1, t0); c.fillStyle = '#07090c'; c.fill();
+    c.strokeStyle = E.accent; c.globalAlpha = 0.7; c.lineWidth = Math.max(1, (b0.y - t0.y) * 0.25);
+    c.beginPath(); c.moveTo((b0.x + t0.x) / 2, (b0.y + t0.y) / 2); c.lineTo((b1.x + t1.x) / 2, (b1.y + t1.y) / 2); c.stroke(); c.globalAlpha = 1;
+  });
+}
+function drawEnvCached() {
+  var E = env();
+  if (!E) {
+    var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#05070A'); g.addColorStop(1, '#0B0F14');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); return;
+  }
+  var key = E.city + E.venue + S.sport + '|' + W + 'x' + H + '|' + CAM.y.toFixed(2) + ',' + CAM.z.toFixed(2);
+  if (envCache.key !== key) {
+    if (!envCache.cv) envCache.cv = document.createElement('canvas');
+    var oc = envCache.cv; oc.width = cv.width; oc.height = cv.height;
+    var c2 = oc.getContext('2d'); c2.setTransform(DPR, 0, 0, DPR, 0, 0);
+    drawEnvironment(c2, E);
+    envCache.key = key;
+  }
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(envCache.cv, 0, 0); ctx.restore();
+  // bewegende lichtbundels
+  if ((E.deco || []).indexOf('beams') >= 0) {
+    var t = performance.now() / 1000, C = court(), hw = C.Wd / 2;
+    for (var i = 0; i < 6; i++) {
+      var bx = (i < 3 ? -1 : 1) * (hw + 10 + (i % 3) * 8), base = proj(bx, C.L + 6, 0);
+      var ang = -Math.PI / 2 + Math.sin(t * 0.5 + i * 1.7) * 0.45, len = H * 0.9, wdt = 0.06;
+      var gB = ctx.createLinearGradient(base.x, base.y, base.x + Math.cos(ang) * len, base.y + Math.sin(ang) * len);
+      gB.addColorStop(0, 'rgba(220,235,255,.22)'); gB.addColorStop(1, 'rgba(220,235,255,0)');
+      ctx.fillStyle = gB; ctx.beginPath(); ctx.moveTo(base.x, base.y);
+      ctx.lineTo(base.x + Math.cos(ang - wdt) * len, base.y + Math.sin(ang - wdt) * len); ctx.lineTo(base.x + Math.cos(ang + wdt) * len, base.y + Math.sin(ang + wdt) * len); ctx.closePath(); ctx.fill();
+    }
+  }
 }
 
 function drawCourt() {
-  var c = court(), hw = c.Wd / 2, L = c.L, nY = L / 2, lw = 0.05;
-  var g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#05070A'); g.addColorStop(1, '#0B0F14');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-
-  poly([[-hw - 3, -2], [hw + 3, -2], [hw + 3, L + 3], [-hw - 3, L + 3]], c.out);
-  poly([[-hw, 0], [hw, 0], [hw, L], [-hw, L]], c.court);
+  var c = court(), hw = c.Wd / 2, L = c.L, nY = L / 2, lw = 0.05, E = env();
+  drawEnvCached();
+  poly([[-hw - 3, -2], [hw + 3, -2], [hw + 3, L + 3], [-hw - 3, L + 3]], E ? E.out : c.out);
+  poly([[-hw, 0], [hw, 0], [hw, L], [-hw, L]], E ? E.court : c.court);
+  if (E && E.kitchen && S.sport === 'pickleball' && E.kitchen !== E.court) poly([[-hw, nY - 2.13], [hw, nY - 2.13], [hw, nY + 2.13], [-hw, nY + 2.13]], E.kitchen);
 
   // lijnen
   line(-hw, 0, hw, 0, lw); line(-hw, L, hw, L, lw); line(-hw, 0, -hw, L, lw); line(hw, 0, hw, L, lw);
@@ -1072,7 +1447,7 @@ function handleData(m) {
     if (typeof m.drill === 'string') S.drill = drillDef(m.drill).id;
     S.player = typeof m.player === 'string' ? m.player.slice(0, 40) : '';
     S.challenge = m.challenge && typeof m.challenge.vs === 'string' ? { vs: m.challenge.vs.slice(0, 40), target: typeof m.challenge.target === 'number' ? m.challenge.target : null } : null;
-    if (S.phase !== 'play') setCamera();
+    if (S.phase !== 'play') { if (!env()) pickVenue(); setCamera(); }
     if (S.phase === 'done') $('doneAgain').textContent = 'Volgende ronde: ' + curDrill().name.toLowerCase() + '. Zwaai om te starten.';
     if (S.phase === 'pair') setPhase('connected');
     showConnectedMsg();
@@ -1143,7 +1518,7 @@ setCamera();
 requestAnimationFrame(frame);
 startPeer();
 
-window.__tv = { DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
+window.__tv = { VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
 })();
 </script>
 </body>

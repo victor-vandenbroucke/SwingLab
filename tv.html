@@ -503,7 +503,7 @@ function heightAtNet(p0, speedKmh, elDeg, dr) {
   return -1;
 }
 
-function hitBall(b, d, speed, lift, now, otherSide) {
+function hitBall(b, d, speed, lift, now, otherSide, faceAz) {
   var c = court(), perfect = !otherSide && Math.abs(d) <= winP(), nY = c.L / 2;
   var p = ballPos(b, now);
   b.judged = true; b.kind = 'out'; b.tr = now; b.trail = []; b.bounceIdx = 0;
@@ -513,11 +513,27 @@ function hitBall(b, d, speed, lift, now, otherSide) {
   var el = hasLift ? launchAngle(el0, lift) : el0;
   // vroeg = cross, laat = langs de lijn
   var az = b.side * clamp(d / winG(), -1, 1) * 16 - b.side * 3 + (Math.random() - 0.5) * 6;
+  // de richting van het blad bepaalt mee of de bal cross of langs de lijn gaat
+  if (typeof faceAz === 'number') az = clamp(0.6 * faceAz + 0.4 * az, -30, 30);
   b.sim = simulateShot(p, speed, el, az, b.dr);
   if (b.sim.outcome !== 'in' && (!hasLift || Math.abs(lift) < 25) && speed < 115) {
-    var safe = simulateShot(p, Math.min(speed, 95), el0, az * 0.6, b.dr);
-    if (safe.outcome === 'in') b.sim = safe;
+    // spelhulp: net genoeg bijsturen tot de bal binnen is, zodat de stand van je blad zichtbaar blijft
+    var step = el < el0 ? 1.5 : -1.5, tryEl = el;
+    for (var k = 0; k < 30; k++) {
+      tryEl += step;
+      if ((step > 0 && tryEl > el0) || (step < 0 && tryEl < el0)) tryEl = el0;
+      var safe = simulateShot(p, Math.min(speed, 95), tryEl, az * 0.8, b.dr);
+      if (safe.outcome === 'in') { b.sim = safe; break; }
+      if (tryEl === el0) break;
+    }
+  } else if (b.sim.outcome === 'out' && hasLift && lift >= 20) {
+    // een lob die net te lang is: iets minder kracht, zoals je op het veld zou doseren
+    for (var f = 0.92; f >= 0.7 && b.sim.outcome !== 'in'; f -= 0.06) {
+      var soft = simulateShot(p, speed * f, el, az, b.dr);
+      if (soft.outcome === 'in') b.sim = soft;
+    }
   }
+  window.__lastShot = { el: Math.round(b.sim.el), top: +b.sim.apex.toFixed(1), land: b.sim.land, outcome: b.sim.outcome }; // alleen voor tests
 
   var timingPts = otherSide ? 40 : (perfect ? 100 : 60);
   if (perfect) R.perfect++; else R.good++;
@@ -589,7 +605,7 @@ function sideFor(dir) {
 }
 
 /* Slag binnen: tp = geschatte toptijd van de zwaai op dit toestel */
-function onSwing(side, speed, lagMs, lift) {
+function onSwing(side, speed, lagMs, lift, az) {
   var now = performance.now(), tp = now - lagMs - (S.demo ? 0 : NET_MS);
   if (S.phase === 'done') { if (now - R.endAt > 2000) startCountdown(); return; }
   if (S.phase !== 'play' || !R) return;
@@ -597,7 +613,7 @@ function onSwing(side, speed, lagMs, lift) {
   if (!b || b.judged) return;
   var d = tp - b.tContact;
   if (Math.abs(d) <= winG()) {
-    hitBall(b, d, speed, lift, now, !(side === b.side || b.anySide));
+    hitBall(b, d, speed, lift, now, !(side === b.side || b.anySide), az);
     return;
   }
   if ((side === b.side || b.anySide) && Math.abs(d) < 700 && (b.cand == null || Math.abs(d) < Math.abs(b.cand))) b.cand = d;
@@ -1061,6 +1077,8 @@ function handleData(m) {
     if (S.phase === 'pair') setPhase('connected');
     showConnectedMsg();
     send({ type: 'phase', phase: S.phase });
+  } else if (m.type === 'recal') {
+    if (S.phase === 'play' || S.phase === 'countdown' || S.phase === 'done') showShot('Opnieuw gekalibreerd');
   } else if (m.type === 'step') {
     if (S.phase === 'pair') setPhase('connected');
     S.step = m.step;
@@ -1070,7 +1088,9 @@ function handleData(m) {
   } else if (m.type === 'again') {
     if (S.phase === 'done') startCountdown();
   } else if (m.type === 'swing') {
-    onSwing(sideFor(m.dir), +m.speed || 0, clamp(+m.lag || 0, 0, 400), (typeof m.lift === 'number') ? m.lift : null);
+    window.__lastSwing = m; // alleen voor tests
+    if (!(+m.speed > 0 && +m.speed <= 160)) return; // onmogelijke snelheid: geen slag
+    onSwing(sideFor(m.dir), +m.speed || 0, clamp(+m.lag || 0, 0, 400), (typeof m.lift === 'number') ? m.lift : null, (typeof m.az === 'number') ? clamp(m.az, -35, 35) : null);
   } else if (m.type === 'o') {
     if (Array.isArray(m.y) && Array.isArray(m.z)) S.rk = { y: m.y, z: m.z, p: Array.isArray(m.p) ? m.p : null, t: performance.now() };
   } else if (m.type === 'bye') {

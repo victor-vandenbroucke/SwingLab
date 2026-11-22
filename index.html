@@ -411,7 +411,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 9</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 11</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -616,6 +616,7 @@ summary .badge{margin-right:auto}
   <div class="tv-step" id="tvPlay" hidden>
     <div class="tv-verdict num" id="tvVerdict">Kijk naar je tv</div>
     <p class="tv-sub" id="tvSub">Het scherm is je forehandkant, de achterkant je backhand.</p>
+    <p class="tv-sub small">Mist het een beetje? Neem de wachthouding aan en tik 3 keer snel op het scherm.</p>
     <div class="tv-lbl" id="lblNextDrill">Training voor de volgende ronde</div>
     <div class="chips" role="group" aria-labelledby="lblNextDrill" id="tvDrillsPlay"></div>
     <p class="tv-sub small" id="tvDrillHint">Kiezen kan zodra de ronde voorbij is.</p>
@@ -674,6 +675,8 @@ summary .badge{margin-right:auto}
 
 /* ---------- Basis ---------- */
 var KEY = 'swinglab.v1';
+var MAX_KMH = 160;      // sneller kan een telefoon als racket niet echt: alles daarboven is ronddraaien of gooien
+var MAX_TURN = 220;     // een slag draait je racket hooguit zo'n 200 graden; ronddraaien gaat veel verder
 var SPORTS = {
   padel:      { name: 'Padel',      radius: 1.05 },
   tennis:     { name: 'Tennis',     radius: 1.35 },
@@ -743,7 +746,17 @@ function load() {
   if (d.settings.hand !== 'left') d.settings.hand = 'right';
   if (!isObj(d.settings.drills)) d.settings.drills = { padel: 'basis', tennis: 'basis', pickleball: 'basis' };
   if (['rustig', 'normaal', 'snel'].indexOf(d.settings.level) < 0) d.settings.level = 'normaal';
+  cleanStats(d.stats);
   return d;
+}
+/* Records en topsnelheden boven het maximum komen van ronddraaien in een oudere versie: weg ermee */
+function cleanStats(st) {
+  if (!st) return st;
+  (st.sessions || []).forEach(function (x) { if (x.peak > MAX_KMH) x.peak = 0; if (x.avg > MAX_KMH) x.avg = 0; });
+  Object.keys(st.best || {}).forEach(function (k) {
+    if (st.best[k] > MAX_KMH) st.best[k] = (st.sessions || []).filter(function (x) { return x.sport === k; }).reduce(function (m, x) { return Math.max(m, x.peak || 0); }, 0);
+  });
+  return st;
 }
 var data = load();
 var lastSettingsJson = JSON.stringify(data.settings);
@@ -788,7 +801,7 @@ function strokeSpeed(wx, wy, wz, radius) {
   var perp = Math.sqrt(wx * wx + wz * wz);
   var v = speedKmh(perp, radius);
   if (perp > 0 && Math.abs(wx) / perp < 0.4) v *= 0.25;
-  if (v > 180) return -1; // onmogelijk snel voor een racket: weggooien
+  if (v > MAX_KMH) return -1; // onmogelijk snel voor een racket: weggooien
   return v;
 }
 function judgeSwing(peak, mode, th) {
@@ -800,16 +813,19 @@ function judgeSwing(peak, mode, th) {
   return peak >= th.power ? 'hit' : 'slow';
 }
 function createDetector() {
-  var inSwing = false, peak = 0, t0 = 0, judged = false, lastEnd = -1e9, blocked = false, peakVec = null, peakT = 0;
-  function reset() { inSwing = false; peak = 0; judged = false; }
+  var inSwing = false, peak = 0, t0 = 0, judged = false, lastEnd = -1e9, blocked = false, peakVec = null, peakT = 0, turn = 0;
+  function reset() { inSwing = false; peak = 0; judged = false; turn = 0; }
   return {
     /* v = huidige snelheid (km/u), t = tijd (ms). Geeft een slag terug op het moment net na de top. */
-    push: function (v, t, mode, th, vec) {
+    /* dTurn = hoeveel graden het racket sinds de vorige meting gedraaid is */
+    push: function (v, t, mode, th, vec, dTurn) {
       if (blocked) { if (v < ONSET_KMH * 0.6) { blocked = false; lastEnd = t; } return null; }
       if (!inSwing) {
-        if (v >= ONSET_KMH && t - lastEnd > 250) { inSwing = true; peak = v; t0 = t; judged = false; peakVec = vec ? vec.slice() : null; peakT = t; }
+        if (v >= ONSET_KMH && t - lastEnd > 250) { inSwing = true; peak = v; t0 = t; judged = false; peakVec = vec ? vec.slice() : null; peakT = t; turn = dTurn || 0; }
         return null;
       }
+      turn += dTurn || 0;
+      if (turn > MAX_TURN) { reset(); blocked = true; return null; } // te ver rondgedraaid: geen slag
       if (t - t0 > 1500) { reset(); blocked = true; return null; } // geen slag maar ronddraaien: wachten tot de telefoon stilvalt
       if (v > peak) { peak = v; peakVec = vec ? vec.slice() : null; peakT = t; }
       var ev = null;
@@ -1078,15 +1094,17 @@ function onMotion(e) {
   var rr = e.rotationRate;
   if (!rr || (rr.alpha == null && rr.beta == null && rr.gamma == null)) return;
   if (!T.gotSensor) { T.gotSensor = true; $('noSensor').hidden = true; }
-  var v = strokeSpeed(rr.beta || 0, rr.gamma || 0, rr.alpha || 0, T.radius);
-  feed(v, performance.now());
+  var now = performance.now(), dt = T.lastMotion ? clampNum((now - T.lastMotion) / 1000, 0.004, 0.05) : 0.016;
+  T.lastMotion = now;
+  var wx = rr.beta || 0, wz = rr.alpha || 0;
+  feed(strokeSpeed(wx, rr.gamma || 0, wz, T.radius), now, Math.sqrt(wx * wx + wz * wz) * dt);
 }
 
-function feed(v, t) {
+function feed(v, t, dTurn) {
   if (v < 0) { T.blockUntil = t + 600; detector.reset(); return; } // rondgetold of gegooid
   if (T.blockUntil && t < T.blockUntil) return;
   if (v > T.live) T.live = v;
-  var ev = detector.push(v, t, T.mode, T.th);
+  var ev = detector.push(v, t, T.mode, T.th, null, dTurn);
   if (ev) onSwing(ev);
 }
 
@@ -1422,6 +1440,17 @@ function tvCaptureReady(y) {
   TVS.liftCal = LIFT_NEUTRAL;
   tvGoPlay();
 }
+/* Drie keer tikken tijdens het spel: de huidige houding is de nieuwe wachthouding */
+function tvQuickRecal() {
+  if (!TVS) return;
+  if (TVS.mode !== 'ready' || !TVS.R) { toast('Opnieuw kalibreren kan via Wachthouding opnieuw instellen.'); return; }
+  var R = TVS.R, y = [R[1], R[4], R[7]];
+  if (Math.abs(y[2]) > 0.85) { toast('Richt je telefoon naar voren, naar de tv, en tik opnieuw 3 keer.'); return; }
+  TVS.yaw = heading(y);
+  buzz([30, 40, 30]);
+  toast('Opnieuw gekalibreerd.');
+  tvSend({ type: 'recal' });
+}
 function tvSendConfig() {
   tvSend(Object.assign({ type: 'config', sport: data.settings.sport, hand: data.settings.hand, level: data.settings.level, drill: curTvDrill() }, tvPlayerInfo()));
 }
@@ -1460,7 +1489,9 @@ function tvOnMotion(e) {
   if (TVS.R) vec = vec.concat(TVS.R);
   tvTrack(e);
   tvLearnSigma(wx, wy, wz);
-  tvFeed(strokeSpeed(wx, wy, wz, TVS.radius), performance.now(), vec);
+  var now = performance.now(), dt = TVS.lastMotion ? clampNum((now - TVS.lastMotion) / 1000, 0.004, 0.05) : 0.016;
+  TVS.lastMotion = now;
+  tvFeed(strokeSpeed(wx, wy, wz, TVS.radius), now, vec, Math.sqrt(wx * wx + wz * wz) * dt);
 }
 /* Draairichting van dit toestel leren: vergelijk de gyroscoop met hoe de stand echt verandert */
 function tvLearnSigma(wx, wy, wz) {
@@ -1497,6 +1528,8 @@ function tvTrack(e) {
 function tvOnOrient(e) {
   if (!TVS || e.beta == null) return;
   var R = TVS.R = rotMat(e.alpha, e.beta, e.gamma);
+  (TVS.oriHist || (TVS.oriHist = [])).push({ t: performance.now(), R: R });
+  if (TVS.oriHist.length > 40) TVS.oriHist.shift();
   // voorlopige richting van de tv: terwijl je naar je scherm kijkt, wijst de achterkant naar de tv
   if (TVS.yaw == null && TVS.conn && TVS.conn.open) TVS.yaw = heading([-R[2], -R[5], -R[8]]);
   var now = performance.now();
@@ -1507,13 +1540,46 @@ function tvOnOrient(e) {
     tvSend({ type: 'o', y: r3(toCourt([R[1], R[4], R[7]], TVS.yaw)), z: r3(toCourt([R[2], R[5], R[8]], TVS.yaw)), p: r3(TVS.pos) });
   }
 }
-function tvFeed(v, t, vec) {
+function tvFeed(v, t, vec, dTurn) {
   if (v < 0) { TVS.blockUntil = t + 600; tvDet.reset(); return; }
   if (TVS.blockUntil && t < TVS.blockUntil) return;
-  var ev = tvDet.push(v, t, 'power', TV_TH, vec);
+  var ev = tvDet.push(v, t, 'power', TV_TH, vec, dTurn);
   if (ev) tvSwing(ev);
 }
 
+/* Hoe stond het racket op het moment van de slag, en welke kant bewoog de kop uit?
+   Beide uit dezelfde standgegevens, zodat een kleine vertraging van de sensor (zoals op iPhones) weinig uitmaakt. */
+/* De standgegevens lopen op sommige toestellen wat achter op de gyroscoop. We meten die vertraging bij elke slag:
+   het moment waarop de stand het snelst verandert, vergeleken met de top van de gyroscoop. */
+function tvEstimateLag(tPeak) {
+  var hs = TVS.oriHist || [], bestT = null, bestW = 0;
+  for (var i = 1; i < hs.length; i++) {
+    var a = hs[i - 1], b = hs[i], dt = (b.t - a.t) / 1000;
+    if (dt <= 0 || b.t < tPeak - 80 || b.t > tPeak + 160) continue;
+    var c = clampNum(a.R[1] * b.R[1] + a.R[4] * b.R[4] + a.R[7] * b.R[7], -1, 1), w = Math.acos(c) / dt;
+    if (w > bestW) { bestW = w; bestT = (a.t + b.t) / 2; }
+  }
+  if (bestT == null || bestW < 3) return;          // te trage slag om iets uit af te leiden
+  var lag = clampNum(bestT - tPeak, 0, 120);
+  TVS.oriLag = TVS.oriLag == null ? lag : TVS.oriLag * 0.6 + lag * 0.4;
+}
+function tvRacketAt(tPeak) {
+  tvEstimateLag(tPeak);
+  tPeak += TVS.oriLag || 0;
+  var hs = TVS.oriHist || [], best = null, a = null, b = null;
+  for (var i = 0; i < hs.length; i++) {
+    var dt = hs[i].t - tPeak;
+    if (!best || Math.abs(dt) < Math.abs(best.t - tPeak)) best = hs[i];
+    if (dt >= -70 && dt <= 70) { if (!a) a = hs[i]; b = hs[i]; }
+  }
+  if (!best || Math.abs(best.t - tPeak) > 120) return null;
+  var out = { R: best.R, v: null };
+  if (a && b && a !== b) {
+    var dY = [b.R[1] - a.R[1], b.R[4] - a.R[4], b.R[7] - a.R[7]];
+    if (Math.sqrt(dY[0] * dY[0] + dY[1] * dY[1] + dY[2] * dY[2]) > 0.05) out.v = norm3(dY);
+  }
+  return out;
+}
 function tvSwing(ev) {
   if (!TVS || ev.peak < 20 || !ev.vec) return;
   ev.at = performance.now();
@@ -1529,24 +1595,34 @@ function tvSwing(ev) {
   }
   if (TVS.step === 'play' && (TVS.vec || TVS.mode === 'ready')) {
     var dir;
-    // alleen slagen van achter naar voor, of van boven je hoofd naar beneden, tellen
-    if (TVS.mode === 'ready' && TVS.sigma && ev.vec.length >= 12) {
-      var vf = norm3(toCourt(mulRv(ev.vec.slice(3, 12), [-TVS.sigma * ev.vec[2], 0, TVS.sigma * ev.vec[0]]), TVS.yaw));
-      if (vf && !(vf[1] > 0.1 || vf[2] < -0.55)) return; // achteruit (uithaal) of zijwaarts: geen slag
-    }
-    if (TVS.mode === 'ready' && ev.vec.length >= 12) {
+    var rel = null, az = null, rk = (TVS.mode === 'ready') ? tvRacketAt(ev.tPeak) : null;
+    var Rp = rk ? rk.R : (ev.vec.length >= 12 ? ev.vec.slice(3, 12) : null);
+    if (TVS.mode === 'ready' && Rp) {
+      // bewegingsrichting van de racketkop (op de baan): uit de standgegevens, of anders uit de gyroscoop
+      var vc = rk && rk.v ? norm3(toCourt(rk.v, TVS.yaw)) : null;
+      if (!vc && TVS.sigma) vc = norm3(toCourt(mulRv(Rp, [-TVS.sigma * ev.vec[2], 0, TVS.sigma * ev.vec[0]]), TVS.yaw));
+      // alleen slagen van achter naar voor, of van boven je hoofd naar beneden, tellen
+      if (vc && !(vc[1] > 0.25 || vc[2] < -0.6)) return;
       // forehand of backhand: aan welke kant van je lichaam de racketkop is op het moment van de slag
-      var Rp = ev.vec.slice(3, 12), hs = data.settings.hand === 'left' ? -1 : 1;
-      var yc = toCourt([Rp[1], Rp[4], Rp[7]], TVS.yaw), score = hs * yc[0];
-      if (TVS.sigma) { // bij twijfel helpt de richting: een forehand gaat van je sterke kant naar je andere kant
-        var vc = norm3(toCourt(mulRv(Rp, [-TVS.sigma * ev.vec[2], 0, TVS.sigma * ev.vec[0]]), TVS.yaw));
-        if (vc) score -= hs * vc[0] * 0.5;
-      }
+      var hs = data.settings.hand === 'left' ? -1 : 1, yc = toCourt([Rp[1], Rp[4], Rp[7]], TVS.yaw), score = hs * yc[0];
+      if (vc) score -= hs * vc[0] * 0.5; // bij twijfel: een forehand gaat van je sterke kant naar je andere kant
       dir = score >= 0 ? 'fh' : 'bh';
-    } else dir = dot3(ev.vec, TVS.vec) >= 0 ? 'fh' : 'bh';
-    var lift = swingLift(ev.vec, TVS.sigma), rel = (lift != null && TVS.liftCal != null) ? Math.round(lift - TVS.liftCal) : null;
+      // stand van het slagvlak: de kant die naar het net wijst
+      var nz = toCourt([Rp[2], Rp[5], Rp[8]], TVS.yaw);
+      if (nz[1] < 0) nz = [-nz[0], -nz[1], -nz[2]];
+      var faceElev = Math.asin(clampNum(nz[2], -1, 1)) * 180 / Math.PI;
+      az = clampNum(Math.atan2(nz[0], nz[1]) * 180 / Math.PI, -35, 35);
+      // de bal vertrekt vooral in de richting van het blad, deels in de richting van de zwaai
+      var pathElev = vc ? Math.asin(clampNum(vc[2], -1, 1)) * 180 / Math.PI : null;
+      rel = Math.round(pathElev != null ? 0.6 * faceElev + 0.4 * (pathElev - LIFT_NEUTRAL) : 0.6 * faceElev);
+    } else {
+      dir = dot3(ev.vec, TVS.vec) >= 0 ? 'fh' : 'bh';
+      var lift = swingLift(ev.vec, TVS.sigma);
+      if (lift != null && TVS.liftCal != null) rel = Math.round(lift - TVS.liftCal);
+    }
     var msg = { type: 'swing', speed: Math.round(ev.peak), dir: dir, lag: Math.round(ev.at - ev.tPeak) };
     if (rel != null) msg.lift = rel;
+    if (az != null) msg.az = Math.round(az);
     tvSend(msg);
     $('tvSub').textContent = Math.round(ev.peak) + ' km/u, ' + (dir === 'fh' ? 'forehand' : 'backhand') + (rel != null && rel >= 20 ? ', omhoog' : '') + '. Terug naar de wachthouding.';
   }
@@ -1659,7 +1735,7 @@ function onAuth(ev, session) {
 function combineStats(list) {
   var out = clone(DEFAULTS.stats);
   list.forEach(function (raw) {
-    var s = mergeDefaults(DEFAULTS.stats, raw);
+    var s = cleanStats(mergeDefaults(DEFAULTS.stats, JSON.parse(JSON.stringify(raw || {}))));
     out.total += s.total; out.hits += s.hits; out.timeMs += s.timeMs;
     Object.keys(s.perSport).forEach(function (k) { out.perSport[k] = (out.perSport[k] || 0) + (s.perSport[k] || 0); });
     Object.keys(s.best).forEach(function (k) { out.best[k] = Math.max(out.best[k] || 0, s.best[k] || 0); });
@@ -2095,6 +2171,13 @@ function bind() {
   $('tvSettingsOk').addEventListener('click', function () { if (TVS) tvBeginReady(); });
   $('tvReady').addEventListener('click', tvReadyTap);
   $('tvReady').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tvReadyTap(); } });
+  var tapTimes = [];
+  $('tvplay').addEventListener('pointerdown', function (e) {
+    if (!TVS || TVS.step !== 'play' || (e.target.closest && e.target.closest('button'))) return;
+    var now = performance.now();
+    tapTimes = tapTimes.filter(function (t) { return now - t < 700; }); tapTimes.push(now);
+    if (tapTimes.length >= 3) { tapTimes = []; tvQuickRecal(); }
+  });
   $('tvNext').addEventListener('click', function () {
     if (!TVS || !TVS.R) return;
     var R = TVS.R, y = [R[1], R[4], R[7]];
@@ -2159,7 +2242,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 9, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 11, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 
@@ -2199,7 +2282,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 }
 
 /* alleen voor tests */
-window.__swinglab = { data: function () { return data; }, createDetector: createDetector, speedKmh: speedKmh, mergeDefaults: mergeDefaults, streaks: streaks, feed: function (v, t) { if (T) feed(v, t); }, tvFeed: function (v, t, vec) { if (TVS) tvFeed(v, t, vec); }, cloud: function () { return { ME: ME, CLOUD: CLOUD, ACTIVE_CH: ACTIVE_CH }; }, VS: function () { return VS(); }, tvRound: function (m) { cloudRound(m); }, tvState: function () { return TVS && { mode: TVS.mode, tvPhase: TVS.tvPhase, pos: TVS.pos, step: TVS.step, calib: TVS.calib.length, vec: TVS.vec, sigma: TVS.sigma, yaw: TVS.yaw, liftCal: TVS.liftCal, swings: TVS.swings, hits: TVS.hits }; }, rotMat: rotMat, swingLift: swingLift, setR: function (R) { if (TVS) TVS.R = R; } };
+window.__swinglab = { data: function () { return data; }, createDetector: createDetector, speedKmh: speedKmh, mergeDefaults: mergeDefaults, streaks: streaks, feed: function (v, t, d) { if (T) feed(v, t, d); }, tvFeed: function (v, t, vec, d) { if (TVS) tvFeed(v, t, vec, d); }, cloud: function () { return { ME: ME, CLOUD: CLOUD, ACTIVE_CH: ACTIVE_CH }; }, VS: function () { return VS(); }, tvRound: function (m) { cloudRound(m); }, tvState: function () { return TVS && { oriLag: TVS.oriLag, yaw: TVS.yaw, mode: TVS.mode, tvPhase: TVS.tvPhase, pos: TVS.pos, step: TVS.step, calib: TVS.calib.length, vec: TVS.vec, sigma: TVS.sigma, yaw: TVS.yaw, liftCal: TVS.liftCal, swings: TVS.swings, hits: TVS.hits }; }, rotMat: rotMat, swingLift: swingLift, setR: function (R) { if (TVS) TVS.R = R; } };
 })();
 </script>
 </body>

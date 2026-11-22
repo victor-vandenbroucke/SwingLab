@@ -187,9 +187,9 @@ var SPORT_ACC = { padel: [47, 123, 255], tennis: [255, 138, 42], pickleball: [47
 function ACC() { var c = SPORT_ACC[S.sport] || SPORT_ACC.padel; return 'rgb(' + c.join(',') + ')'; }
 function ACCA(a) { var c = SPORT_ACC[S.sport] || SPORT_ACC.padel; return 'rgba(' + c.join(',') + ',' + a + ')'; }
 var COURTS = {
-  padel:      { name: 'Padel',      L: 20,    Wd: 10,    net: 0.88, court: '#1F5C9E', out: '#0C2B4D', glass: true },
-  tennis:     { name: 'Tennis',     L: 23.77, Wd: 10.97, net: 0.91, court: '#2F6C8F', out: '#24553A', glass: false },
-  pickleball: { name: 'Pickleball', L: 13.41, Wd: 6.1,   net: 0.86, court: '#2D5F8C', out: '#2E5E40', glass: false }
+  padel:      { name: 'Padel',      L: 20,    Wd: 10,    net: 0.88, netPost: 0.92,  court: '#1F5C9E', out: '#0C2B4D', glass: true },
+  tennis:     { name: 'Tennis',     L: 23.77, Wd: 10.97, net: 0.914, netPost: 1.07, court: '#2F6C8F', out: '#24553A', glass: false },
+  pickleball: { name: 'Pickleball', L: 13.41, Wd: 6.1,   net: 0.86, netPost: 0.914, court: '#2D5F8C', out: '#2E5E40', glass: false }
 };
 var LEVELS = { rustig: 2.0, normaal: 1.55, snel: 1.2 };
 var BALLS = 20, G = 9.81, NET_MS = 30;
@@ -213,6 +213,7 @@ var DRILLS = {
     { id: 'volley',  name: 'Volleys aan het net',  type: 'volley',   P: 7.0, target: { y0: 0.55, y1: 1, x0: -1, x1: 1 } },
     { id: 'bandeja', name: 'Bandeja en smash',     type: 'overhead', P: 6.0, target: { y0: 0.65, y1: 1, x0: -1, x1: 1 }, liftOffset: 25 },
     { id: 'glas',    name: 'Spelen met het glas',  type: 'glass',    P: 1.5, target: { y0: 0.55, y1: 1, x0: -1, x1: 1 } },
+    { id: 'kort',    name: 'Korte ballen, naar het net', type: 'short', P: 6.6, target: { y0: 0.55, y1: 1, x0: -1, x1: 1 } },
     { id: 'mix',     name: 'Mix van alles',        type: 'mix' }
   ],
   tennis: [
@@ -220,6 +221,7 @@ var DRILLS = {
     { id: 'return', name: 'Return van service',      type: 'serve',    P: 0.0, target: { y0: 0.5, y1: 1, x0: -1, x1: 1 }, reb: 20 },
     { id: 'volley', name: 'Volleys aan het net',     type: 'volley',   P: 8.9, target: { y0: 0.5, y1: 1, x0: -1, x1: 1 } },
     { id: 'smash',  name: 'Smash op lobs',           type: 'overhead', P: 7.4, target: { y0: 0.3, y1: 1, x0: -1, x1: 1 }, liftOffset: 25 },
+    { id: 'kort',   name: 'Korte ballen, naar het net', type: 'short', P: 8.6, target: { y0: 0.5, y1: 1, x0: -1, x1: 1 } },
     { id: 'mix',    name: 'Mix van alles',           type: 'mix' }
   ],
   pickleball: [
@@ -227,6 +229,7 @@ var DRILLS = {
     { id: 'dink',   name: 'Dinks aan de kitchen',    type: 'dink',     P: 4.3, target: { y0: 0, y1: 0.32, x0: -1, x1: 1 }, reb: 3 },
     { id: 'volley', name: 'Volleys aan de kitchen',  type: 'volley',   P: 4.3, target: { y0: 0.4, y1: 1, x0: -1, x1: 1 } },
     { id: 'smash',  name: 'Smash op lobs',           type: 'overhead', P: 3.2, target: { y0: 0.3, y1: 1, x0: -1, x1: 1 }, liftOffset: 25 },
+    { id: 'kort',   name: 'Korte ballen, naar de kitchen', type: 'short', P: 4.2, target: { y0: 0, y1: 0.32, x0: -1, x1: 1 }, reb: 4 },
     { id: 'mix',    name: 'Mix van alles',           type: 'mix' }
   ]
 };
@@ -530,6 +533,10 @@ function makeIncoming(dr, side, now) {
     wps = timed([W(rx, L - 1.5, 1.0), W(cx * 0.8, 3.2, 0, 'ground'), W(cx * 1.1, 0, 1.3, 'wall'), W(cx, 1.5, 1.0)], [14 / lf, 9 / lf, 4.5 / lf]);
   } else if (dr.type === 'serve') {
     wps = timed([W(rx * 0.3 + (Math.random() < 0.5 ? -1.5 : 1.5), L + 0.3, 2.7), W(cx * 0.6, nY - 4.6, 0, 'ground'), W(cx, P, 1.1)], [24 / lf, 17 / lf]);
+  } else if (dr.type === 'short') {
+    // een korte bal net over het net: je moet naar voren
+    wps = timed([W(rx * 0.7, L - 2.0, 1.0), W(cx * 0.6, P + 1.3, 0, 'ground'), W(cx * 0.8, P, 0.55)], [7 / lf, 3.2 / lf]);
+    cx = cx * 0.8;
   } else if (dr.type === 'dink') {
     wps = timed([W(rx * 0.6, nY + 2.0, 0.6), W(cx * 0.7, nY - 1.2, 0, 'ground'), W(cx * 0.8, P, 0.5)], [3.8 / lf, 3 / lf]);
     cx = cx * 0.8;
@@ -606,14 +613,14 @@ function simulateShot(p0, speedKmh, elDeg, azDeg, dr) {
   var el = elDeg * Math.PI / 180, az = azDeg * Math.PI / 180;
   var vx = v * Math.cos(el) * Math.sin(az), vy = v * Math.cos(el) * Math.cos(az), vz = v * Math.sin(el);
   var x = p0[0], y = p0[1], z = p0[2], dt = 1 / 240, t = 0, hw = (MS && MS.hwIn) || c.Wd / 2, L = c.L, nY = L / 2;
-  var pts = [[x, y, z]], bounces = 0, outcome = null, tEvent = 0, netHit = false, apex = z, land = null, bounceTimes = [];
+  var netX = null, tNet = 0, pts = [[x, y, z]], bounces = 0, outcome = null, tEvent = 0, netHit = false, apex = z, land = null, bounceTimes = [];
   for (var i = 1; t < 3.4; i++) {
     var sp = Math.sqrt(vx * vx + vy * vy + vz * vz);
     vx -= DRAG * sp * vx * dt; vy -= DRAG * sp * vy * dt; vz -= (G + DRAG * sp * vz) * dt;
     var py = y; x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
     if (z > apex) apex = z;
-    if (!netHit && py < nY && y >= nY && z < c.net + 0.03) {
-      netHit = true; y = nY - 0.03; vy = -0.15 * vy; vx *= 0.3;
+    if (!netHit && py < nY && y >= nY && z < netTop(x) + 0.03) {
+      netHit = true; netX = x; tNet = t; y = nY - 0.03; vy = -0.15 * vy; vx *= 0.3;
       if (!outcome) { outcome = 'net'; tEvent = t; }
     }
     if (c.glass && y > nY) {
@@ -632,7 +639,7 @@ function simulateShot(p0, speedKmh, elDeg, azDeg, dr) {
     if (i % 4 === 0) pts.push([x, y, z]);
   }
   if (!outcome) { outcome = 'out'; tEvent = t; }
-  return { pts: pts, dt: 4 / 240, outcome: outcome, tEvent: tEvent, apex: apex, land: land, el: elDeg, bounceTimes: bounceTimes };
+  return { pts: pts, dt: 4 / 240, outcome: outcome, tEvent: tEvent, apex: apex, land: land, el: elDeg, bounceTimes: bounceTimes, netX: netX, tNet: tNet };
 }
 
 /* Hoek waarbij een neutrale zwaai (zonder opwaartse beweging) het net ruim haalt.
@@ -747,6 +754,7 @@ function resolveShot(b, perfect, speed, timingPts) {
     send({ type: 'outcome', outcome: 'in', text: label, points: pts });
   } else {
     R.streak = 0; R.outs++;
+    if (sim.outcome === 'net' && sim.netX != null) netPulse(sim.netX, 1, 0.24);
     var txt = sim.outcome === 'net' ? 'In het net' : 'Uit';
     playMiss();
     showVerdict(txt, 'bad');
@@ -1270,7 +1278,7 @@ function liveDetails(E, now) {
   // scorebord
   if (!E.walls) {
     var s0 = proj(-5, L + 12, 9.6), s1 = proj(5, L + 12, 6.8);
-    if (s1.y - s0.y > 8) {
+    if (s1.y - s0.y > 8 && s0.y > H * 0.14) {
       var w = s1.x - s0.x, hh = s1.y - s0.y;
       ctx.fillStyle = 'rgba(6,8,12,.92)'; ctx.fillRect(s0.x, s0.y, w, hh);
       ctx.strokeStyle = E.accent; ctx.lineWidth = 1.5; ctx.strokeRect(s0.x, s0.y, w, hh);
@@ -1402,50 +1410,109 @@ function drawCourt() {
     line(0, 0, 0, k, lw); line(0, L - k, 0, L, lw);
   }
 
-  if (c.glass) {
-    // achterwand en zijwanden in glas aan de overkant
-    poly([[-hw, L, 0], [hw, L, 0], [hw, L, 3], [-hw, L, 3]], 'rgba(170,215,255,.07)', 'rgba(255,255,255,.22)', 1.5);
-    [-hw, hw].forEach(function (x) {
-      poly([[x, L - 4, 0], [x, L, 0], [x, L, 3], [x, L - 4, 3]], 'rgba(170,215,255,.06)', 'rgba(255,255,255,.18)', 1.2);
-      for (var yy = 4; yy <= L - 4; yy += 2) {
-        var a = proj(x, yy, 0), b2 = proj(x, yy, 3);
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b2.x, b2.y); ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 1; ctx.stroke();
-      }
-      var m1 = proj(x, 4, 3), m2 = proj(x, L - 4, 3);
-      ctx.beginPath(); ctx.moveTo(m1.x, m1.y); ctx.lineTo(m2.x, m2.y); ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.stroke();
-    });
-    // metalen staanders en bovenrand van het glas
-    ctx.strokeStyle = 'rgba(30,34,40,.9)';
-    for (var gx = -hw; gx <= hw + 0.01; gx += 2) { var gp0 = proj(gx, L, 0), gp1 = proj(gx, L, 3); ctx.lineWidth = Math.max(1.5, gp0.s * 0.05); ctx.beginPath(); ctx.moveTo(gp0.x, gp0.y); ctx.lineTo(gp1.x, gp1.y); ctx.stroke(); }
-    [-hw, hw].forEach(function (x) { for (var gy = L - 4; gy <= L; gy += 2) { var q0 = proj(x, gy, 0), q1 = proj(x, gy, 3); ctx.lineWidth = Math.max(1.5, q0.s * 0.05); ctx.beginPath(); ctx.moveTo(q0.x, q0.y); ctx.lineTo(q1.x, q1.y); ctx.stroke(); } });
-    var tr0 = proj(-hw, L, 3), tr1 = proj(hw, L, 3); ctx.lineWidth = Math.max(2, tr0.s * 0.06); ctx.beginPath(); ctx.moveTo(tr0.x, tr0.y); ctx.lineTo(tr1.x, tr1.y); ctx.stroke();
-  }
   var E2 = env();
   if (E2) { courtside(E2, c, hw, L); liveDetails(E2, performance.now()); }
 }
 
-function drawNet() {
-  var c = court(), hw = c.Wd / 2 + 0.3, nY = c.L / 2;
-  poly([[-hw, nY, 0], [hw, nY, 0], [hw, nY, c.net], [-hw, nY, c.net]], 'rgba(10,12,16,.35)');
-  ctx.strokeStyle = 'rgba(255,255,255,.10)'; ctx.lineWidth = 1;
-  for (var nx = -hw; nx <= hw; nx += 0.5) { var n0 = proj(nx, nY, 0), n1 = proj(nx, nY, c.net); ctx.beginPath(); ctx.moveTo(n0.x, n0.y); ctx.lineTo(n1.x, n1.y); ctx.stroke(); }
-  [-hw, hw].forEach(function (px) { var p0 = proj(px, nY, 0), p1 = proj(px, nY, c.net + 0.1); ctx.strokeStyle = '#2a2d33'; ctx.lineWidth = Math.max(2, p0.s * 0.08); ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke(); });
-  var a = proj(-hw, nY, c.net), b = proj(hw, nY, c.net);
-  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(2, a.s * 0.06); ctx.stroke();
+/* hoogte van het net: in het midden iets lager dan aan de palen, zoals een echt gespannen net */
+function netTop(x) {
+  var c = court(), hw = c.Wd / 2 + 0.3, post = c.netPost || c.net + 0.04, u = clamp(x / hw, -1, 1);
+  return post - (post - c.net) * (1 - u * u);
+}
+var netHits = [];
+function netPulse(x, sign, amp) {
+  netHits.push({ x: x, s: sign || 1, a: amp || 0.22, t: performance.now() });
+  if (audio) { noise(220, 0.7, 0.45, 0.12); tone('sine', 90, 60, 0.25, 0.14); }
+}
+function netOffset(x, z, now) {
+  var off = 0;
+  for (var i = 0; i < netHits.length; i++) {
+    var n = netHits[i], t = (now - n.t) / 1000, g = Math.exp(-Math.pow((x - n.x) / 0.85, 2));
+    off += n.s * n.a * g * Math.min(1, z / 0.9) * Math.exp(-2.4 * t) * Math.cos(11 * t);
+  }
+  return off;
+}
+function drawNet(now) {
+  now = now || performance.now();
+  netHits = netHits.filter(function (n) { return now - n.t < 2600; });
+  var c = court(), hw = c.Wd / 2 + 0.3, nY = c.L / 2, xs = [], i;
+  for (var x = -hw; x <= hw + 0.001; x += 0.25) xs.push(x);
+  function P(x, z) { var o = netOffset(x, z, now); return proj(x, nY + o, z - Math.abs(o) * 0.5 * Math.min(1, z / 0.9)); }
+  // het doek
+  ctx.beginPath();
+  xs.forEach(function (x, k) { var q = P(x, netTop(x)); if (k) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); });
+  for (i = xs.length - 1; i >= 0; i--) { var q2 = P(xs[i], 0.04); ctx.lineTo(q2.x, q2.y); }
+  ctx.closePath(); ctx.fillStyle = 'rgba(12,14,18,.30)'; ctx.fill();
+  // mazen
+  ctx.strokeStyle = 'rgba(235,240,245,.13)'; ctx.lineWidth = 1;
+  xs.forEach(function (x) { var a = P(x, 0.04), b = P(x, netTop(x)); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); });
+  for (var f = 0.15; f < 0.95; f += 0.15) {
+    ctx.beginPath(); xs.forEach(function (x, k) { var q3 = P(x, netTop(x) * f); if (k) ctx.lineTo(q3.x, q3.y); else ctx.moveTo(q3.x, q3.y); }); ctx.stroke();
+  }
+  // witte band bovenaan en kabel onderaan
+  ctx.beginPath(); xs.forEach(function (x, k) { var q4 = P(x, netTop(x)); if (k) ctx.lineTo(q4.x, q4.y); else ctx.moveTo(q4.x, q4.y); });
+  ctx.strokeStyle = '#f6f6f2'; ctx.lineWidth = Math.max(2, proj(0, nY, 1).s * 0.05); ctx.stroke();
+  // palen
+  [-hw, hw].forEach(function (px) { var p0 = proj(px, nY, 0), p1 = proj(px, nY, netTop(px) + 0.06); ctx.strokeStyle = '#2a2d33'; ctx.lineWidth = Math.max(3, p0.s * 0.09); ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke(); });
 }
 
+/* De padelkooi: glazen achterwanden met gaas erboven, getrapte glazen zijwanden, gaas met deuren bij het net, zwarte staanders */
+function cagePanel(x0, y0, x1, y1, z0, z1, kind, nearFade) {
+  var a = proj(x0, y0, z0), b = proj(x1, y1, z0), c2 = proj(x1, y1, z1), d = proj(x0, y0, z1);
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c2.x, c2.y); ctx.lineTo(d.x, d.y); ctx.closePath();
+  if (kind === 'glass') {
+    var g = ctx.createLinearGradient(d.x, d.y, a.x, a.y);
+    g.addColorStop(0, 'rgba(210,235,255,' + (0.10 * nearFade) + ')'); g.addColorStop(0.5, 'rgba(180,215,245,' + (0.05 * nearFade) + ')'); g.addColorStop(1, 'rgba(210,235,255,' + (0.09 * nearFade) + ')');
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.22 * nearFade) + ')'; ctx.lineWidth = 1; ctx.stroke();
+    // lichtreflectie schuin over het glas
+    var r0 = proj(x0 + (x1 - x0) * 0.2, y0 + (y1 - y0) * 0.2, z1), r1 = proj(x0 + (x1 - x0) * 0.45, y0 + (y1 - y0) * 0.45, z0);
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.07 * nearFade) + ')'; ctx.lineWidth = Math.max(2, a.s * 0.12); ctx.beginPath(); ctx.moveTo(r0.x, r0.y); ctx.lineTo(r1.x, r1.y); ctx.stroke();
+  } else {
+    ctx.fillStyle = 'rgba(20,24,30,' + (0.10 * nearFade) + ')'; ctx.fill();
+    ctx.strokeStyle = 'rgba(25,28,34,' + (0.42 * nearFade) + ')'; ctx.lineWidth = 1;
+    var len = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(len / 0.5)), m = Math.max(1, Math.round((z1 - z0) / 0.5));
+    for (var i = 1; i < n; i++) { var t = i / n, p0 = proj(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, z0), p1 = proj(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, z1); ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke(); }
+    for (var j = 1; j < m; j++) { var zz = z0 + (z1 - z0) * j / m, q0 = proj(x0, y0, zz), q1 = proj(x1, y1, zz); ctx.beginPath(); ctx.moveTo(q0.x, q0.y); ctx.lineTo(q1.x, q1.y); ctx.stroke(); }
+  }
+}
+function cagePost(x, y, hgt, nearFade) {
+  var a = proj(x, y, 0), b = proj(x, y, hgt);
+  ctx.strokeStyle = 'rgba(18,20,24,' + (0.95 * nearFade) + ')'; ctx.lineWidth = Math.max(2, Math.min(a.s * 0.07, 9)); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+}
+function drawCage(part) {
+  var c = court(); if (!c.glass) return;
+  var hw = c.Wd / 2, L = c.L, nY = L / 2, far = part === 'far', fade = far ? 1 : 0.7;
+  var yb = far ? L : 0, dir = far ? -1 : 1;   // dir: van de achterwand naar het net
+  function Y(d) { return yb + dir * d; }
+  // achterwand: 3 m glas en 1 m gaas erboven
+  cagePanel(-hw, yb, hw, yb, 0, 3, 'glass', far ? 1 : 0.45);
+  cagePanel(-hw, yb, hw, yb, 3, 4, 'mesh', far ? 1 : 0.45);
+  for (var x = -hw; x <= hw + 0.01; x += 2) cagePost(x, yb, 4, far ? 1 : (Math.abs(x) > hw - 0.1 ? 0.5 : 0.12));
+  // zijwanden: 2 m glas van 3 m hoog, 2 m glas van 2 m hoog, dan gaas met een deur bij het net
+  [-hw, hw].forEach(function (xs) {
+    cagePanel(xs, Y(0), xs, Y(2), 0, 3, 'glass', fade);
+    cagePanel(xs, Y(0), xs, Y(2), 3, 4, 'mesh', fade);
+    cagePanel(xs, Y(2), xs, Y(4), 0, 2, 'glass', fade);
+    cagePanel(xs, Y(2), xs, Y(4), 2, 3, 'mesh', fade);
+    cagePanel(xs, Y(4), xs, Y(nY - 1.7), 0, 3, 'mesh', fade);
+    cagePanel(xs, Y(nY - 0.9), xs, Y(nY), 0, 3, 'mesh', fade);
+    cagePanel(xs, Y(nY - 1.7), xs, Y(nY - 0.9), 2.1, 3, 'mesh', fade);   // boven de deur
+    [0, 2, 4, 6, 8, nY - 1.7, nY - 0.9].forEach(function (d) { if (d <= nY) cagePost(xs, Y(d), d < 2.01 ? 4 : 3, fade); });
+    var t0 = proj(xs, Y(0), 4), t1 = proj(xs, Y(2), 4), t2 = proj(xs, Y(2), 3), t3 = proj(xs, Y(nY), 3);
+    ctx.strokeStyle = 'rgba(18,20,24,' + (0.9 * fade) + ')'; ctx.lineWidth = Math.max(2, t0.s * 0.05);
+    ctx.beginPath(); ctx.moveTo(t0.x, t0.y); ctx.lineTo(t1.x, t1.y); ctx.lineTo(t2.x, t2.y); ctx.lineTo(t3.x, t3.y); ctx.stroke();
+  });
+}
 function drawNearGlass(now) {
   var c = court(); if (!c.glass) return;
   var hw = c.Wd / 2;
-  poly([[-hw, 0, 0], [hw, 0, 0], [hw, 0, 3], [-hw, 0, 3]], 'rgba(170,215,255,.035)', 'rgba(255,255,255,.14)', 1.5);
+  drawCage('near');
   flashes = flashes.filter(function (f) { return now - f.t < 400; });
   flashes.forEach(function (f) {
     var q = proj(f.p[0], f.p[1], f.p[2]), k = (now - f.t) / 400;
     ctx.beginPath(); ctx.ellipse(q.x, q.y, q.s * (0.2 + k * 0.6), q.s * (0.15 + k * 0.45), 0, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(200,235,255,' + (0.8 * (1 - k)) + ')'; ctx.lineWidth = 3; ctx.stroke();
-  });
-  [-hw, hw].forEach(function (x) {
-    poly([[x, 0, 0], [x, 4, 0], [x, 4, 3], [x, 0, 3]], 'rgba(170,215,255,.05)', 'rgba(255,255,255,.16)', 1.5);
   });
 }
 
@@ -1579,8 +1646,9 @@ function shade(hex, f) {
 function pathPts(pts) { ctx.moveTo(pts[0].x, pts[0].y); for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y); ctx.closePath(); }
 
 /* Tekent een vlakke vorm met dikte: achterkant, zijkanten en voorkant in de juiste volgorde */
+var RS_CUR = 2.5;
 function slab(F, outline, holes, t, col, detail) {
-  var k = RACKET_SCALE, half = t * k / 2;
+  var k = RS_CUR, half = t * k / 2;
   function P(q, side) { return v3add(v3add(v3add(F.H, F.x, q[0] * k), F.y, q[1] * k), F.z, side * half); }
   var camDir = v3norm([CAM.x - F.H[0], CAM.y - F.H[1], CAM.z - F.H[2]]);
   var front = v3dot(F.z, camDir) > 0 ? 1 : -1;               // de kant die naar de camera kijkt
@@ -1608,10 +1676,11 @@ function slab(F, outline, holes, t, col, detail) {
   if (detail) detail(function (q) { return proj.apply(null, P(q, front)); }, near);
 }
 
-function drawRacket(H, yv, zv, mode) {
+function drawRacket(H, yv, zv, mode, scale) {
   yv = v3norm(yv);
   zv = v3norm(v3add(zv, yv, -v3dot(zv, yv)));
-  var xv = v3cross(yv, zv), F = { H: H, x: xv, y: yv, z: zv }, M = MODELS[S.sport] || MODELS.padel, k = RACKET_SCALE;
+  var xv = v3cross(yv, zv), F = { H: H, x: xv, y: yv, z: zv }, M = MODELS[S.sport] || MODELS.padel, k = scale || RACKET_SCALE;
+  RS_CUR = k;
   function P2(q) { return proj.apply(null, v3add(v3add(H, xv, q[0] * k), yv, q[1] * k)); }
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
 
@@ -1754,11 +1823,12 @@ function drawFrame(now) {
 
   CAM.y += (camTarget.y - CAM.y) * 0.06; CAM.z += (camTarget.z - CAM.z) * 0.06;
   drawCourt();
+  drawCage('far');
   var nY = court().L / 2, far = [], near = [];
   balls.forEach(function (b) { var p = ballPos(b, now); (p[1] > nY ? far : near).push(b); });
   drawPlayers(now, true);
   far.forEach(function (b) { drawBall(b, now); });
-  drawNet();
+  drawNet(now);
   drawTarget();
   drawZones(now);
   drawGhost(now);
@@ -1766,7 +1836,7 @@ function drawFrame(now) {
   near.forEach(function (b) { drawBall(b, now); });
   drawPlayers(now, false);
   drawTrainingFigure(now);
-  if (!MS) drawLiveRacket(now);
+  if (!MS && !hostPlayer()) drawLiveRacket(now);
   drawParts(now);
   drawNearGlass(now);
   // donkere randen, zoals een echt camerabeeld
@@ -1959,7 +2029,7 @@ function startMatch() {
       w.team = ti; w.idx = k;
       var sx = team.length === 1 ? (ti === 0 ? -0.6 : 0) : (k === 0 ? -1 : 1) * hw * 0.45;
       if (ti === 1) sx = -sx;
-      w.x0 = sx; w.y0 = ti === 0 ? 0.6 : L - 0.6; w.x = sx; w.y = w.y0; w.tx = sx;
+      w.zone = 'back'; w.x0 = sx; w.y0 = zoneY(ti, 'back'); w.x = sx; w.y = w.y0; w.tx = sx; w.ty = w.y0; w.spd = 0; w.runPh = 0; w.cT = 0;
       w.st = { swings: 0, hits: 0, perfect: 0, best: 0 };
       if (w.kind === 'human' && w.p) w.av = w.p.av;
       who.push(w);
@@ -1975,6 +2045,15 @@ function startMatch() {
   startCountdown();
   updateMatchHud();
 }
+/* waar staat een team: achteraan of aan het net */
+function zoneY(team, zone) {
+  var C = court(), L = C.L, nY = L / 2;
+  var back = { padel: 1.4, tennis: -0.6, pickleball: 0.3 }[S.sport], net = { padel: 3.2, tennis: 2.8, pickleball: 2.4 }[S.sport];
+  var y = zone === 'net' ? nY - net : back;
+  return team === 0 ? y : L - y;
+}
+function setZone(team, zone) { MS.teams[team].forEach(function (w) { w.zone = zone; }); }
+function goHome(w) { w.tx = w.x0; w.ty = zoneY(w.team, w.zone); }
 function teamName(t) { return MS.teams[t].map(function (w) { return w.name; }).join(' & '); }
 function pointText(t) {
   if (S.sport === 'pickleball') return String(MS.pts[t]);
@@ -2018,21 +2097,47 @@ function buildPath(wps) {
   }
   return wps;
 }
-function launchShot(hitter, from, land, recv, vh, now, firstT) {
-  var C = court(), L = C.L, toNear = recv.team === 0;
-  var cy = toNear ? clamp(land[1] - 3.2, -0.6, 1.4) : clamp(land[1] + 3.2, L - 1.4, L + 0.6);
-  var cx = clamp(land[0] + (recv.x0 - land[0]) * 0.25, -MS.hwIn - 0.6, MS.hwIn + 0.6);
-  var wps = [{ p: from.slice(), kind: '', t: 0 }, { p: [land[0], land[1], 0], kind: 'ground', t: 0 }, { p: [cx, cy, 1.0], kind: '', t: 0 }];
-  wps[1].t = firstT || Math.max(0.35, dist2(from, wps[1].p) / vh);
-  wps[2].t = wps[1].t + Math.max(0.28, dist2(wps[1].p, wps[2].p) / (vh * 0.7));
+function launchShot(hitter, from, land, recv, vh, now, firstT, kind) {
+  var C = court(), L = C.L, nY = L / 2, toNear = recv.team === 0, wps, cx, cy, cz = 1.0, glass = false;
+  kind = kind || 'drive';
+  if (kind === 'lob' && recv.zone === 'net') setZone(recv.team, 'back');            // gelobd: terug naar achteren
+  var volley = recv.zone === 'net' && kind !== 'lob' && kind !== 'serve' && kind !== 'drop';
+  if (volley) {
+    // aan het net: de bal wordt uit de lucht genomen, voor hij stuitst
+    cy = zoneY(recv.team, 'net');
+    var tt = clamp((cy - from[1]) / ((land[1] - from[1]) || 0.001), 0.2, 1);
+    cx = clamp(from[0] + (land[0] - from[0]) * tt, -MS.hwIn - 0.4, MS.hwIn + 0.4); cz = 1.15;
+    wps = [{ p: from.slice(), kind: '', t: 0 }, { p: [cx, cy, cz], kind: '', t: 0 }];
+    wps[1].t = Math.max(0.35, dist2(from, wps[1].p) / vh);
+  } else {
+    var deep = toNear ? land[1] < 4.2 : land[1] > L - 4.2;
+    glass = S.sport === 'padel' && deep && kind !== 'drop' && Math.random() < 0.75;
+    wps = [{ p: from.slice(), kind: '', t: 0 }, { p: [land[0], land[1], 0], kind: 'ground', t: 0 }];
+    wps[1].t = firstT || Math.max(0.35, dist2(from, wps[1].p) / vh);
+    if (glass) {
+      // padel: na de stuits tegen de achterwand en dan terug het veld in
+      var wallP = [clamp(land[0] * 1.05, -C.Wd / 2 + 0.3, C.Wd / 2 - 0.3), toNear ? 0 : L, 0.9 + Math.random() * 0.6];
+      cx = clamp(wallP[0] * 0.85, -MS.hwIn, MS.hwIn); cy = toNear ? 1.7 : L - 1.7;
+      wps.push({ p: wallP, kind: 'wall', t: wps[1].t + Math.max(0.2, dist2(wps[1].p, wallP) / (vh * 0.7)) });
+      wps.push({ p: [cx, cy, 1.0], kind: '', t: wps[2].t + Math.max(0.3, dist2(wallP, [cx, cy]) / (vh * 0.45)) });
+    } else {
+      var by = zoneY(recv.team, recv.zone === 'net' && kind !== 'lob' ? 'net' : 'back');
+      cy = toNear ? clamp(Math.min(land[1] - 1.6, by + 0.6), -1.0, land[1] - 0.8) : clamp(Math.max(land[1] + 1.6, by - 0.6), land[1] + 0.8, L + 1.0);
+      if (kind === 'drop') { cy = toNear ? clamp(land[1] - 1.2, 0, nY - 0.6) : clamp(land[1] + 1.2, nY + 0.6, L); cz = 0.55; }
+      cx = clamp(land[0] + (recv.x0 - land[0]) * 0.25, -MS.hwIn - 0.6, MS.hwIn + 0.6);
+      wps.push({ p: [cx, cy, cz], kind: '', t: wps[1].t + Math.max(0.28, dist2(wps[1].p, [cx, cy]) / (vh * (kind === 'drop' ? 0.45 : 0.7))) });
+    }
+  }
   buildPath(wps);
-  var Tf = wps[2].t, b = { kind: 'in', match: true, dr: { type: 'ground', P: cy }, side: 1, anySide: false, t0: now, Tf: Tf, wps: wps, evIdx: 1,
-    c: [cx, cy, 1.0], tContact: now + Tf * 1000, judged: false, wrong: false, cand: null, trail: [], hitter: hitter, recv: recv };
+  if (window.__shotLog) window.__shotLog.push({ kind: kind, volley: volley, glass: glass, recvZone: recv.zone, recvTeam: recv.team, hitter: hitter.name });  // alleen voor tests
+  MS.who.forEach(function (o) { if (o !== recv) goHome(o); });
+  var Tf = wps[wps.length - 1].t, b = { kind: 'in', match: true, dr: { type: 'ground', P: cy }, side: 1, anySide: false, t0: now, Tf: Tf, wps: wps, evIdx: 1,
+    c: [cx, cy, cz], tContact: now + Tf * 1000, judged: false, wrong: false, cand: null, trail: [], hitter: hitter, recv: recv, shot: kind, volley: volley, viaGlass: glass };
   // aan welke kant van de ontvanger komt de bal: forehand of backhand?
   var rel = (cx - recv.x) * (recv.team === 0 ? 1 : -1), right = rel >= 0;
   b.expDir = (recv.hand === 'left') ? (right ? 'bh' : 'fh') : (right ? 'fh' : 'bh');
   b.side = cx >= recv.x ? 1 : -1;
-  recv.tx = cx;
+  recv.tx = cx; recv.ty = cy; recv.cT = b.tContact; recv.sk = cz > 1.8 ? 'over' : b.expDir;
   balls.push(b);
   MS.ball = b; MS.receiver = recv; MS.state = 'rally';
   if (R) R.inc = recv.kind === 'human' ? b : null;
@@ -2040,6 +2145,8 @@ function launchShot(hitter, from, land, recv, vh, now, firstT) {
 function serve(now) {
   var C = court(), L = C.L, nY = L / 2, hw = C.Wd / 2, st = MS.server, team = MS.teams[st];
   var srv = team[MS.dbl ? MS.serveIdx[st] % team.length : 0];
+  setZone(0, 'back'); setZone(1, 'back'); MS.shotNo = 0;
+  MS.who.forEach(function (w) { goHome(w); w.x = w.tx; w.y = w.ty; });
   var even = (S.sport === 'pickleball' ? MS.pts[st] : MS.pts[0] + MS.pts[1]) % 2 === 0;
   var sx = (st === 0 ? 1 : -1) * (even ? 1 : -1) * Math.min(MS.hwIn, hw) * 0.4;
   srv.x = srv.tx = sx;
@@ -2048,11 +2155,20 @@ function serve(now) {
   var recv = nearestOf(1 - st, lx);
   srv.swingT = now; playHit(0.8);
   showShot(srv.name + ' serveert');
-  launchShot(srv, from, [lx, ly], recv, S.sport === 'tennis' ? 19 : 11, now);
+  srv.cT = now; srv.sk = S.sport === 'tennis' ? 'over' : 'fh';
+  launchShot(srv, from, [lx, ly], recv, S.sport === 'tennis' ? 19 : 11, now, 0, 'serve');
+  if (S.sport === 'padel') { setZone(st, 'net'); MS.teams[st].forEach(goHome); }       // bij padel loopt de serveerder naar het net
 }
 function matchTick(now) {
   if (!MS || S.phase !== 'play') return;
-  MS.who.forEach(function (w) { w.x += (w.tx - w.x) * 0.07; });
+  var dt = MS.lastT ? clamp((now - MS.lastT) / 1000, 0.001, 0.05) : 0.016; MS.lastT = now;
+  MS.who.forEach(function (w) {
+    var ty = w.ty != null ? w.ty : w.y0, dx = w.tx - w.x, dy = ty - w.y, d = Math.sqrt(dx * dx + dy * dy);
+    var vmax = 5.5; if (w.cT && w.cT > now) vmax = clamp(d / Math.max(0.15, (w.cT - now) / 1000 - 0.08), 2, 8.5);
+    var step = Math.min(d, vmax * dt);
+    if (d > 0.004) { w.x += dx / d * step; w.y += dy / d * step; }
+    w.spd = (w.spd || 0) * 0.8 + (step / dt) * 0.2; w.runPh = (w.runPh || 0) + step * 3.3;
+  });
   if (MS.state === 'start') { MS.state = 'wait'; MS.after = 'serve'; MS.nextAt = now + 700; }
   if (MS.state === 'wait' && now >= MS.nextAt) {
     if (MS.after === 'serve') { MS.who.forEach(function (w) { w.tx = w.x0; }); serve(now); }
@@ -2074,14 +2190,25 @@ function botHit(b, now) {
   b.judged = true; w.swingT = now;
   var p = ballPos(b, now), hard = b.hard || 0;
   balls = balls.filter(function (x) { return x !== b; });
-  if (Math.random() < lv.p - hard * 0.18) {
-    var opp = 1 - w.team, depth = 0.35 + Math.random() * lv.deep * 0.6;
-    var ly = opp === 0 ? nY - (1.2 + (nY - 2.2) * depth) : nY + (1.2 + (nY - 2.2) * depth);
-    var lx = (Math.random() * 2 - 1) * MS.hwIn * (0.45 + lv.deep * 0.4);
-    playHit(0.85);
-    launchShot(w, [p[0], p[1], Math.max(0.7, p[2])], [lx, ly], nearestOf(opp, lx), lv.v * (S.sport === 'pickleball' ? 0.75 : 1) * (0.9 + Math.random() * 0.25), now);
+  var chance = lv.p - hard * 0.18 - (b.viaGlass ? 0.05 : 0) - (b.shot === 'drop' && !b.volley ? 0.08 : 0);
+  if (Math.random() < chance) {
+    var opp = 1 - w.team, oppNet = MS.teams[opp].some(function (x) { return x.zone === 'net'; }), r = Math.random(), kind;
+    if (oppNet) kind = r < 0.38 ? 'lob' : 'drive';
+    else if (w.zone === 'net') kind = r < 0.3 ? 'drop' : 'drive';
+    else kind = r < 0.22 ? 'drop' : r < 0.36 ? 'lob' : 'drive';
+    var depth = kind === 'drop' ? 0.06 + Math.random() * 0.2 : kind === 'lob' ? 0.82 + Math.random() * 0.13 : 0.45 + Math.random() * lv.deep * 0.5;
+    var half = nY - 0.6, ly = opp === 0 ? nY - (0.6 + half * depth) : nY + (0.6 + half * depth);
+    var lx = (Math.random() * 2 - 1) * MS.hwIn * (kind === 'drop' ? 0.6 : 0.45 + lv.deep * 0.4);
+    var vv = lv.v * (S.sport === 'pickleball' ? 0.75 : 1) * (kind === 'drop' ? 0.45 : kind === 'lob' ? 0.55 : 0.9 + Math.random() * 0.25);
+    playHit(kind === 'drop' ? 0.5 : 0.85);
+    MS.shotNo = (MS.shotNo || 0) + 1;
+    if (kind === 'drop' || (S.sport === 'pickleball' && MS.shotNo >= 2)) setZone(w.team, 'net');    // kort spelen en oprukken
+    if (kind === 'drop') showShot(w.name + ': korte bal');
+    else if (kind === 'lob') showShot(w.name + ': lob');
+    launchShot(w, [p[0], p[1], Math.max(0.7, p[2])], [lx, ly], nearestOf(opp, lx), vv, now, 0, kind);
   } else {
     var net = Math.random() < 0.5, mir = w.team === 1;
+    w.cT = now;
     var ph = mir ? [-p[0], L - p[1], p[2]] : p;
     var sim = simulateShot(ph, net ? 35 : 95, net ? -8 : 30, (Math.random() - 0.5) * 20, null);
     playHit(0.7);
@@ -2092,6 +2219,7 @@ function botHit(b, now) {
 }
 function showOutBall(sim, mir, now) {
   var L = court().L;
+  if (sim.outcome === 'net' && sim.netX != null) { var nx = mir ? -sim.netX : sim.netX; setTimeout(function () { netPulse(nx, mir ? -1 : 1, 0.24); }, Math.max(0, sim.tNet * 1000)); }
   var pts = sim.pts.map(function (q) { return mir ? [-q[0], L - q[1], q[2]] : q; });
   var bt = { kind: 'out', sim: { pts: pts, dt: sim.dt, bounceTimes: sim.bounceTimes, outcome: sim.outcome, tEvent: sim.tEvent, apex: sim.apex, land: sim.land, el: sim.el }, tr: now, trail: [], bounceIdx: 0, dr: { type: 'ground' } };
   balls.push(bt);
@@ -2122,8 +2250,11 @@ function onMatchSwing(pl, m) {
   if (sim.outcome === 'in') {
     w.st.hits++; if (perfect) w.st.perfect++;
     var land = mir ? [-sim.land[0], L - sim.land[1]] : sim.land, opp = 1 - w.team;
-    var vh = dist2(ph, sim.land) / Math.max(0.3, sim.tEvent);
-    launchShot(w, p, land, nearestOf(opp, land[0]), vh, now, sim.tEvent);
+    var vh = dist2(ph, sim.land) / Math.max(0.3, sim.tEvent), nYm = L / 2;
+    var depthF = Math.abs(land[1] - nYm) / nYm, kindH = depthF < 0.32 ? 'drop' : (sim.apex > 3.8 ? 'lob' : 'drive');
+    MS.shotNo = (MS.shotNo || 0) + 1;
+    if (kindH === 'drop' || b.volley) { setZone(w.team, 'net'); if (kindH === 'drop') showShot(w.name + ': korte bal, naar het net!'); }
+    launchShot(w, p, land, nearestOf(opp, land[0]), vh, now, sim.tEvent, kindH);
     MS.ball.hard = clamp((speed - 50) / 60, 0, 1);
     showVerdict(w.name + ': ' + verdict, perfect ? 'perfect' : 'good');
     sendTo(pl, { type: 'result', verdict: verdict, hit: true, swung: true, perfect: perfect, speed: Math.round(speed) });
@@ -2195,65 +2326,179 @@ function drawTrainingFigure(now) {
   if (MS || S.demo || !(S.phase === 'play' || S.phase === 'countdown' || S.phase === 'done' || S.phase === 'connected')) return;
   var hp = hostPlayer(); if (!hp) return;
   var bb = R && R.inc, P = (S.phase === 'play' && bb) ? bb.c[1] : (curDrill().P || 1);
-  drawFigure({ x: 0.15, y: P - 0.5, team: 0, idx: 0, kind: 'human', name: hp.name, hand: hp.hand, av: hp.av, p: hp }, now, 0.35);
+  drawFigure({ x: 0.15, y: P - 0.5, team: 0, idx: 0, kind: 'human', name: hp.name, hand: hp.hand, av: hp.av || botAvatar({ name: hp.name, team: 0, idx: 0 }), p: hp, spd: 0 }, now, 0.6);
 }
 
 /* spelers op de baan: figuurtjes met naam, en het racket van wie met zijn telefoon speelt */
 function teamCol(t, human) { return t === 0 ? (human ? ACC() : ACCA(0.7)) : (human ? '#f2f2f2' : '#9aa3ad'); }
+/* ---------- Spelers als 3D-mensen ----------
+   Elk figuur is een skelet: heupen, knieën, enkels, schouders, ellebogen, polsen en hoofd, in 3D berekend en in perspectief
+   getekend met ronde, belichte ledematen. Lopen, wachthouding en slagbeweging, met het racket in de hand. */
+var SPORT_HEX = { padel: '#2f7bff', tennis: '#ff8a2a', pickleball: '#2fbf5b' };
+var SHIRT_HEX = { wit: '#f2f2f2', streep: '#f2f2f2', zwart: '#1d1f24', camo: '#4a5a32', goud: '#e6b53a', regenboog: '#8a3ac8' };
+function smooth01(t) { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }
+function lerp3(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+/* polspositie tijdens een slag (lokaal: x = sterke kant, y = vooruit, z = omhoog), op 4 momenten */
+var SWING_KEYS = {
+  fh:   [[0.14, 0.36, 1.0], [0.62, -0.42, 1.06], [0.5, 0.46, 1.0], [-0.3, 0.3, 1.46]],
+  bh:   [[0.14, 0.36, 1.0], [-0.6, -0.32, 1.04], [-0.4, 0.46, 1.0], [0.46, 0.3, 1.5]],
+  over: [[0.14, 0.36, 1.0], [0.3, -0.26, 1.95], [0.22, 0.36, 2.34], [-0.2, 0.36, 0.95]]
+};
+function swingWrist(kind, p) {
+  var K = SWING_KEYS[kind] || SWING_KEYS.fh;
+  if (p <= 0.25) return lerp3(K[0], K[1], smooth01(p / 0.25));
+  if (p <= 0.45) return lerp3(K[1], K[2], smooth01((p - 0.25) / 0.2));
+  return lerp3(K[2], K[3], smooth01((p - 0.45) / 0.55));
+}
+function armIK(S0, Wr, L1, L2, hint) {
+  var d = [Wr[0] - S0[0], Wr[1] - S0[1], Wr[2] - S0[2]], len = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) || 0.001, maxL = L1 + L2 - 0.004;
+  if (len > maxL) { var k = maxL / len; d = [d[0] * k, d[1] * k, d[2] * k]; Wr = [S0[0] + d[0], S0[1] + d[1], S0[2] + d[2]]; len = maxL; }
+  var a = (L1 * L1 - L2 * L2 + len * len) / (2 * len), hh = Math.sqrt(Math.max(0, L1 * L1 - a * a)), u = [d[0] / len, d[1] / len, d[2] / len];
+  var dt = hint[0] * u[0] + hint[1] * u[1] + hint[2] * u[2], pb = v3norm([hint[0] - dt * u[0], hint[1] - dt * u[1], hint[2] - dt * u[2]]);
+  return { e: [S0[0] + u[0] * a + pb[0] * hh, S0[1] + u[1] * a + pb[1] * hh, S0[2] + u[2] * a + pb[2] * hh], w: Wr };
+}
+function swingPhase(w, now) {
+  if (!w.cT) return 0;
+  if (now < w.cT - 450) return 0;
+  if (now <= w.cT) return 0.45 * (now - (w.cT - 450)) / 450;
+  if (now < w.cT + 380) return 0.45 + 0.55 * (now - w.cT) / 380;
+  return 0;
+}
+function botAvatar(w) {
+  if (w.av) return w.av;
+  var hsh = hashStr((w.name || 'bot') + w.team + w.idx), skins = ['s0', 's1', 's2', 's3', 's4', 's5'], hairs = ['kort', 'krullen', 'staart', 'kaal', 'knot'], hc = ['zwart', 'bruin', 'blond', 'rood'];
+  w.av = { skin: skins[hsh % 6], hair: hairs[(hsh >> 3) % 5], hairCol: hc[(hsh >> 6) % 4], shirt: w.team === 0 ? 'sport' : 'wit', shorts: w.team === 0 ? 'zwart' : 'navy', shoes: 'wit', extra: (hsh >> 9) % 3 === 0 ? 'zweetband' : 'geen' };
+  return w.av;
+}
+function limb(a, b, r0, r1, col) {
+  var A = proj(a[0], a[1], a[2]), B = proj(b[0], b[1], b[2]);
+  var wd = Math.max(1.4, (r0 * A.s + r1 * B.s));
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = shadeHex(col, 0.6); ctx.lineWidth = wd; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+  ctx.strokeStyle = shadeHex(col, 1.12); ctx.lineWidth = wd * 0.5; var o = wd * 0.16;
+  ctx.beginPath(); ctx.moveTo(A.x - o, A.y - o); ctx.lineTo(B.x - o, B.y - o); ctx.stroke();
+}
+function drawHuman(w, now, alpha, live) {
+  var base = proj(w.x, w.y, 0); if (base.s < 1.2) return;
+  var fs = w.team === 0 ? 1 : -1, hs = w.hand === 'left' ? -1 : 1, av = botAvatar(w);
+  function Wd(l) { return [w.x + l[0] * fs, w.y + l[1] * fs, l[2]]; }
+  var skin = AVC.skin[av.skin] || '#e0ac85', shirt = av.shirt === 'sport' || av.shirt === 'pro' ? SPORT_HEX[S.sport] : (SHIRT_HEX[av.shirt] || SPORT_HEX[S.sport]);
+  var shorts = AVC.shorts[av.shorts] || '#16181c', shoe = AVC.shoes[av.shoes] || '#f4f4f4', hairC = AVC.hairCol[av.hairCol] || '#5a3a22';
+  var spd = w.spd || 0, running = spd > 0.6, cr = running ? 0.05 : 0.13, stride = clamp(spd / 5.5, 0, 1) * 0.62, ph = w.runPh || 0;
+  var p = live ? 0 : swingPhase(w, now), kind = w.sk || 'fh';
+  var tw = 0;
+  if (p > 0) { var back = p < 0.25 ? smooth01(p / 0.25) : 1 - smooth01((p - 0.25) / 0.75); tw = (kind === 'bh' ? 0.65 : -0.65) * hs * back + (p > 0.45 ? (kind === 'bh' ? -0.5 : 0.5) * hs * smooth01((p - 0.45) / 0.55) : 0); }
+  function rot(l) { var c = Math.cos(tw), s = Math.sin(tw); return [l[0] * c - l[1] * s, l[0] * s + l[1] * c, l[2]]; }
+  var items = [];
+  // benen
+  [-1, 1].forEach(function (sd) {
+    var pp = ph + (sd > 0 ? 0 : Math.PI), a = Math.sin(pp) * stride, lift = Math.max(0, Math.cos(pp)) * stride * 1.15, bk = cr * 2.5 + lift;
+    var hip = [sd * 0.1, 0, 0.94 - cr];
+    var knee = [sd * 0.115, Math.sin(a + bk * 0.45) * 0.44, hip[2] - Math.cos(a + bk * 0.45) * 0.44];
+    var ank = [sd * 0.12, knee[1] + Math.sin(a - bk * 0.55) * 0.44, Math.max(0.07, knee[2] - Math.cos(a - bk * 0.55) * 0.44)];
+    var toe = [ank[0], ank[1] + 0.16, Math.max(0.03, ank[2] - 0.05)];
+    var thighMid = lerp3(hip, knee, 0.45);
+    items.push({ k: 'limb', a: Wd(hip), b: Wd(thighMid), r0: 0.085, r1: 0.075, c: shorts });
+    items.push({ k: 'limb', a: Wd(thighMid), b: Wd(knee), r0: 0.07, r1: 0.055, c: skin });
+    items.push({ k: 'limb', a: Wd(knee), b: Wd(ank), r0: 0.055, r1: 0.04, c: skin });
+    items.push({ k: 'limb', a: Wd(ank), b: Wd(toe), r0: 0.05, r1: 0.045, c: shoe });
+  });
+  // romp, armen en hoofd
+  var pelvis = [0, 0, 0.94 - cr], chest = [0, 0.05, 1.4 - cr], head = [0, 0.07, 1.66 - cr];
+  var shR = rot([0.2, 0.02, 1.43 - cr]), shL = rot([-0.2, 0.02, 1.43 - cr]);
+  var domSh = hs > 0 ? shR : shL, offSh = hs > 0 ? shL : shR;
+  var wristW, racketY, racketZ;
+  if (live) {
+    racketY = v3norm(live.y); racketZ = v3norm(live.z);
+    var dir = v3norm([racketY[0], racketY[1], racketY[2] * 0.55 - 0.32]), S0 = Wd(domSh);
+    wristW = [S0[0] + dir[0] * 0.5, S0[1] + dir[1] * 0.5, S0[2] + dir[2] * 0.5];
+  } else {
+    var wl = p > 0 ? swingWrist(kind, p) : swingWrist(kind, 0);
+    wl = [wl[0] * hs, wl[1], wl[2] - (p > 0 ? 0 : cr * 0.5)];
+    wristW = Wd(wl);
+  }
+  var arm = armIK(Wd(domSh), wristW, 0.3, 0.28, [hs * fs * 0.6, 0, -0.8]);
+  wristW = arm.w;
+  if (!live) {
+    var eDir = v3norm([wristW[0] - arm.e[0], wristW[1] - arm.e[1], wristW[2] - arm.e[2]]);
+    racketY = v3norm([eDir[0], eDir[1], eDir[2] + (kind === 'over' && p > 0.1 ? 0.6 : 0.45)]);
+    racketZ = [0, fs, 0];
+  }
+  var offWl = (p < 0.3 && !live) ? [hs * -0.02, 0.4, 1.05 - cr] : [-hs * 0.42, 0.22, 1.2 - cr];
+  var offW = live ? Wd([-hs * 0.3, 0.3, 1.15 - cr]) : Wd(offWl);
+  var arm2 = armIK(Wd(offSh), offW, 0.3, 0.28, [-hs * fs * 0.6, 0, -0.8]);
+  items.push({ k: 'torso', a: Wd(shL), b: Wd(shR), pl: Wd([-0.16, 0, 0.98 - cr]), pr: Wd([0.16, 0, 0.98 - cr]), c: shirt });
+  items.push({ k: 'limb', a: Wd(domSh), b: lerp3(Wd(domSh), arm.e, 0.45), r0: 0.065, r1: 0.06, c: shirt });
+  items.push({ k: 'limb', a: lerp3(Wd(domSh), arm.e, 0.45), b: arm.e, r0: 0.05, r1: 0.045, c: skin });
+  items.push({ k: 'limb', a: arm.e, b: wristW, r0: 0.042, r1: 0.035, c: skin });
+  items.push({ k: 'limb', a: Wd(offSh), b: lerp3(Wd(offSh), arm2.e, 0.45), r0: 0.065, r1: 0.06, c: shirt });
+  items.push({ k: 'limb', a: lerp3(Wd(offSh), arm2.e, 0.45), b: arm2.e, r0: 0.05, r1: 0.045, c: skin });
+  items.push({ k: 'limb', a: arm2.e, b: arm2.w, r0: 0.042, r1: 0.035, c: skin });
+  items.push({ k: 'limb', a: Wd([0, 0.06, 1.47 - cr]), b: Wd([0, 0.07, 1.55 - cr]), r0: 0.05, r1: 0.05, c: skin });
+  items.push({ k: 'head', a: Wd(head) });
+  items.push({ k: 'racket', a: wristW });
+  items.forEach(function (it) { var pt = it.a; it.d = (pt[1] - CAM.y) + (it.k === 'head' ? -0.05 : 0); });
+  items.sort(function (a, b) { return b.d - a.d; });
+  ctx.save(); ctx.globalAlpha = alpha;
+  // schaduw
+  ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.beginPath(); ctx.ellipse(base.x, base.y, base.s * 0.36, base.s * 0.11, 0, 0, Math.PI * 2); ctx.fill();
+  items.forEach(function (it) {
+    if (it.k === 'limb') limb(it.a, it.b, it.r0, it.r1, it.c);
+    else if (it.k === 'torso') {
+      var A = proj.apply(null, it.a), B = proj.apply(null, it.b), C = proj.apply(null, it.pr), D = proj.apply(null, it.pl);
+      var g = ctx.createLinearGradient(A.x, A.y, B.x, B.y); g.addColorStop(0, shadeHex(it.c, 1.15)); g.addColorStop(0.6, it.c); g.addColorStop(1, shadeHex(it.c, 0.62));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.quadraticCurveTo((A.x + B.x) / 2, Math.min(A.y, B.y) - A.s * 0.03, B.x, B.y); ctx.lineTo(C.x, C.y); ctx.lineTo(D.x, D.y); ctx.closePath(); ctx.fill();
+      if (av.shirt === 'streep') { ctx.strokeStyle = SPORT_HEX[S.sport]; ctx.lineWidth = Math.max(1, A.s * 0.025); for (var st = 1; st <= 3; st++) { var f = st / 4; ctx.beginPath(); ctx.moveTo(A.x + (D.x - A.x) * f, A.y + (D.y - A.y) * f); ctx.lineTo(B.x + (C.x - B.x) * f, B.y + (C.y - B.y) * f); ctx.stroke(); } }
+      // broekrand
+      var p1 = proj.apply(null, Wd([-0.17, 0, 1.0 - cr])), p2 = proj.apply(null, Wd([0.17, 0, 1.0 - cr])), p3 = proj.apply(null, Wd([0.15, 0, 0.82 - cr])), p4 = proj.apply(null, Wd([-0.15, 0, 0.82 - cr]));
+      ctx.fillStyle = shorts; ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.closePath(); ctx.fill();
+    } else if (it.k === 'head') {
+      var Hq = proj.apply(null, it.a), r = Math.max(2, 0.115 * Hq.s);
+      var gh = ctx.createRadialGradient(Hq.x - r * 0.35, Hq.y - r * 0.35, r * 0.1, Hq.x, Hq.y, r); gh.addColorStop(0, shadeHex(skin, 1.12)); gh.addColorStop(1, shadeHex(skin, 0.72));
+      ctx.fillStyle = gh; ctx.beginPath(); ctx.arc(Hq.x, Hq.y, r, 0, Math.PI * 2); ctx.fill();
+      var facing = fs < 0;  // het verre team kijkt naar de camera
+      ctx.fillStyle = hairC;
+      if (av.hair !== 'kaal') {
+        ctx.beginPath();
+        if (facing) ctx.arc(Hq.x, Hq.y - r * 0.12, r * 1.02, Math.PI * 1.05, Math.PI * 1.95);
+        else ctx.ellipse(Hq.x, Hq.y - r * 0.08, r * 1.02, r * 0.95, 0, Math.PI * 0.95, Math.PI * 2.05);
+        ctx.fill();
+        if (av.hair === 'staart' || av.hair === 'lang') { ctx.beginPath(); ctx.ellipse(Hq.x, Hq.y + r * 0.9, r * 0.35, r * (av.hair === 'lang' ? 1.1 : 0.8), 0, 0, Math.PI * 2); ctx.fill(); }
+        if (av.hair === 'knot') { ctx.beginPath(); ctx.arc(Hq.x, Hq.y - r * 1.05, r * 0.42, 0, Math.PI * 2); ctx.fill(); }
+        if (av.hair === 'krullen') for (var kq = 0; kq < 7; kq++) { var aa = Math.PI * (1 + kq / 6); ctx.beginPath(); ctx.arc(Hq.x + Math.cos(aa) * r * 0.9, Hq.y - r * 0.1 + Math.sin(aa) * r * 0.9, r * 0.32, 0, Math.PI * 2); ctx.fill(); }
+      }
+      if (facing && r > 4) { ctx.fillStyle = '#1d1a17'; ctx.beginPath(); ctx.arc(Hq.x - r * 0.33, Hq.y + r * 0.08, r * 0.09, 0, Math.PI * 2); ctx.arc(Hq.x + r * 0.33, Hq.y + r * 0.08, r * 0.09, 0, Math.PI * 2); ctx.fill(); }
+      if (av.extra === 'pet') { ctx.fillStyle = SPORT_HEX[S.sport]; ctx.beginPath(); ctx.arc(Hq.x, Hq.y - r * 0.15, r * 1.04, Math.PI, 0); ctx.fill(); }
+      if (av.extra === 'zweetband') { ctx.fillStyle = SPORT_HEX[S.sport]; ctx.fillRect(Hq.x - r, Hq.y - r * 0.45, r * 2, r * 0.28); }
+      if (av.extra === 'zonnebril' && facing) { ctx.fillStyle = '#111'; ctx.fillRect(Hq.x - r * 0.6, Hq.y, r * 1.2, r * 0.25); }
+      if (av.extra === 'kroon') { ctx.fillStyle = '#f2c230'; ctx.fillRect(Hq.x - r * 0.7, Hq.y - r * 1.4, r * 1.4, r * 0.4); }
+    } else if (it.k === 'racket') {
+      var M = MODELS[S.sport] || MODELS.padel, gm = (M.grip.y0 + M.grip.y1) / 2, ks = 1.25;
+      var Hh = [wristW[0] - racketY[0] * gm * ks, wristW[1] - racketY[1] * gm * ks, wristW[2] - racketY[2] * gm * ks];
+      drawRacket(Hh, racketY, racketZ, 'live', ks);
+    }
+  });
+  ctx.restore();
+  var top = proj(w.x, w.y, 2.0);
+  ctx.font = '700 ' + Math.round(Math.max(11, base.s * 0.17)) + 'px system-ui, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = w.kind === 'human' ? '#fff' : 'rgba(255,255,255,.62)';
+  ctx.fillText(w.name || '', top.x, top.y);
+}
 function drawFigure(w, now, alpha) {
-  var base = proj(w.x, w.y, 0), s = base.s;
-  if (s < 1.5) return;
-  var hip = proj(w.x, w.y, 0.92), sh = proj(w.x, w.y, 1.45), hd = proj(w.x, w.y, 1.66), col = teamCol(w.team, w.kind === 'human');
-  ctx.globalAlpha = alpha;
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(base.x, base.y, s * 0.35, s * 0.1, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#1d2026'; ctx.lineWidth = Math.max(2, s * 0.12); ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(hip.x - s * 0.1, hip.y); ctx.lineTo(base.x - s * 0.14, base.y); ctx.moveTo(hip.x + s * 0.1, hip.y); ctx.lineTo(base.x + s * 0.14, base.y); ctx.stroke();
-  var av = w.av || null, skinC = av ? avSkin(av.skin) : SKIN[(w.idx + w.team * 2) % SKIN.length];
-  // broek en schoenen
-  if (av) {
-    var kn = proj(w.x, w.y, 0.55);
-    ctx.fillStyle = AVC.shorts[av.shorts] || '#16181c'; ctx.fillRect(hip.x - s * 0.21, hip.y - s * 0.02, s * 0.42, (kn.y - hip.y) * 0.75);
-    ctx.fillStyle = AVC.shoes[av.shoes] || '#f4f4f4'; ctx.fillRect(base.x - s * 0.24, base.y - s * 0.06, s * 0.18, s * 0.06); ctx.fillRect(base.x + s * 0.06, base.y - s * 0.06, s * 0.18, s * 0.06);
+  var live = null;
+  if (w.kind === 'human' && w.p && w.p.rk && now - w.p.rk.t < 600) {
+    var ty = v3norm(w.p.rk.y), tz = v3norm(w.p.rk.z);
+    if (w.team === 1) { ty = [-ty[0], -ty[1], ty[2]]; tz = [-tz[0], -tz[1], tz[2]]; }
+    live = { y: ty, z: tz };
   }
-  ctx.fillStyle = av ? avShirt(av, hip, sh, s) : col; ctx.beginPath(); ctx.moveTo(hip.x - s * 0.2, hip.y); ctx.lineTo(sh.x - s * 0.23, sh.y); ctx.lineTo(sh.x + s * 0.23, sh.y); ctx.lineTo(hip.x + s * 0.2, hip.y); ctx.closePath(); ctx.fill();
-  if (av && av.shirt === 'streep') { ctx.fillStyle = ACC(); for (var st2 = 1; st2 <= 3; st2++) { var yy2 = hip.y + (sh.y - hip.y) * st2 / 4; ctx.fillRect(hip.x - s * 0.21, yy2, s * 0.42, Math.max(1, s * 0.04)); } }
-  ctx.fillStyle = skinC; ctx.beginPath(); ctx.arc(hd.x, hd.y, s * 0.12, 0, Math.PI * 2); ctx.fill();
-  if (av) {
-    var hc = AVC.hairCol[av.hairCol] || '#5a3a22';
-    ctx.fillStyle = hc;
-    if (av.hair !== 'kaal') { ctx.beginPath(); ctx.arc(hd.x, hd.y - s * 0.02, s * 0.125, Math.PI, 0); ctx.fill(); }
-    if (av.hair === 'staart' || av.hair === 'lang') { ctx.fillRect(hd.x - s * 0.05, hd.y, s * 0.1, s * (av.hair === 'lang' ? 0.22 : 0.16)); }
-    if (av.hair === 'knot') { ctx.beginPath(); ctx.arc(hd.x, hd.y - s * 0.15, s * 0.06, 0, Math.PI * 2); ctx.fill(); }
-    if (av.hair === 'hanenkam') { ctx.fillRect(hd.x - s * 0.03, hd.y - s * 0.2, s * 0.06, s * 0.1); }
-    if (av.extra === 'pet') { ctx.fillStyle = ACC(); ctx.beginPath(); ctx.arc(hd.x, hd.y - s * 0.03, s * 0.13, Math.PI, 0); ctx.fill(); }
-    if (av.extra === 'zweetband') { ctx.fillStyle = ACC(); ctx.fillRect(hd.x - s * 0.12, hd.y - s * 0.06, s * 0.24, s * 0.035); }
-    if (av.extra === 'kroon') { ctx.fillStyle = '#f2c230'; ctx.fillRect(hd.x - s * 0.1, hd.y - s * 0.2, s * 0.2, s * 0.06); }
-  }
-  // arm met racket, die even zwaait bij een slag
-  var sw = w.swingT && now - w.swingT < 350 ? (now - w.swingT) / 350 : 1, dir = (w.team === 0 ? 1 : -1) * (w.hand === 'left' ? -1 : 1);
-  var ang = -0.6 + sw * 1.8, ax = sh.x + dir * s * 0.22, ay = sh.y;
-  var ex = ax + dir * Math.cos(ang) * s * 0.55, ey = ay + Math.sin(ang) * s * 0.35;
-  if (w.kind !== 'human' || !(w.p && w.p.rk && now - w.p.rk.t < 600)) {
-    ctx.strokeStyle = SKIN[1]; ctx.lineWidth = Math.max(1.5, s * 0.07); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ex, ey); ctx.stroke();
-    ctx.fillStyle = '#16181c'; ctx.beginPath(); ctx.ellipse(ex + dir * s * 0.14, ey - s * 0.05, s * 0.12, s * 0.15, 0, 0, Math.PI * 2); ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-  ctx.font = '700 ' + Math.round(Math.max(11, s * 0.17)) + 'px system-ui, sans-serif'; ctx.textAlign = 'center';
-  ctx.fillStyle = w.kind === 'human' ? '#fff' : 'rgba(255,255,255,.6)';
-  ctx.fillText(w.name, hd.x, hd.y - s * 0.24);
+  drawHuman(w, now, alpha, live);
 }
 function drawPlayers(now, farSide) {
   if (!MS) return;
   var nY = court().L / 2;
   MS.who.forEach(function (w) {
     if ((w.y > nY) !== farSide) return;
-    drawFigure(w, now, w.team === 0 ? 0.42 : 1);
-    if (w.kind === 'human' && w.p && w.p.rk && now - w.p.rk.t < 600) {
-      var mir = w.team === 1, ty = v3norm(w.p.rk.y), tz = v3norm(w.p.rk.z);
-      if (mir) { ty = [-ty[0], -ty[1], ty[2]]; tz = [-tz[0], -tz[1], tz[2]]; }
-      var pivot = [w.x + 0.25 * ty[0], w.y + (mir ? 0.4 : -0.4), 1.05], Hh = v3add(pivot, ty, 0.95);
-      drawRacket(Hh, ty, tz, 'live');
-    }
+    drawFigure(w, now, w.team === 0 ? 0.55 : 1);
   });
 }
 
@@ -2288,7 +2533,7 @@ setCamera();
 requestAnimationFrame(frame);
 startPeer();
 
-window.__tv = { celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
+window.__tv = { netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
 })();
 </script>
 </body>

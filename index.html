@@ -453,7 +453,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 18</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 19</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -799,9 +799,9 @@ var MODE_HINTS = {
 var ONSET_KMH = 15;
 /* Trainingen op de tv (zelfde ids als in tv.html) */
 var TV_DRILLS = {
-  padel:      [['basis', 'Slagen vanaf achter'], ['volley', 'Volleys aan het net'], ['bandeja', 'Bandeja en smash'], ['glas', 'Spelen met het glas'], ['mix', 'Mix van alles']],
-  tennis:     [['basis', 'Rally vanaf de baseline'], ['return', 'Return van service'], ['volley', 'Volleys aan het net'], ['smash', 'Smash op lobs'], ['mix', 'Mix van alles']],
-  pickleball: [['basis', 'Drives vanaf achter'], ['dink', 'Dinks aan de kitchen'], ['volley', 'Volleys aan de kitchen'], ['smash', 'Smash op lobs'], ['mix', 'Mix van alles']]
+  padel:      [['basis', 'Slagen vanaf achter'], ['volley', 'Volleys aan het net'], ['bandeja', 'Bandeja en smash'], ['glas', 'Spelen met het glas'], ['kort', 'Korte ballen, naar het net'], ['mix', 'Mix van alles']],
+  tennis:     [['basis', 'Rally vanaf de baseline'], ['return', 'Return van service'], ['volley', 'Volleys aan het net'], ['smash', 'Smash op lobs'], ['kort', 'Korte ballen, naar het net'], ['mix', 'Mix van alles']],
+  pickleball: [['basis', 'Drives vanaf achter'], ['dink', 'Dinks aan de kitchen'], ['volley', 'Volleys aan de kitchen'], ['smash', 'Smash op lobs'], ['kort', 'Korte ballen, naar de kitchen'], ['mix', 'Mix van alles']]
 };
 function curTvDrill() {
   var sp = data.settings.sport, id = data.settings.drills[sp], l = TV_DRILLS[sp];
@@ -2616,7 +2616,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 18, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 19, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 

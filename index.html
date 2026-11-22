@@ -58,8 +58,40 @@ h3{font-size:15px;font-weight:600;color:var(--ink2);margin:28px 0 10px}
 /* Melding nieuwe versie */
 .update{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:14px 14px 14px 16px;border-radius:20px;background:var(--surface);box-shadow:inset 4px 0 0 var(--lime),0 0 0 1px var(--line)}
 .update p{margin:0;flex:1;font-size:15px;line-height:1.35;font-weight:600}
-.update button{flex:none;padding:12px 16px;border-radius:99px;background:var(--lime);color:#000;font-size:15px;font-weight:700}
+.update button{flex:none;padding:12px 16px;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-size:15px;font-weight:700}
 .update button:disabled{opacity:.6}
+
+/* Drie sporten, elk met een eigen kleur */
+body[data-sport="padel"]{--lime:#2f7bff;--lime-ink:#ffffff}
+body[data-sport="tennis"]{--lime:#ff8a2a;--lime-ink:#1a0d00}
+body[data-sport="pickleball"]{--lime:#2fbf5b;--lime-ink:#002a10}
+.sportbar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px}
+.sportbar button{padding:14px 6px;border-radius:18px;font-weight:800;font-size:16px;background:var(--surface);box-shadow:inset 0 0 0 2px var(--c);color:var(--c)}
+.sportbar button[aria-pressed="true"]{background:var(--c);color:#fff}
+.sportbar .sp-padel{--c:#2f7bff}.sportbar .sp-tennis{--c:#ff8a2a}.sportbar .sp-pickleball{--c:#2fbf5b}
+.coins{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--surface);font-weight:800;font-size:15px;box-shadow:0 0 0 1px var(--line)}
+.coins::before{content:"";width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe58a,#e0a91f);box-shadow:inset 0 0 0 1.5px #b98510}
+.cards2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.card{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:22px;background:var(--surface);text-align:left;box-shadow:0 0 0 1px var(--line);min-height:150px;position:relative;overflow:hidden}
+.card .c-lbl{font-size:13px;font-weight:700;color:var(--ink2)}
+.card b{font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:34px;line-height:1.05;color:var(--lime)}
+.card span{font-size:13px;color:var(--ink2)}
+.card canvas{position:absolute;right:4px;bottom:0;width:78px;height:110px}
+.sportbadge{display:inline-block;margin:0 auto 4px;padding:6px 14px;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-weight:800;font-size:14px}
+.rankrow{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.rankrow:last-child{border-bottom:0}
+.rankrow .r{font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;color:var(--ink2)}
+.rankrow .p{font-weight:700}
+.rankrow.me{background:color-mix(in srgb,var(--lime) 18%,transparent);border-radius:10px;padding-left:6px;padding-right:6px}
+.rankhead{display:flex;align-items:flex-end;gap:14px;margin:4px 0 14px}
+.rankhead b{font-family:var(--num);font-variation-settings:"wdth" 118;font-weight:800;font-size:54px;line-height:1;color:var(--lime)}
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.items button{position:relative;padding:12px 6px;border-radius:14px;background:var(--surface);font-size:13px;font-weight:700;box-shadow:0 0 0 1px var(--line);min-height:62px}
+.items button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--lime)}
+.items button .sw{display:block;width:26px;height:26px;border-radius:50%;margin:0 auto 6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.items button .price{display:block;font-size:12px;color:#b98510;margin-top:3px}
+.items button.locked{opacity:.75}
+.avbig{display:block;width:180px;height:240px;margin:0 auto}
 
 /* Home: today */
 .today{display:flex;align-items:center;gap:22px;padding:22px;background:var(--surface);border-radius:28px}
@@ -174,7 +206,7 @@ details[open] summary::after{transform:rotate(225deg)}
 /* Speel op tv (telefoon) */
 .tvbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:10px;padding:17px;border-radius:22px;background:var(--surface);color:var(--ink);font-size:17px;font-weight:600;box-shadow:0 0 0 1px var(--line)}
 .tvbtn svg{width:22px;height:22px}
-.tvbtn.top{margin-top:14px;background:var(--lime);color:#000;box-shadow:none;font-size:18px;font-weight:700;padding:18px}
+.tvbtn.top{margin-top:14px;background:var(--lime);color:var(--lime-ink);box-shadow:none;font-size:18px;font-weight:700;padding:18px}
 .tvp{touch-action:manipulation;overflow:auto}
 .tclose{font-size:15px;font-weight:600;color:var(--ink);padding:6px 0}
 .tv-step{flex:1;width:100%;max-width:420px;display:flex;flex-direction:column;justify-content:center;padding:12px 0}
@@ -200,12 +232,18 @@ details[open] summary::after{transform:rotate(225deg)}
 .ready-ill{width:110px;height:110px;align-self:center;margin-bottom:8px}
 .readytap{cursor:pointer;-webkit-user-select:none;user-select:none}
 .readytap:active .tapbig{transform:scale(.97)}
-.tapbig{margin:26px auto 0;padding:22px 26px;border-radius:24px;background:var(--lime);color:#000;font-size:20px;font-weight:800;text-align:center;transition:transform .1s}
+.tapbig{margin:26px auto 0;padding:22px 26px;border-radius:24px;background:var(--lime);color:var(--lime-ink);font-size:20px;font-weight:800;text-align:center;transition:transform .1s}
 .steady{height:10px;border-radius:99px;background:var(--track);overflow:hidden;margin:26px 20px 0}
 .steady i{display:block;height:100%;width:0;background:var(--lime);border-radius:99px;transition:width .1s linear}
 .dots{display:flex;gap:16px;justify-content:center;margin-top:28px}
 .dots i{width:22px;height:22px;border-radius:50%;background:var(--track);transition:background .2s,transform .2s}
 .dots i.on{background:var(--lime);transform:scale(1.15)}
+.lobbylist{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 4px}
+.lobbylist span{padding:8px 12px;border-radius:12px;background:var(--track);font-size:14px;font-weight:600}
+.lobbylist span.host{box-shadow:inset 0 0 0 2px var(--lime)}
+.lobbylist span.me{background:var(--ink);color:var(--bg)}
+.scoreline{margin:0 auto 18px;padding:10px 14px;border-radius:14px;background:var(--surface);font-size:15px;font-weight:600;text-align:center;box-shadow:0 0 0 1px var(--line)}
+.seg button:disabled{opacity:.4}
 .tv-verdict{font-size:clamp(44px,14vw,72px);line-height:1;text-align:center}
 .tv-verdict.good{color:var(--ink)}
 .tv-verdict.bad{color:var(--amber)}
@@ -285,7 +323,13 @@ summary .badge{margin-right:auto}
   <header class="top">
     <img src="icon-192.png" alt="">
     <h1>SwingLab</h1>
+    <span class="coins" id="coinChip" aria-label="Munten">0</span>
   </header>
+  <div class="sportbar" id="sportBar" role="group" aria-label="Sport">
+    <button type="button" class="sp-padel" data-sport="padel">Padel</button>
+    <button type="button" class="sp-tennis" data-sport="tennis">Tennis</button>
+    <button type="button" class="sp-pickleball" data-sport="pickleball">Pickleball</button>
+  </div>
 
   <div class="update" id="updateBar" role="status" hidden>
     <p>Er is een nieuwe versie beschikbaar, klik op de knop hiernaast om hem te activeren!</p>
@@ -309,17 +353,15 @@ summary .badge{margin-right:auto}
     Speel op tv
   </button>
 
+  <div class="cards2">
+    <button type="button" class="card" id="cardRank"><span class="c-lbl">Competitie</span><b id="rankBig">–</b><span id="rankSub">Nog geen ranking</span></button>
+    <button type="button" class="card" id="cardPlayer"><span class="c-lbl">Jouw speler</span><span id="playerSub">Aanpassen</span><canvas id="avatarMini" width="156" height="220" aria-hidden="true"></canvas></button>
+  </div>
+
   <div class="facts">
     <div><b id="factStreak">0</b><span id="factStreakLbl">dagen op rij</span></div>
     <div><b id="factBest">0</b><span id="factBestLbl">km/u record padel</span></div>
     <div><b id="factTotal">0</b><span>slagen in totaal</span></div>
-  </div>
-
-  <h3 id="lblSport">Sport</h3>
-  <div class="seg" role="group" aria-labelledby="lblSport" id="segSport">
-    <button type="button" data-sport="padel">Padel</button>
-    <button type="button" data-sport="tennis">Tennis</button>
-    <button type="button" data-sport="pickleball">Pickleball</button>
   </div>
 
   <h3 id="lblMode">Modus</h3>
@@ -411,7 +453,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 16</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 18</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -581,17 +623,41 @@ summary .badge{margin-right:auto}
   </div>
 
   <div class="tv-step" id="tvSettings" hidden>
+    <div class="sportbadge" id="tvSportBadge">Padel</div>
     <div class="tv-big">Verbonden met je tv</div>
     <p class="tv-sub">Kies wat je wil spelen. Je ziet het meteen op je tv.</p>
-    <div class="tv-lbl" id="lblTvSport">Sport</div>
-    <div class="seg" role="group" aria-labelledby="lblTvSport" id="segTvSport"><button type="button" data-sport="padel">Padel</button><button type="button" data-sport="tennis">Tennis</button><button type="button" data-sport="pickleball">Pickleball</button></div>
+    <div class="lobbylist" id="tvLobby"></div>
+    <div class="tv-lbl" id="lblPlayMode">Speelvorm</div>
+    <div class="seg" role="group" aria-labelledby="lblPlayMode" id="segPlayMode"><button type="button" data-pm="train">Training</button><button type="button" data-pm="match">Wedstrijd</button><button type="button" data-pm="ranked">Ranking</button></div>
+    <div id="rankOpts" hidden><p class="sheet-p" id="rankOptsTxt" style="margin-top:14px"></p></div>
+    <div id="trainOpts">
     <div class="tv-lbl" id="lblDrill">Training</div>
     <div class="chips" role="group" aria-labelledby="lblDrill" id="tvDrills"></div>
+    </div>
+    <div id="matchOpts" hidden>
+      <div id="fmtBox"><div class="tv-lbl" id="lblFmt">Tennis</div>
+        <div class="seg" role="group" aria-labelledby="lblFmt" id="segTennisFmt"><button type="button" data-fmt="enkel">Enkel</button><button type="button" data-fmt="dubbel">Dubbel</button></div></div>
+      <div id="teamBox"><div class="tv-lbl" id="lblTeam">Jullie twee</div>
+        <div class="seg" role="group" aria-labelledby="lblTeam" id="segTeam"><button type="button" data-team="samen">Samen</button><button type="button" data-team="tegen">Tegen elkaar</button></div></div>
+      <div class="tv-lbl" id="lblBots">Niveau van de bots</div>
+      <div class="seg" role="group" aria-labelledby="lblBots" id="segBots"><button type="button" data-bots="makkelijk">Makkelijk</button><button type="button" data-bots="normaal">Normaal</button><button type="button" data-bots="moeilijk">Moeilijk</button></div>
+      <div class="tv-lbl" id="lblLen">Lengte</div>
+      <div class="seg" role="group" aria-labelledby="lblLen" id="segLen"><button type="button" data-len="kort">Kort</button><button type="button" data-len="middel">Middel</button><button type="button" data-len="lang">Lang</button></div>
+      <p class="tv-sub small" id="lineupHint"></p>
+    </div>
     <div class="tv-lbl" id="lblHand">Ik speel met</div>
     <div class="seg" role="group" aria-labelledby="lblHand" id="segHand"><button type="button" data-hand="left">Links</button><button type="button" data-hand="right">Rechts</button></div>
     <div class="tv-lbl" id="lblLevel">Tempo</div>
-    <div class="seg" role="group" aria-labelledby="lblLevel" id="segLevel"><button type="button" data-level="rustig">Rustig</button><button type="button" data-level="normaal">Normaal</button><button type="button" data-level="snel">Snel</button></div>
+    <div class="seg" role="group" aria-labelledby="lblLevel" id="segLevel" data-train="1"><button type="button" data-level="rustig">Rustig</button><button type="button" data-level="normaal">Normaal</button><button type="button" data-level="snel">Snel</button></div>
     <button type="button" class="start" id="tvSettingsOk">Verder</button>
+  </div>
+
+  <div class="tv-step" id="tvWait" hidden>
+    <div class="tv-big">Lobby</div>
+    <div class="lobbylist" id="tvWaitList"></div>
+    <p class="tv-sub" id="tvWaitMsg">De eerste speler kiest de sport en de speelvorm.</p>
+    <div class="tv-lbl" id="lblHand2">Ik speel met</div>
+    <div class="seg" role="group" aria-labelledby="lblHand2" id="segHand2"><button type="button" data-hand="left">Links</button><button type="button" data-hand="right">Rechts</button></div>
   </div>
 
   <div class="tv-step" id="tvBusy" hidden><div class="tv-big">Verbinden…</div><p class="tv-sub">Even geduld.</p></div>
@@ -614,6 +680,7 @@ summary .badge{margin-right:auto}
   </div>
 
   <div class="tv-step" id="tvPlay" hidden>
+    <div class="scoreline" id="tvScore" hidden></div>
     <div class="tv-verdict num" id="tvVerdict">Kijk naar je tv</div>
     <p class="tv-sub" id="tvSub">Het scherm is je forehandkant, de achterkant je backhand.</p>
     <p class="tv-sub small">Mist het een beetje? Neem de wachthouding aan en tik 3 keer snel op het scherm.</p>
@@ -626,6 +693,36 @@ summary .badge{margin-right:auto}
 
   <button type="button" class="hold" id="tvStop" hidden><i></i><span>Houd ingedrukt om te stoppen</span></button>
 </section>
+
+<!-- ============ COMPETITIE ============ -->
+<div class="backdrop" id="rankSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rkTitle">
+    <div class="sportbadge" id="rkSport">Padel</div>
+    <h2 id="rkTitle">Competitie</h2>
+    <div class="rankhead"><b id="rkRank">–</b><div><div id="rkPts" style="font-weight:700"></div><div class="pf-small" id="rkRecord"></div></div></div>
+    <p class="sheet-p" id="rkNext"></p>
+    <button type="button" class="start" id="rkPlay">Speel deze wedstrijd op tv</button>
+    <h3>Ranking</h3>
+    <div id="rkList"></div>
+    <button type="button" class="textbtn pf-center" id="rkClose">Sluiten</button>
+  </div>
+</div>
+
+<!-- ============ JOUW SPELER ============ -->
+<div class="backdrop" id="avatarSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="avTitle">
+    <div class="sportbadge" id="avSport">Padel</div>
+    <h2 id="avTitle">Jouw speler</h2>
+    <canvas class="avbig" id="avatarBig" width="360" height="480" aria-hidden="true"></canvas>
+    <p class="sheet-p" style="text-align:center">Je hebt <b id="avCoins">0</b> munten. Verdien er meer met goede slagen, gewonnen wedstrijden en de competitie.</p>
+    <div class="seg" role="group" aria-label="Onderdeel" id="avCats" style="overflow-x:auto">
+      <button type="button" data-cat="skin">Huid</button><button type="button" data-cat="hair">Haar</button><button type="button" data-cat="hairCol">Kleur</button>
+      <button type="button" data-cat="shirt">Shirt</button><button type="button" data-cat="shorts">Broek</button><button type="button" data-cat="shoes">Schoen</button><button type="button" data-cat="extra">Extra</button>
+    </div>
+    <div class="items" id="avItems"></div>
+    <button type="button" class="start" id="avClose" style="margin-top:18px">Klaar</button>
+  </div>
+</div>
 
 <!-- ============ IPHONE: BEGINSCHERM ============ -->
 <div class="backdrop" id="installSheet" hidden>
@@ -716,12 +813,15 @@ function clone(o) { return JSON.parse(JSON.stringify(o)); }
 function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
 
 var DEFAULTS = {
-  settings: { sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, hand: 'right', level: 'normaal', drills: { padel: 'basis', tennis: 'basis', pickleball: 'basis' }, thresholds: clone(DEFAULT_THRESHOLDS) },
+  settings: { coins: 0, owned: [], avatars: {}, career: {}, sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, hand: 'right', level: 'normaal', drills: { padel: 'basis', tennis: 'basis', pickleball: 'basis' }, match: { mode: 'train', team: 'samen', bots: 'normaal', length: 'kort', tennis: 'enkel' }, thresholds: clone(DEFAULT_THRESHOLDS) },
   meta: { settingsAt: 0 },
   stats: { total: 0, hits: 0, timeMs: 0, perSport: { padel: 0, tennis: 0, pickleball: 0 }, best: { padel: 0, tennis: 0, pickleball: 0 }, days: {}, sessions: [] }
 };
 
 /* Bewaarde waarden winnen altijd; standaardwaarden vullen alleen aan wat ontbreekt. */
+function defaultAvatar(sp) {
+  return { skin: sp === 'tennis' ? 's1' : sp === 'pickleball' ? 's2' : 's0', hair: sp === 'tennis' ? 'staart' : 'kort', hairCol: 'bruin', shirt: 'sport', shorts: 'zwart', shoes: 'wit', extra: sp === 'tennis' ? 'zweetband' : 'geen' };
+}
 function mergeDefaults(def, saved) {
   if (!isObj(saved)) return clone(def);
   var out = {}, k;
@@ -744,6 +844,13 @@ function load() {
   if (!SPORTS[d.settings.sport]) d.settings.sport = 'padel';
   if (d.settings.mode !== 'power' && d.settings.mode !== 'control') d.settings.mode = 'power';
   if (d.settings.hand !== 'left') d.settings.hand = 'right';
+  ['padel', 'tennis', 'pickleball'].forEach(function (sp) {
+    if (!isObj(d.settings.avatars[sp])) d.settings.avatars[sp] = defaultAvatar(sp);
+    if (!isObj(d.settings.career[sp])) d.settings.career[sp] = { pts: 0, w: 0, l: 0, best: 0, next: 0 };
+  });
+  if (!Array.isArray(d.settings.owned)) d.settings.owned = [];
+  if (typeof d.settings.coins !== 'number') d.settings.coins = 0;
+  if (!isObj(d.settings.match)) d.settings.match = { mode: 'train', team: 'samen', bots: 'normaal', length: 'kort', tennis: 'enkel' };
   if (!isObj(d.settings.drills)) d.settings.drills = { padel: 'basis', tennis: 'basis', pickleball: 'basis' };
   if (['rustig', 'normaal', 'snel'].indexOf(d.settings.level) < 0) d.settings.level = 'normaal';
   cleanStats(d.stats);
@@ -912,7 +1019,9 @@ function renderHome() {
   $('factBestLbl').textContent = 'km/u record ' + SPORTS[s.sport].name.toLowerCase();
   $('factTotal').textContent = fmt(VS().total);
 
-  Array.prototype.forEach.call(document.querySelectorAll('#segSport button'), function (b) {
+  document.body.dataset.sport = s.sport;
+  renderRankCard();
+  Array.prototype.forEach.call(document.querySelectorAll('#sportBar button'), function (b) {
     b.setAttribute('aria-pressed', String(b.getAttribute('data-sport') === s.sport));
   });
   Array.prototype.forEach.call(document.querySelectorAll('#segMode button'), function (b) {
@@ -1155,7 +1264,7 @@ function commitSwing(ev) {
   if (!st.days[k]) st.days[k] = { s: 0, h: 0 };
   st.days[k].s++;
   if (peak > (st.best[T.sport] || 0)) st.best[T.sport] = peak;
-  if (ev.result === 'hit') { T.hits++; st.hits++; st.days[k].h++; }
+  if (ev.result === 'hit') { T.hits++; st.hits++; st.days[k].h++; data.settings.coins = (data.settings.coins || 0) + 1; }
   $('tSwings').textContent = T.swings;
   $('tHits').textContent = T.hits;
   $('tBest').textContent = fmt(st.best[T.sport]);
@@ -1268,23 +1377,67 @@ function drillChips(el, enabled) {
   }).join('');
 }
 function renderPlayDrills() {
-  var ok = !!TVS && (TVS.tvPhase === 'done' || TVS.tvPhase === 'connected');
-  $('tvNext').hidden = !(TVS && TVS.tvPhase === 'done' && TVS.mode === 'ready');
+  var ok = !!TVS && (TVS.tvPhase === 'done' || TVS.tvPhase === 'connected'), match = playMode() !== 'train';
+  $('tvNext').hidden = !(TVS && TVS.tvPhase === 'done' && TVS.mode === 'ready' && TVS.isHost !== false);
+  $('tvNext').textContent = match ? 'Wachthouding aannemen en tikken voor een nieuwe wedstrijd' : 'Wachthouding aannemen en tikken voor de volgende ronde';
+  $('lblNextDrill').hidden = match; $('tvDrillsPlay').hidden = match; $('tvDrillHint').hidden = match;
   drillChips($('tvDrillsPlay'), ok);
   $('tvDrillHint').textContent = ok ? 'Tik een training aan: de volgende ronde begint ermee.' : 'Kiezen kan zodra de ronde voorbij is.';
 }
 function renderTvSetup() {
   $('tvUrl').textContent = tvPageUrl().replace(/^https?:\/\//, '');
 }
+function lobbyCount() { return TVS && TVS.lobby ? TVS.lobby.length : 1; }
+function playMode() { var m = data.settings.match.mode; return lobbyCount() > 1 ? 'match' : m; }
+function lobbyHTML() {
+  return (TVS && TVS.lobby ? TVS.lobby : []).map(function (q) {
+    return '<span class="' + (q.host ? 'host' : '') + (TVS && q.id === TVS.you ? ' me' : '') + '">' + esc(q.name) + (TVS && q.id === TVS.you ? ' (jij)' : '') + '</span>';
+  }).join('');
+}
+/* wie speelt met wie: dezelfde verdeling als op de tv */
+function lineupText() {
+  var mt = data.settings.match, n = lobbyCount(), names = (TVS && TVS.lobby ? TVS.lobby : [{ name: 'Jij' }]).map(function (q) { return q.name; });
+  var dbl = data.settings.sport !== 'tennis' || mt.tennis === 'dubbel' || n > 2, A, B;
+  if (!dbl) { A = [names[0]]; B = [n > 1 ? names[1] : 'Bot']; }
+  else if (n <= 1) { A = [names[0], 'Bot']; B = ['Bot', 'Bot']; }
+  else if (n === 2) { if (mt.team === 'tegen') { A = [names[0], 'Bot']; B = [names[1], 'Bot']; } else { A = [names[0], names[1]]; B = ['Bot', 'Bot']; } }
+  else if (n === 3) { A = [names[0], names[1]]; B = [names[2], 'Bot']; }
+  else { A = [names[0], names[1]]; B = [names[2], names[3]]; }
+  return A.join(' & ') + ' tegen ' + B.join(' & ') + '.';
+}
+function renderWait() {
+  $('tvWaitList').innerHTML = lobbyHTML();
+  var hp = (TVS && TVS.lobby || []).filter(function (q) { return q.host; })[0];
+  $('tvWaitMsg').textContent = (hp ? hp.name : 'De eerste speler') + ' kiest de sport en de speelvorm. Daarna neem je de wachthouding aan.';
+  Array.prototype.forEach.call(document.querySelectorAll('#segHand2 button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-hand') === data.settings.hand)); });
+}
 function renderTvSettings() {
-  var s = data.settings;
-  Array.prototype.forEach.call(document.querySelectorAll('#segTvSport button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-sport') === s.sport)); });
+  var s = data.settings, mt = s.match, n = lobbyCount(), pm = playMode();
+  $('tvLobby').innerHTML = n > 1 ? lobbyHTML() : '';
+  Array.prototype.forEach.call(document.querySelectorAll('#segPlayMode button'), function (b) { var v = b.getAttribute('data-pm'); b.setAttribute('aria-pressed', String(v === pm)); b.disabled = (v === 'train' || v === 'ranked') && n > 1; });
+  $('trainOpts').hidden = pm !== 'train'; $('matchOpts').hidden = pm !== 'match'; $('rankOpts').hidden = pm !== 'ranked';
+  $('lblLevel').hidden = pm !== 'train'; $('segLevel').hidden = pm !== 'train';
+  if (pm === 'ranked') {
+    var o = nextOpponent(s.sport), r = myRank(s.sport);
+    $('rankOptsTxt').textContent = 'Jij' + (r ? ' (nummer ' + r + ')' : ' (nog geen ranking)') + ' tegen ' + o.name + ' (' + o.cc + ', nummer ' + o.rank + ')' +
+      (s.sport !== 'tennis' ? ', met een bot als partner tegen ' + o.name + ' en ' + o.partner : '') + '. Winst: +' + o.win + ' punten.';
+  }
+  $('fmtBox').hidden = s.sport !== 'tennis';
+  if (n > 2) mt.tennis = 'dubbel';
+  Array.prototype.forEach.call(document.querySelectorAll('#segTennisFmt button'), function (b) { var v = b.getAttribute('data-fmt'); b.setAttribute('aria-pressed', String(v === mt.tennis)); b.disabled = v === 'enkel' && n > 2; });
+  $('teamBox').hidden = !(n === 2 && (s.sport !== 'tennis' || mt.tennis === 'dubbel'));
+  Array.prototype.forEach.call(document.querySelectorAll('#segTeam button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-team') === mt.team)); });
+  Array.prototype.forEach.call(document.querySelectorAll('#segBots button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-bots') === mt.bots)); });
+  Array.prototype.forEach.call(document.querySelectorAll('#segLen button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-len') === mt.length)); });
+  var lenTxt = s.sport === 'pickleball' ? ({ kort: 'tot 5 punten', middel: 'tot 11 punten', lang: 'tot 15 punten' })[mt.length] : ({ kort: '1 game', middel: '3 games', lang: '6 games' })[mt.length];
+  $('lineupHint').textContent = lineupText() + ' Je speelt ' + lenTxt + '.';
+  $('tvSportBadge').textContent = SPORTS[s.sport].name;
   drillChips($('tvDrills'), true);
   Array.prototype.forEach.call(document.querySelectorAll('#segHand button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-hand') === s.hand)); });
   Array.prototype.forEach.call(document.querySelectorAll('#segLevel button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-level') === s.level)); });
 }
 function tvStep(n) {
-  ['Setup', 'Busy', 'Settings', 'Ready', 'Calib', 'Play'].forEach(function (k) { $('tv' + k).hidden = k.toLowerCase() !== n; });
+  ['Setup', 'Busy', 'Settings', 'Wait', 'Ready', 'Calib', 'Play'].forEach(function (k) { $('tv' + k).hidden = k.toLowerCase() !== n; });
   var live = n === 'ready' || n === 'calib' || n === 'play';
   $('tvStop').hidden = !live;
   $('tvClose').hidden = live;
@@ -1353,7 +1506,7 @@ function tvStartSession(code) {
     c.on('open', function () {
       if (TVS !== me) return;
       clearTimeout(me.timeout);
-      tvSend(Object.assign({ type: 'hello', v: 1, sport: s.sport, hand: s.hand, level: s.level, drill: curTvDrill() }, tvPlayerInfo()));
+      tvSend(tvConfigMsg('hello'));
       window.addEventListener('devicemotion', tvOnMotion);
       window.addEventListener('deviceorientation', tvOnOrient);
       if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(function (w) { if (TVS === me) me.wake = w; else w.release(); }, function () {});
@@ -1451,8 +1604,15 @@ function tvQuickRecal() {
   toast('Opnieuw gekalibreerd.');
   tvSend({ type: 'recal' });
 }
+function tvConfigMsg(type) {
+  var s = data.settings, mt = s.match;
+  return Object.assign({ type: type || 'config', sport: s.sport, hand: s.hand, level: s.level, drill: curTvDrill(),
+    mode: playMode(), team: mt.team, bots: mt.bots, length: playMode() === 'ranked' ? 'middel' : mt.length, tennis: lobbyCount() > 2 ? 'dubbel' : mt.tennis,
+    opp: playMode() === 'ranked' ? nextOpponent(s.sport) : null, av: s.avatars[s.sport] }, tvPlayerInfo());
+}
 function tvSendConfig() {
-  tvSend(Object.assign({ type: 'config', sport: data.settings.sport, hand: data.settings.hand, level: data.settings.level, drill: curTvDrill() }, tvPlayerInfo()));
+  if (TVS && TVS.isHost === false) { tvSend(Object.assign({ type: 'hello', hand: data.settings.hand, av: data.settings.avatars[data.settings.sport] }, tvPlayerInfo())); return; }
+  tvSend(tvConfigMsg('config'));
 }
 function tvSettingsChanged() {
   save(); renderTvSettings();
@@ -1463,7 +1623,9 @@ function tvGoPlay() {
   renderPlayDrills();
   $('tvVerdict').textContent = 'Kijk naar je tv'; $('tvVerdict').className = 'tv-verdict num';
   $('tvSub').textContent = 'Begin elke slag vanuit de wachthouding.';
-  tvSend(Object.assign({ type: 'config', sport: data.settings.sport, hand: data.settings.hand, level: data.settings.level, drill: curTvDrill() }, tvPlayerInfo()));
+  $('tvScore').hidden = playMode() === 'train';
+  if (playMode() !== 'train') { $('tvVerdict').textContent = 'Klaar'; $('tvSub').textContent = 'De wedstrijd start zodra iedereen klaar is. Begin elke slag vanuit de wachthouding.'; }
+  tvSendConfig();
   tvSend({ type: 'ready' });
   buzz([30, 40, 30]);
 }
@@ -1659,6 +1821,29 @@ function tvCalibCommit(ev) {
 
 function tvOnData(m) {
   if (!TVS || !m || typeof m !== 'object') return;
+  if (m.type === 'lobby') {
+    TVS.lobby = Array.isArray(m.players) ? m.players : []; TVS.isHost = !!m.host; TVS.you = m.you;
+    if (TVS.step === 'settings' && !TVS.isHost) { renderWait(); tvStep('wait'); }
+    else if (TVS.step === 'wait' && TVS.isHost) { renderTvSettings(); tvStep('settings'); }
+    else if (TVS.step === 'settings') renderTvSettings();
+    else if (TVS.step === 'wait') renderWait();
+    return;
+  }
+  if (m.type === 'goReady') { if (TVS.isHost === false && (TVS.step === 'wait' || TVS.step === 'play')) tvBeginReady(); return; }
+  if (m.type === 'full') { tvFail(m.reason === 'vol' ? 'Deze tv zit vol: er spelen al 4 spelers.' : 'Op deze tv wordt nu gespeeld. Wacht tot de ronde voorbij is en probeer opnieuw.'); return; }
+  if (m.type === 'score') { $('tvScore').hidden = false; $('tvScore').textContent = m.text; return; }
+  if (m.type === 'matchEnd') {
+    $('tvVerdict').textContent = m.won ? 'Gewonnen!' : 'Verloren';
+    $('tvVerdict').className = 'tv-verdict num ' + (m.won ? 'good' : 'bad');
+    $('tvSub').textContent = m.text + (m.st ? '. Jij: ' + m.st.hits + ' van ' + m.st.swings + ' slagen goed, ' + m.st.perfect + ' perfect.' : '');
+    if (m.ranked) {
+      var rr = applyRankResult(data.settings.sport, m.won);
+      $('tvSub').textContent += ' Ranking: ' + (rr.after ? '#' + rr.after : 'nog geen') + ' (' + (rr.delta >= 0 ? '+' : '') + rr.delta + ' punten).';
+      tvSendConfig();
+    } else if (m.won) addCoins(15, 'wedstrijd gewonnen');
+    buzz(m.won ? [40, 60, 40, 60, 80] : 200);
+    return;
+  }
   if (m.type === 'phase') { TVS.tvPhase = m.phase; if (TVS.step === 'play') renderPlayDrills(); return; }
   if (m.type === 'outcome') { if (m.text) $('tvSub').textContent = m.text + (m.points ? ', +' + m.points : ''); return; }
   if (m.type === 'result') {
@@ -1683,11 +1868,186 @@ function tvCommit(m) {
   st.days[k].s++;
   if (m.hit) {
     var v = Math.round(+m.speed || 0);
-    TVS.hits++; st.hits++; st.days[k].h++;
+    TVS.hits++; st.hits++; st.days[k].h++; data.settings.coins = (data.settings.coins || 0) + 1;
     TVS.sumPeak += v; if (v > TVS.peak) TVS.peak = v;
     if (v > (st.best[sp] || 0)) st.best[sp] = v;
   }
   save();
+}
+
+/* ---------- Munten, competitie en je speler ---------- */
+var SPORT_COL = { padel: '#2f7bff', tennis: '#ff8a2a', pickleball: '#2fbf5b' };
+function addCoins(n, why) {
+  if (!n) return;
+  data.settings.coins = Math.max(0, (data.settings.coins || 0) + n); save();
+  $('coinChip').textContent = fmt(data.settings.coins);
+  if (why) toast('+' + n + ' munten: ' + why);
+}
+/* Een ranglijst per sport met verzonnen spelers, zoals de echte toptoernooien: #1 heeft zo'n 12.500 punten */
+var RANK_N = 300, rankCache = {};
+function rankPool(sp) {
+  if (rankCache[sp]) return rankCache[sp];
+  var fn = ['Lucas', 'Mateo', 'Hugo', 'Diego', 'Bruno', 'Pablo', 'Iker', 'Thiago', 'Nico', 'Leo', 'Marco', 'Luca', 'Elias', 'Noah', 'Jules', 'Milan', 'Sam', 'Tom', 'Ruben', 'Sven', 'Lars', 'Emil', 'Felix', 'Oscar', 'Sara', 'Lena', 'Emma', 'Nora', 'Iris', 'Marta', 'Paula', 'Julia', 'Elena', 'Lotte', 'Ines', 'Mila', 'Yara', 'Zoe'];
+  var ln = ['Vandersteen', 'Ortega', 'Delacroix', 'Hartmann', 'Kowalczyk', 'Bianchi', 'Lindberg', 'Moreau', 'Okafor', 'Tanaka', 'Silva', 'Ferreira', 'Castell', 'Duval', 'Brennan', 'Varga', 'Holm', 'Navarro', 'Ibarra', 'Quintero', 'Maes', 'Claes', 'Wouters', 'Dupont', 'Keller', 'Romano', 'Esposito', 'Sato', 'Petrov', 'Haugen', 'Lagos', 'Serrano', 'Montero', 'Aguado', 'Vidal', 'Beaumont'];
+  var cc = ['BEL', 'ESP', 'ARG', 'FRA', 'ITA', 'NED', 'GER', 'SWE', 'POR', 'USA', 'MEX', 'BRA', 'GBR', 'AUS', 'JPN', 'CAN'];
+  var seed = { padel: 11, tennis: 23, pickleball: 37 }[sp] || 5, rnd = function () { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  var list = [];
+  for (var r = 1; r <= RANK_N; r++) list.push({ rank: r, name: fn[Math.floor(rnd() * fn.length)] + ' ' + ln[Math.floor(rnd() * ln.length)], cc: cc[Math.floor(rnd() * cc.length)], pts: Math.round(12500 * Math.pow(0.975, r - 1)) });
+  return (rankCache[sp] = list);
+}
+function myRank(sp) {
+  var c = data.settings.career[sp], pool = rankPool(sp);
+  if (!c.pts) return 0;
+  var n = 1; for (var i = 0; i < pool.length; i++) if (pool[i].pts > c.pts) n++;
+  return n;
+}
+function nextOpponent(sp) {
+  var c = data.settings.career[sp], pool = rankPool(sp), mr = myRank(sp) || RANK_N + 1;
+  if (!c.next || c.next >= mr || c.next < mr - 30) c.next = Math.max(1, Math.min(RANK_N, mr - (3 + Math.floor(Math.random() * 14))));
+  var o = pool[c.next - 1], partner = pool[Math.min(RANK_N - 1, o.rank + 3)];
+  var lvl = 1 - (o.rank - 1) / (RANK_N - 1);
+  return { name: o.name, cc: o.cc, rank: o.rank, pts: o.pts, lvl: Math.round(lvl * 100) / 100, partner: partner.name, win: rankGain(sp, o), loss: rankLoss(sp) };
+}
+function rankGain(sp, o) { var mr = myRank(sp) || RANK_N + 1; return Math.round(25 + o.pts * 0.04 + Math.max(0, mr - o.rank) * 1.5); }
+function rankLoss(sp) { var c = data.settings.career[sp]; return Math.min(c.pts, Math.round(5 + c.pts * 0.01)); }
+function applyRankResult(sp, won) {
+  var c = data.settings.career[sp], o = nextOpponent(sp), before = myRank(sp);
+  if (won) { c.pts += o.win; c.w++; addCoins(30 + Math.round(o.lvl * 40)); }
+  else { c.pts = Math.max(0, c.pts - o.loss); c.l++; addCoins(5); }
+  c.next = 0;
+  var after = myRank(sp);
+  if (after && (!c.best || after < c.best)) c.best = after;
+  save();
+  return { before: before, after: after, delta: won ? o.win : -o.loss };
+}
+function renderRankCard() {
+  var sp = data.settings.sport, r = myRank(sp), c = data.settings.career[sp];
+  $('rankBig').textContent = r ? '#' + r : '–';
+  $('rankSub').textContent = r ? fmt(c.pts) + ' punten, ' + c.w + ' gewonnen' : 'Win je eerste wedstrijd';
+  $('coinChip').textContent = fmt(data.settings.coins || 0);
+  drawAvatar($('avatarMini'), data.settings.avatars[sp], sp);
+}
+function openRank() {
+  var sp = data.settings.sport, r = myRank(sp), c = data.settings.career[sp], o = nextOpponent(sp), pool = rankPool(sp);
+  $('rkSport').textContent = SPORTS[sp].name; $('rkRank').textContent = r ? '#' + r : '–';
+  $('rkPts').textContent = r ? fmt(c.pts) + ' rankingpunten' : 'Nog geen ranking';
+  $('rkRecord').textContent = c.w + ' gewonnen, ' + c.l + ' verloren' + (c.best ? ', beste ranking #' + c.best : '');
+  $('rkNext').textContent = 'Volgende tegenstander: ' + o.name + ' (' + o.cc + '), nummer ' + o.rank + ' met ' + fmt(o.pts) + ' punten' +
+    (sp !== 'tennis' ? ', samen met ' + o.partner : '') + '. Winst levert +' + o.win + ' punten op' + (o.loss ? ', verlies kost ' + o.loss : '') + '.';
+  var rows = [], show = {};
+  for (var i = 0; i < 5; i++) show[i] = true;
+  var mi = r ? r - 1 : RANK_N; for (var j = mi - 3; j <= mi + 3; j++) if (j >= 0 && j < RANK_N) show[j] = true;
+  var last = -1, mine = r ? r - 1 : -1;
+  Object.keys(show).map(Number).sort(function (a, b) { return a - b; }).forEach(function (i2) {
+    if (last >= 0 && i2 > last + 1) rows.push('<div class="rankrow"><span class="r">…</span><span></span><span></span></div>');
+    if (i2 === mine) rows.push('<div class="rankrow me"><span class="r">' + r + '</span><span class="p">' + esc(ME && ME.profile ? ME.profile.display_name : 'Jij') + '</span><span>' + fmt(c.pts) + '</span></div>');
+    var q = pool[i2]; rows.push('<div class="rankrow"><span class="r">' + (i2 >= mine && mine >= 0 ? q.rank + 1 : q.rank) + '</span><span class="p">' + esc(q.name) + ' <span class="pf-small">' + q.cc + '</span></span><span>' + fmt(q.pts) + '</span></div>');
+    last = i2;
+  });
+  if (!r) rows.push('<div class="rankrow me"><span class="r">–</span><span class="p">Jij</span><span>0</span></div>');
+  $('rkList').innerHTML = rows.join('');
+  $('rankSheet').hidden = false;
+}
+
+/* Jouw speler: per sport een eigen figuurtje, met kleren die je vrijspeelt */
+var AV = {
+  skin: [['s0', 'Licht', 0, '#f1c9a5'], ['s1', 'Getint', 0, '#e0ac85'], ['s2', 'Midden', 0, '#c68863'], ['s3', 'Bruin', 0, '#8d5a3b'], ['s4', 'Donker', 0, '#5c3a26'], ['s5', 'Bleek', 0, '#f6d7bd']],
+  hair: [['kort', 'Kort', 0], ['krullen', 'Krullen', 0], ['staart', 'Staart', 0], ['kaal', 'Kaal', 0], ['knot', 'Knot', 40], ['lang', 'Lang', 60], ['hanenkam', 'Hanenkam', 150]],
+  hairCol: [['zwart', 'Zwart', 0, '#1d1a17'], ['bruin', 'Bruin', 0, '#5a3a22'], ['blond', 'Blond', 0, '#d8b25a'], ['rood', 'Rood', 0, '#a8452a'], ['grijs', 'Grijs', 0, '#9a9a9a'], ['blauw', 'Blauw', 80, '#2f7bff'], ['roze', 'Roze', 80, '#ff5aa8']],
+  shirt: [['sport', 'Sportkleur', 0], ['wit', 'Wit', 0, '#f4f4f4'], ['zwart', 'Zwart', 0, '#1b1d22'], ['streep', 'Strepen', 50], ['pro', 'Pro', 120], ['camo', 'Camo', 180], ['goud', 'Goud', 300], ['regenboog', 'Regenboog', 400]],
+  shorts: [['zwart', 'Zwart', 0, '#16181c'], ['wit', 'Wit', 0, '#f2f2f2'], ['navy', 'Marine', 0, '#1d2a4a'], ['rood', 'Rood', 40, '#c43b3b'], ['camo', 'Camo', 150, '#4a5a32']],
+  shoes: [['wit', 'Wit', 0, '#f4f4f4'], ['zwart', 'Zwart', 0, '#111111'], ['neon', 'Neon', 90, '#c6ff3a'], ['goud', 'Goud', 250, '#e6b53a']],
+  extra: [['geen', 'Niets', 0], ['zweetband', 'Zweetband', 40], ['polsband', 'Polsbandjes', 30], ['pet', 'Pet', 60], ['zonnebril', 'Zonnebril', 120], ['medaille', 'Top 10', 0, null, 10], ['kroon', 'Nummer 1', 0, null, 1]]
+};
+var avCat = 'skin';
+function avItem(cat, id) { var l = AV[cat]; for (var i = 0; i < l.length; i++) if (l[i][0] === id) return l[i]; return l[0]; }
+function avOwned(cat, it) {
+  if (it[4]) { var c = data.settings.career[data.settings.sport]; return !!(c.best && c.best <= it[4]); }
+  return !it[2] || data.settings.owned.indexOf(cat + ':' + it[0]) >= 0;
+}
+/* tekent het figuurtje met racket van de sport (ook gebruikt op de tv in een andere vorm) */
+function drawAvatar(cv, av, sp) {
+  if (!cv || !av) return;
+  var c = cv.getContext('2d'), W2 = cv.width, H2 = cv.height, u = H2 / 24, cx = W2 / 2;
+  c.clearRect(0, 0, W2, H2);
+  var skin = avItem('skin', av.skin)[3], hairC = avItem('hairCol', av.hairCol)[3], sc = SPORT_COL[sp] || '#2f7bff';
+  function shirtFill(x, y, w, hh) {
+    if (av.shirt === 'goud') { var g = c.createLinearGradient(x, y, x + w, y + hh); g.addColorStop(0, '#fff1a8'); g.addColorStop(0.5, '#e6b53a'); g.addColorStop(1, '#a8761a'); return g; }
+    if (av.shirt === 'regenboog') { var g2 = c.createLinearGradient(x, y, x, y + hh); ['#e53b3b', '#ff9a2a', '#ffd93a', '#3ac45a', '#2f7bff', '#8a3ac8'].forEach(function (cl, i) { g2.addColorStop(i / 5, cl); }); return g2; }
+    if (av.shirt === 'camo') return '#4a5a32';
+    if (av.shirt === 'wit' || av.shirt === 'streep') return '#f4f4f4';
+    if (av.shirt === 'zwart') return '#1b1d22';
+    return sc;
+  }
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  // schaduw
+  c.fillStyle = 'rgba(0,0,0,.15)'; c.beginPath(); c.ellipse(cx, H2 - u * 0.8, u * 4, u * 0.7, 0, 0, Math.PI * 2); c.fill();
+  // benen en schoenen
+  c.strokeStyle = skin; c.lineWidth = u * 1.3;
+  c.beginPath(); c.moveTo(cx - u * 1.2, u * 15.5); c.lineTo(cx - u * 1.4, u * 21.6); c.moveTo(cx + u * 1.2, u * 15.5); c.lineTo(cx + u * 1.4, u * 21.6); c.stroke();
+  c.fillStyle = avItem('shoes', av.shoes)[3];
+  c.beginPath(); c.ellipse(cx - u * 1.7, u * 22.3, u * 1.5, u * 0.7, 0, 0, Math.PI * 2); c.ellipse(cx + u * 1.7, u * 22.3, u * 1.5, u * 0.7, 0, 0, Math.PI * 2); c.fill();
+  // broek
+  c.fillStyle = avItem('shorts', av.shorts)[3]; c.beginPath(); c.moveTo(cx - u * 3, u * 13); c.lineTo(cx + u * 3, u * 13); c.lineTo(cx + u * 3.1, u * 17); c.lineTo(cx + u * 0.2, u * 17); c.lineTo(cx, u * 15.4); c.lineTo(cx - u * 0.2, u * 17); c.lineTo(cx - u * 3.1, u * 17); c.closePath(); c.fill();
+  if (av.shorts === 'camo') { c.fillStyle = 'rgba(30,40,20,.5)'; for (var k = 0; k < 6; k++) { c.beginPath(); c.ellipse(cx - u * 2 + (k % 3) * u * 2, u * 14 + Math.floor(k / 3) * u * 1.6, u * 0.8, u * 0.45, k, 0, Math.PI * 2); c.fill(); } }
+  // shirt
+  c.fillStyle = shirtFill(cx - u * 3.4, u * 7, u * 6.8, u * 6.6);
+  c.beginPath(); c.moveTo(cx - u * 3.4, u * 7.4); c.lineTo(cx + u * 3.4, u * 7.4); c.lineTo(cx + u * 3.1, u * 13.4); c.lineTo(cx - u * 3.1, u * 13.4); c.closePath(); c.fill();
+  if (av.shirt === 'streep') { c.fillStyle = sc; for (var s1 = 0; s1 < 3; s1++) c.fillRect(cx - u * 3.3, u * (8.4 + s1 * 1.6), u * 6.6, u * 0.6); }
+  if (av.shirt === 'pro') { c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(cx - u * 3.4, u * 7.4); c.lineTo(cx - u * 1.2, u * 7.4); c.lineTo(cx - u * 3.25, u * 11); c.closePath(); c.fill(); c.beginPath(); c.moveTo(cx + u * 3.4, u * 7.4); c.lineTo(cx + u * 1.2, u * 7.4); c.lineTo(cx + u * 3.25, u * 11); c.closePath(); c.fill(); }
+  if (av.shirt === 'camo') { c.fillStyle = 'rgba(30,45,20,.55)'; for (var k2 = 0; k2 < 8; k2++) { c.beginPath(); c.ellipse(cx - u * 2.4 + (k2 % 4) * u * 1.6, u * 8.5 + Math.floor(k2 / 4) * u * 2.6, u * 0.9, u * 0.5, k2, 0, Math.PI * 2); c.fill(); } }
+  // armen; rechterarm houdt het racket
+  c.strokeStyle = skin; c.lineWidth = u * 1.1;
+  c.beginPath(); c.moveTo(cx - u * 3.3, u * 8); c.lineTo(cx - u * 4.2, u * 13); c.moveTo(cx + u * 3.3, u * 8); c.lineTo(cx + u * 5, u * 11.6); c.stroke();
+  if (av.extra === 'polsband' || av.extra === 'zweetband') { c.strokeStyle = sc; c.lineWidth = u * 1.3; c.beginPath(); c.moveTo(cx + u * 4.6, u * 10.9); c.lineTo(cx + u * 4.85, u * 11.4); c.moveTo(cx - u * 4, u * 12.3); c.lineTo(cx - u * 4.1, u * 12.8); c.stroke(); }
+  // racket van de sport
+  c.save(); c.translate(cx + u * 5.3, u * 11.6); c.rotate(-0.35);
+  c.fillStyle = '#16181c'; c.fillRect(-u * 0.35, -u * 0.2, u * 0.7, u * 3);
+  if (sp === 'tennis') { c.strokeStyle = '#1b1d22'; c.lineWidth = u * 0.45; c.beginPath(); c.ellipse(0, -u * 3.6, u * 1.9, u * 2.6, 0, 0, Math.PI * 2); c.stroke(); c.strokeStyle = 'rgba(200,200,200,.8)'; c.lineWidth = 1; for (var t = -2; t <= 2; t++) { c.beginPath(); c.moveTo(t * u * 0.6, -u * 6); c.lineTo(t * u * 0.6, -u * 1.2); c.stroke(); c.beginPath(); c.moveTo(-u * 1.7, -u * 3.6 + t * u * 0.7); c.lineTo(u * 1.7, -u * 3.6 + t * u * 0.7); c.stroke(); } }
+  else if (sp === 'pickleball') { c.fillStyle = '#1b1d22'; c.beginPath(); c.roundRect ? c.roundRect(-u * 1.6, -u * 5.6, u * 3.2, u * 4.4, u * 0.8) : c.rect(-u * 1.6, -u * 5.6, u * 3.2, u * 4.4); c.fill(); c.strokeStyle = sc; c.lineWidth = u * 0.25; c.stroke(); }
+  else { c.fillStyle = '#1b1d22'; c.beginPath(); c.ellipse(0, -u * 3.4, u * 1.9, u * 2.3, 0, 0, Math.PI * 2); c.fill(); c.fillStyle = 'rgba(255,255,255,.35)'; for (var hx = -1; hx <= 1; hx++) for (var hy = -1; hy <= 1; hy++) { c.beginPath(); c.arc(hx * u * 0.7, -u * 3.4 + hy * u * 0.8, u * 0.18, 0, Math.PI * 2); c.fill(); } c.strokeStyle = sc; c.lineWidth = u * 0.25; c.beginPath(); c.ellipse(0, -u * 3.4, u * 1.9, u * 2.3, 0, 0, Math.PI * 2); c.stroke(); }
+  c.restore();
+  // hoofd en haar
+  c.fillStyle = skin; c.fillRect(cx - u * 0.6, u * 6.2, u * 1.2, u * 1.4);
+  c.beginPath(); c.arc(cx, u * 4.6, u * 2.1, 0, Math.PI * 2); c.fill();
+  c.fillStyle = hairC;
+  if (av.hair === 'kort') { c.beginPath(); c.arc(cx, u * 4.2, u * 2.2, Math.PI * 1.05, Math.PI * 1.95); c.fill(); }
+  else if (av.hair === 'krullen') { for (var k3 = 0; k3 < 9; k3++) { var a3 = Math.PI * (1 + k3 / 8); c.beginPath(); c.arc(cx + Math.cos(a3) * u * 1.9, u * 4.3 + Math.sin(a3) * u * 1.9, u * 0.75, 0, Math.PI * 2); c.fill(); } }
+  else if (av.hair === 'staart') { c.beginPath(); c.arc(cx, u * 4.2, u * 2.2, Math.PI * 1.02, Math.PI * 1.98); c.fill(); c.beginPath(); c.ellipse(cx + u * 2.3, u * 5.4, u * 0.7, u * 1.7, 0.3, 0, Math.PI * 2); c.fill(); }
+  else if (av.hair === 'knot') { c.beginPath(); c.arc(cx, u * 4.2, u * 2.2, Math.PI * 1.02, Math.PI * 1.98); c.fill(); c.beginPath(); c.arc(cx, u * 1.9, u * 0.95, 0, Math.PI * 2); c.fill(); }
+  else if (av.hair === 'lang') { c.beginPath(); c.arc(cx, u * 4.2, u * 2.3, Math.PI, 0); c.fill(); c.fillRect(cx - u * 2.3, u * 4.2, u * 0.9, u * 3.6); c.fillRect(cx + u * 1.4, u * 4.2, u * 0.9, u * 3.6); }
+  else if (av.hair === 'hanenkam') { c.beginPath(); c.moveTo(cx - u * 0.6, u * 3); c.lineTo(cx, u * 0.8); c.lineTo(cx + u * 0.6, u * 3); c.closePath(); c.fill(); }
+  // ogen
+  c.fillStyle = '#1d1a17'; c.beginPath(); c.arc(cx - u * 0.7, u * 4.8, u * 0.2, 0, Math.PI * 2); c.arc(cx + u * 0.7, u * 4.8, u * 0.2, 0, Math.PI * 2); c.fill();
+  // extra's
+  if (av.extra === 'zweetband') { c.fillStyle = sc; c.fillRect(cx - u * 2.15, u * 3.3, u * 4.3, u * 0.6); }
+  if (av.extra === 'pet') { c.fillStyle = sc; c.beginPath(); c.arc(cx, u * 3.9, u * 2.2, Math.PI, 0); c.fill(); c.fillRect(cx, u * 3.6, u * 3, u * 0.55); }
+  if (av.extra === 'zonnebril') { c.fillStyle = '#111'; c.fillRect(cx - u * 1.6, u * 4.4, u * 1.3, u * 0.7); c.fillRect(cx + u * 0.3, u * 4.4, u * 1.3, u * 0.7); c.fillRect(cx - u * 0.3, u * 4.55, u * 0.6, u * 0.2); }
+  if (av.extra === 'kroon') { c.fillStyle = '#f2c230'; c.beginPath(); c.moveTo(cx - u * 1.8, u * 2.6); c.lineTo(cx - u * 1.8, u * 1.2); c.lineTo(cx - u * 0.9, u * 2); c.lineTo(cx, u * 0.8); c.lineTo(cx + u * 0.9, u * 2); c.lineTo(cx + u * 1.8, u * 1.2); c.lineTo(cx + u * 1.8, u * 2.6); c.closePath(); c.fill(); }
+  if (av.extra === 'medaille') { c.strokeStyle = sc; c.lineWidth = u * 0.3; c.beginPath(); c.moveTo(cx - u * 1.2, u * 7.4); c.lineTo(cx, u * 9.6); c.lineTo(cx + u * 1.2, u * 7.4); c.stroke(); c.fillStyle = '#e6b53a'; c.beginPath(); c.arc(cx, u * 10, u * 0.7, 0, Math.PI * 2); c.fill(); }
+}
+function openAvatar() { $('avatarSheet').hidden = false; renderAvatarSheet(); }
+function renderAvatarSheet() {
+  var sp = data.settings.sport, av = data.settings.avatars[sp];
+  $('avSport').textContent = SPORTS[sp].name; $('avCoins').textContent = fmt(data.settings.coins || 0);
+  drawAvatar($('avatarBig'), av, sp);
+  Array.prototype.forEach.call(document.querySelectorAll('#avCats button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-cat') === avCat)); });
+  $('avItems').innerHTML = AV[avCat].map(function (it) {
+    var own = avOwned(avCat, it), col = avCat === 'shirt' && it[0] === 'sport' ? SPORT_COL[sp] : it[3];
+    var price = own ? '' : (it[4] ? '<span class="price">' + (it[4] === 1 ? 'Word nummer 1' : 'Haal de top ' + it[4]) + '</span>' : '<span class="price">' + it[2] + ' munten</span>');
+    return '<button type="button" data-id="' + it[0] + '" aria-pressed="' + (av[avCat] === it[0]) + '" class="' + (own ? '' : 'locked') + '">' + (col ? '<span class="sw" style="background:' + col + '"></span>' : '') + it[1] + price + '</button>';
+  }).join('');
+}
+function avatarPick(id) {
+  var sp = data.settings.sport, it = avItem(avCat, id);
+  if (!avOwned(avCat, it)) {
+    if (it[4]) { toast(it[4] === 1 ? 'Word nummer 1 in de ranking om dit vrij te spelen.' : 'Haal de top ' + it[4] + ' van de ranking om dit vrij te spelen.'); return; }
+    if ((data.settings.coins || 0) < it[2]) { toast('Je hebt nog ' + (it[2] - (data.settings.coins || 0)) + ' munten nodig.'); return; }
+    if (!confirm(it[1] + ' kopen voor ' + it[2] + ' munten?')) return;
+    data.settings.coins -= it[2]; data.settings.owned.push(avCat + ':' + it[0]);
+  }
+  data.settings.avatars[sp][avCat] = id; save();
+  renderAvatarSheet(); renderRankCard();
 }
 
 /* ---------- Accounts (Supabase) ----------
@@ -2139,10 +2499,17 @@ function bind() {
   Array.prototype.forEach.call(document.querySelectorAll('.tabbar button'), function (b) {
     b.addEventListener('click', function () { showView(b.getAttribute('data-view')); });
   });
-  $('segSport').addEventListener('click', function (e) {
+  $('sportBar').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
     data.settings.sport = b.getAttribute('data-sport'); save(); renderHome();
   });
+  $('cardRank').addEventListener('click', openRank);
+  $('cardPlayer').addEventListener('click', openAvatar);
+  $('rkClose').addEventListener('click', function () { $('rankSheet').hidden = true; });
+  $('rkPlay').addEventListener('click', function () { $('rankSheet').hidden = true; data.settings.match.mode = 'ranked'; save(); openTv(); });
+  $('avClose').addEventListener('click', function () { $('avatarSheet').hidden = true; });
+  $('avCats').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; avCat = b.getAttribute('data-cat'); renderAvatarSheet(); });
+  $('avItems').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; avatarPick(b.getAttribute('data-id')); });
   $('segMode').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
     data.settings.mode = b.getAttribute('data-mode'); save(); renderHome();
@@ -2167,9 +2534,15 @@ function bind() {
   $('segHand').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.hand = b.getAttribute('data-hand'); tvSettingsChanged(); });
   $('segLevel').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.level = b.getAttribute('data-level'); tvSettingsChanged(); });
   $('tvRecal').addEventListener('click', function () { if (TVS) tvBeginReady(); });
-  $('segTvSport').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.sport = b.getAttribute('data-sport'); tvSettingsChanged(); });
+
   $('tvDrills').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.drills[data.settings.sport] = b.getAttribute('data-drill'); tvSettingsChanged(); });
   $('tvSettingsOk').addEventListener('click', function () { if (TVS) tvBeginReady(); });
+  function matchSeg(id, attr, key) {
+    $(id).addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b || b.disabled) return; data.settings.match[key] = b.getAttribute(attr); tvSettingsChanged(); });
+  }
+  matchSeg('segPlayMode', 'data-pm', 'mode'); matchSeg('segTennisFmt', 'data-fmt', 'tennis'); matchSeg('segTeam', 'data-team', 'team');
+  matchSeg('segBots', 'data-bots', 'bots'); matchSeg('segLen', 'data-len', 'length');
+  $('segHand2').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.hand = b.getAttribute('data-hand'); save(); renderWait(); tvSendConfig(); });
   $('tvReady').addEventListener('click', tvReadyTap);
   $('tvReady').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tvReadyTap(); } });
   var tapTimes = [];
@@ -2243,7 +2616,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 16, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 18, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 

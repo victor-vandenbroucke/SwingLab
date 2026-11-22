@@ -70,7 +70,8 @@ body[data-sport="pickleball"]{--lime:#2fbf5b;--lime-ink:#002a10}
 .sportbar button[aria-pressed="true"]{background:var(--c);color:#fff}
 .sportbar .sp-padel{--c:#2f7bff}.sportbar .sp-tennis{--c:#ff8a2a}.sportbar .sp-pickleball{--c:#2fbf5b}
 .coins{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--surface);font-weight:800;font-size:15px;box-shadow:0 0 0 1px var(--line)}
-.coins::before{content:"";width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe58a,#e0a91f);box-shadow:inset 0 0 0 1.5px #b98510}
+.coins::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--lime)}
+.coins::after{content:"punten";font-weight:600;font-size:12px;color:var(--ink2)}
 .cards2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .card{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:22px;background:var(--surface);text-align:left;box-shadow:0 0 0 1px var(--line);min-height:150px;position:relative;overflow:hidden}
 .card .c-lbl{font-size:13px;font-weight:700;color:var(--ink2)}
@@ -238,6 +239,9 @@ details[open] summary::after{transform:rotate(225deg)}
 .dots{display:flex;gap:16px;justify-content:center;margin-top:28px}
 .dots i{width:22px;height:22px;border-radius:50%;background:var(--track);transition:background .2s,transform .2s}
 .dots i.on{background:var(--lime);transform:scale(1.15)}
+#tvplay.hold-l,#tvplay.hold-r{position:fixed!important;top:0!important;left:0!important;right:auto!important;bottom:auto!important;width:100vh!important;height:100vw!important;transform-origin:top left}
+#tvplay.hold-l{transform:rotate(-90deg) translateX(-100%)}
+#tvplay.hold-r{transform:rotate(90deg) translateY(-100%)}
 .lobbylist{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 4px}
 .lobbylist span{padding:8px 12px;border-radius:12px;background:var(--track);font-size:14px;font-weight:600}
 .lobbylist span.host{box-shadow:inset 0 0 0 2px var(--lime)}
@@ -323,7 +327,7 @@ summary .badge{margin-right:auto}
   <header class="top">
     <img src="icon-192.png" alt="">
     <h1>SwingLab</h1>
-    <span class="coins" id="coinChip" aria-label="Munten">0</span>
+    <span class="coins" id="coinChip" aria-label="Punten">0</span>
   </header>
   <div class="sportbar" id="sportBar" role="group" aria-label="Sport">
     <button type="button" class="sp-padel" data-sport="padel">Padel</button>
@@ -436,6 +440,74 @@ summary .badge{margin-right:auto}
     </div>
   </details>
 
+  <h3 id="lblManual">Handleiding</h3>
+  <details>
+    <summary>Zo begin je</summary>
+    <div class="dbody">
+      <p><b>1. Zet SwingLab op je beginscherm.</b> Op een iPhone: open de site in Safari, tik op het deelicoon en kies "Zet op beginscherm". Open SwingLab daarna altijd via dat icoon.</p>
+      <p><b>2. Kies je sport</b> bovenaan het startscherm: padel (blauw), tennis (oranje) of pickleball (groen). Alles in de app hoort dan bij die sport.</p>
+      <p><b>3. Geef toestemming voor de bewegingssensoren</b> als je telefoon erom vraagt. Zonder die toestemming kan SwingLab je slagen niet meten.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Alleen trainen met je telefoon</summary>
+    <div class="dbody">
+      <p>Tik op <b>Start training</b>. Houd je telefoon vast zoals een racket: het onderste deel is het handvat, het scherm is het blad.</p>
+      <p>Een slag telt alleen als je telefoon echt naar voren beweegt (zoals een forehand of backhand) of van boven naar onder (zoals een smash). Je telefoon snel ronddraaien of met je pols flikken telt niet.</p>
+      <p><b>Kracht</b>: elke slag boven je drempel telt. <b>Controle</b>: je slag moet tussen twee snelheden blijven. Die drempels pas je aan bij Instellingen.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Spelen op je tv</summary>
+    <div class="dbody">
+      <p><b>1.</b> Open op je tv of laptop het adres van SwingLab met <b>/tv.html</b> erachter. Je ziet een code van 4 cijfers.</p>
+      <p><b>2.</b> Tik op je telefoon op <b>Speel op tv</b> en tik de code in.</p>
+      <p><b>3.</b> Kies de speelvorm: <b>Training</b>, <b>Wedstrijd</b> of <b>Ranking</b>, en tik op Verder.</p>
+      <p><b>4. Wachthouding</b>: sta met je gezicht naar de tv, houd je telefoon als je racket op navelhoogte voor je, recht naar voren naar de tv en loodrecht op je buik (niet al in forehandpositie). Tik dan op het scherm. Zo weet SwingLab waar de tv staat.</p>
+      <p><b>5.</b> Sla de bal op het moment dat hij bij je racket op de tv komt. Het doorzichtige racket toont waar en wanneer.</p>
+      <p>Klopt de richting niet meer? <b>Tik drie keer snel</b> op je scherm terwijl je in de wachthouding staat: dan meet SwingLab opnieuw.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Slagen: forehand, backhand, lob, smash en korte ballen</summary>
+    <div class="dbody">
+      <p><b>Forehand of backhand</b> kies je zelf: allebei tellen even goed.</p>
+      <p><b>Lob</b>: zwaai van laag naar hoog. Hoe meer omhoog, hoe hoger de bal.</p>
+      <p><b>Smash of bandeja</b>: zwaai van boven naar onder als de bal hoog bij je komt.</p>
+      <p><b>Korte bal</b>: sla zacht. Speel je kort, dan loopt je speler naar het net en volley je daar.</p>
+      <p>Bij <b>padel</b> kaatst de bal via het glas terug: wacht tot hij van de wand komt en sla dan.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Wedstrijd en ranking</summary>
+    <div class="dbody">
+      <p><b>Wedstrijd</b>: tot 4 telefoons tikken dezelfde code in. De eerste speler kiest alles; ontbrekende spelers worden bots, op het niveau dat je kiest.</p>
+      <p><b>Ranking</b> (alleen als je alleen speelt): je speelt tegen een bot die net boven jou staat. Win je, dan stijg je in de ranglijst. Hier verdien je geen punten, alleen plaatsen.</p>
+      <p>De telling is zoals in het echt: 15, 30, 40 en games bij tennis en padel (met een gouden punt bij padel), en tot 11 punten bij pickleball.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Punten en je speler</summary>
+    <div class="dbody">
+      <p>Met trainingen en wedstrijden verdien je <b>punten</b>. Daarmee speel je bij <b>Jouw speler</b> kleren, kapsels en extra's vrij. Elke sport heeft een eigen speler.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Mijn scherm draait mee</summary>
+    <div class="dbody">
+      <p>Tijdens het spelen houdt SwingLab het scherm rechtop. Wil je het draaien helemaal vermijden, zet dan de rotatievergrendeling van je telefoon aan.</p>
+      <p>iPhone: veeg van rechtsboven naar beneden en tik op het slotje met de pijl. Android: zet "Automatisch draaien" uit in de snelle instellingen.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Het werkt niet: wat nu?</summary>
+    <div class="dbody">
+      <p><b>De code werkt niet</b>: zorg dat zowel je telefoon als je tv met het internet verbonden zijn, en tik de code opnieuw in.</p>
+      <p><b>Geen geluid</b>: zet de stille schakelaar van je iPhone uit en het volume hoger.</p>
+      <p><b>Er worden geen slagen gemeten</b>: geef toestemming voor de bewegingssensoren en zwaai als een echte slag, met je hele arm.</p>
+    </div>
+  </details>
+
   <details>
     <summary>Veilig trainen</summary>
     <div class="dbody">
@@ -447,13 +519,13 @@ summary .badge{margin-right:auto}
   <details>
     <summary>Hoe juist zijn de snelheden?</summary>
     <div class="dbody">
-      <p>SwingLab meet hoe snel je telefoon draait en rekent dat om naar een geschatte snelheid van je racketkop. Het is geen radarmeting.</p>
+      <p>SwingLab meet hoe snel je telefoon draait en hoe snel hij zelf naar voren of naar onder beweegt, en rekent dat om naar een geschatte snelheid van je racketkop. Het is geen radarmeting.</p>
       <p>De cijfers zijn vooral nuttig om jezelf te vergelijken met vorige trainingen, op hetzelfde toestel.</p>
     </div>
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 19</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 21</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -714,7 +786,7 @@ summary .badge{margin-right:auto}
     <div class="sportbadge" id="avSport">Padel</div>
     <h2 id="avTitle">Jouw speler</h2>
     <canvas class="avbig" id="avatarBig" width="360" height="480" aria-hidden="true"></canvas>
-    <p class="sheet-p" style="text-align:center">Je hebt <b id="avCoins">0</b> munten. Verdien er meer met goede slagen, gewonnen wedstrijden en de competitie.</p>
+    <p class="sheet-p" style="text-align:center">Je hebt <b id="avCoins">0</b> punten. Verdien er meer met trainingen en wedstrijden.</p>
     <div class="seg" role="group" aria-label="Onderdeel" id="avCats" style="overflow-x:auto">
       <button type="button" data-cat="skin">Huid</button><button type="button" data-cat="hair">Haar</button><button type="button" data-cat="hairCol">Kleur</button>
       <button type="button" data-cat="shirt">Shirt</button><button type="button" data-cat="shorts">Broek</button><button type="button" data-cat="shoes">Schoen</button><button type="button" data-cat="extra">Extra</button>
@@ -813,7 +885,7 @@ function clone(o) { return JSON.parse(JSON.stringify(o)); }
 function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
 
 var DEFAULTS = {
-  settings: { coins: 0, owned: [], avatars: {}, career: {}, sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, hand: 'right', level: 'normaal', drills: { padel: 'basis', tennis: 'basis', pickleball: 'basis' }, match: { mode: 'train', team: 'samen', bots: 'normaal', length: 'kort', tennis: 'enkel' }, thresholds: clone(DEFAULT_THRESHOLDS) },
+  settings: { points: 0, owned: [], avatars: {}, career: {}, sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, hand: 'right', level: 'normaal', drills: { padel: 'basis', tennis: 'basis', pickleball: 'basis' }, match: { mode: 'train', team: 'samen', bots: 'normaal', length: 'kort', tennis: 'enkel' }, thresholds: clone(DEFAULT_THRESHOLDS) },
   meta: { settingsAt: 0 },
   stats: { total: 0, hits: 0, timeMs: 0, perSport: { padel: 0, tennis: 0, pickleball: 0 }, best: { padel: 0, tennis: 0, pickleball: 0 }, days: {}, sessions: [] }
 };
@@ -849,7 +921,9 @@ function load() {
     if (!isObj(d.settings.career[sp])) d.settings.career[sp] = { pts: 0, w: 0, l: 0, best: 0, next: 0 };
   });
   if (!Array.isArray(d.settings.owned)) d.settings.owned = [];
-  if (typeof d.settings.coins !== 'number') d.settings.coins = 0;
+  // vroeger munten, nu punten (1 munt = 100 punten)
+  if (typeof d.settings.points !== 'number') d.settings.points = 0;
+  if (typeof d.settings.coins === 'number') { d.settings.points += d.settings.coins * 100; delete d.settings.coins; }
   if (!isObj(d.settings.match)) d.settings.match = { mode: 'train', team: 'samen', bots: 'normaal', length: 'kort', tennis: 'enkel' };
   if (!isObj(d.settings.drills)) d.settings.drills = { padel: 'basis', tennis: 'basis', pickleball: 'basis' };
   if (['rustig', 'normaal', 'snel'].indexOf(d.settings.level) < 0) d.settings.level = 'normaal';
@@ -905,11 +979,33 @@ function speedKmh(omegaDegPerSec, radius) {
 /* Snelheid van de racketkop. Draaien rond de lengte-as van je telefoon verplaatst de racketkop niet,
    en een slag beweegt met het slagvlak vooruit. Rondtollen of plat ronddraaien telt dus niet. */
 function strokeSpeed(wx, wy, wz, radius) {
-  var perp = Math.sqrt(wx * wx + wz * wz);
-  var v = speedKmh(perp, radius);
-  if (perp > 0 && Math.abs(wx) / perp < 0.4) v *= 0.25;
+  // alleen de draaiing waarbij het blad naar voren (of van boven naar onder) beweegt telt;
+  // draaien in het vlak van het scherm of rond de lengte-as telt niet
+  var v = speedKmh(Math.abs(wx), radius);
   if (v > MAX_KMH) return -1; // onmogelijk snel voor een racket: weggooien
   return v;
+}
+/* Een echte slag verplaatst je hele telefoon snel, loodrecht op het scherm (zoals een racketblad naar voren gaat)
+   of van boven naar onder. Een draai in je hand of een polsflik op de plaats doet dat niet.
+   Uit de versnellingsmeter: hoe snel beweegt de telefoon zelf? Dat begrenst de snelheid. */
+var LIN = { vz: 0, vd: 0, t: 0, ok: false };
+window.__lin = LIN;  // alleen voor tests
+function linTrack(e, R, tau) {
+  var acc = e && e.acceleration, now = performance.now(), dt = LIN.t ? Math.min(0.05, (now - LIN.t) / 1000) : 0.016;
+  LIN.t = now;
+  if (!acc || acc.z == null) { LIN.ok = false; return; }
+  LIN.ok = true;
+  LIN.vz = (LIN.vz + acc.z * dt) * 0.95;
+  if (R && tau && Math.abs(tau) >= 0.5) {
+    var s = tau > 0 ? 1 : -1, aUp = s * (acc.x * R[6] + acc.y * R[7] + acc.z * R[8]);
+    LIN.vd = (LIN.vd - aUp * dt) * 0.95;
+  } else LIN.vd = 0;
+}
+function linCap() {
+  if (!LIN.ok) return Infinity;              // toestel zonder versnellingsmeter: niet begrenzen
+  var L = Math.max(Math.abs(LIN.vz), Math.max(0, LIN.vd));
+  if (L < 1.6) return 0;                      // de telefoon bewoog nauwelijks: geen slag
+  return L * 3.6 * 3.2 + 10;
 }
 function judgeSwing(peak, mode, th) {
   if (mode === 'control') {
@@ -1206,7 +1302,9 @@ function onMotion(e) {
   var now = performance.now(), dt = T.lastMotion ? clampNum((now - T.lastMotion) / 1000, 0.004, 0.05) : 0.016;
   T.lastMotion = now;
   var wx = rr.beta || 0, wz = rr.alpha || 0;
-  feed(strokeSpeed(wx, rr.gamma || 0, wz, T.radius), now, Math.sqrt(wx * wx + wz * wz) * dt);
+  linTrack(e, null, 0);
+  var vs = strokeSpeed(wx, rr.gamma || 0, wz, T.radius);
+  feed(vs < 0 ? vs : Math.min(vs, linCap()), now, Math.sqrt(wx * wx + wz * wz) * dt);
 }
 
 function feed(v, t, dTurn) {
@@ -1264,7 +1362,7 @@ function commitSwing(ev) {
   if (!st.days[k]) st.days[k] = { s: 0, h: 0 };
   st.days[k].s++;
   if (peak > (st.best[T.sport] || 0)) st.best[T.sport] = peak;
-  if (ev.result === 'hit') { T.hits++; st.hits++; st.days[k].h++; data.settings.coins = (data.settings.coins || 0) + 1; }
+  if (ev.result === 'hit') { T.hits++; st.hits++; st.days[k].h++; data.settings.points = (data.settings.points || 0) + 10; }
   $('tSwings').textContent = T.swings;
   $('tHits').textContent = T.hits;
   $('tBest').textContent = fmt(st.best[T.sport]);
@@ -1420,7 +1518,7 @@ function renderTvSettings() {
   if (pm === 'ranked') {
     var o = nextOpponent(s.sport), r = myRank(s.sport);
     $('rankOptsTxt').textContent = 'Jij' + (r ? ' (nummer ' + r + ')' : ' (nog geen ranking)') + ' tegen ' + o.name + ' (' + o.cc + ', nummer ' + o.rank + ')' +
-      (s.sport !== 'tennis' ? ', met een bot als partner tegen ' + o.name + ' en ' + o.partner : '') + '. Winst: +' + o.win + ' punten.';
+      (s.sport !== 'tennis' ? ', met een bot als partner tegen ' + o.name + ' en ' + o.partner : '') + '. Win je, dan sta je daarna ongeveer op plaats ' + rankAfter(s.sport, data.settings.career[s.sport].pts + o.win) + '.';
   }
   $('fmtBox').hidden = s.sport !== 'tennis';
   if (n > 2) mt.tennis = 'dubbel';
@@ -1442,7 +1540,22 @@ function tvStep(n) {
   $('tvStop').hidden = !live;
   $('tvClose').hidden = live;
   if (TVS) TVS.step = n;
+  if (live) lockPortrait(); else unlockPortrait();
+  holdPortrait();
 }
+/* Tijdens het spelen draai je je telefoon alle kanten op: het scherm mag dan niet meedraaien.
+   Android: de stand vastzetten. iPhone kan dat niet vanuit een webapp, dus zetten we de inhoud terug rechtop. */
+function lockPortrait() { try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(function () {}); } catch (e) {} }
+function unlockPortrait() { try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {} }
+function holdPortrait() {
+  var el = $('tvplay'); if (!el) return;
+  el.classList.remove('hold-l', 'hold-r');
+  if (!TVS || el.hidden || !(TVS.step === 'ready' || TVS.step === 'calib' || TVS.step === 'play')) return;
+  var ang = typeof window.orientation === 'number' ? window.orientation : ((screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : 0);
+  if (ang === 90) el.classList.add('hold-l'); else if (ang === 270 || ang === -90) el.classList.add('hold-r');
+}
+window.addEventListener('orientationchange', function () { setTimeout(holdPortrait, 60); });
+window.addEventListener('resize', holdPortrait);
 function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
 function isStandalone() { return navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches); }
 function openTv() {
@@ -1653,7 +1766,9 @@ function tvOnMotion(e) {
   tvLearnSigma(wx, wy, wz);
   var now = performance.now(), dt = TVS.lastMotion ? clampNum((now - TVS.lastMotion) / 1000, 0.004, 0.05) : 0.016;
   TVS.lastMotion = now;
-  tvFeed(strokeSpeed(wx, wy, wz, TVS.radius), now, vec, Math.sqrt(wx * wx + wz * wz) * dt);
+  linTrack(e, TVS.R, TVS.tauAcc);
+  var vs = strokeSpeed(wx, wy, wz, TVS.radius);
+  tvFeed(vs < 0 ? vs : Math.min(vs, linCap()), now, vec, Math.sqrt(wx * wx + wz * wz) * dt);
 }
 /* Draairichting van dit toestel leren: vergelijk de gyroscoop met hoe de stand echt verandert */
 function tvLearnSigma(wx, wy, wz) {
@@ -1838,9 +1953,9 @@ function tvOnData(m) {
     $('tvSub').textContent = m.text + (m.st ? '. Jij: ' + m.st.hits + ' van ' + m.st.swings + ' slagen goed, ' + m.st.perfect + ' perfect.' : '');
     if (m.ranked) {
       var rr = applyRankResult(data.settings.sport, m.won);
-      $('tvSub').textContent += ' Ranking: ' + (rr.after ? '#' + rr.after : 'nog geen') + ' (' + (rr.delta >= 0 ? '+' : '') + rr.delta + ' punten).';
+      $('tvSub').textContent += ' ' + rankText(rr.before, rr.after);
       tvSendConfig();
-    } else if (m.won) addCoins(15, 'wedstrijd gewonnen');
+    } else if (m.st) addPoints((m.st.hits || 0) * 10 + (m.won ? 500 : 150), m.won ? 'wedstrijd gewonnen' : 'wedstrijd gespeeld');
     buzz(m.won ? [40, 60, 40, 60, 80] : 200);
     return;
   }
@@ -1855,6 +1970,7 @@ function tvOnData(m) {
   } else if (m.type === 'round') {
     TVS.rounds++;
     cloudRound(m);
+    addPoints(m.score, 'training');
     $('tvVerdict').textContent = fmt(m.score) + ' punten';
     if (m.venue) $('tvVerdict').textContent += ' in ' + m.venue;
     $('tvVerdict').className = 'tv-verdict num good';
@@ -1868,7 +1984,7 @@ function tvCommit(m) {
   st.days[k].s++;
   if (m.hit) {
     var v = Math.round(+m.speed || 0);
-    TVS.hits++; st.hits++; st.days[k].h++; data.settings.coins = (data.settings.coins || 0) + 1;
+    TVS.hits++; st.hits++; st.days[k].h++;
     TVS.sumPeak += v; if (v > TVS.peak) TVS.peak = v;
     if (v > (st.best[sp] || 0)) st.best[sp] = v;
   }
@@ -1877,11 +1993,11 @@ function tvCommit(m) {
 
 /* ---------- Munten, competitie en je speler ---------- */
 var SPORT_COL = { padel: '#2f7bff', tennis: '#ff8a2a', pickleball: '#2fbf5b' };
-function addCoins(n, why) {
-  if (!n) return;
-  data.settings.coins = Math.max(0, (data.settings.coins || 0) + n); save();
-  $('coinChip').textContent = fmt(data.settings.coins);
-  if (why) toast('+' + n + ' munten: ' + why);
+function addPoints(n, why) {
+  n = Math.round(n || 0); if (!n) return;
+  data.settings.points = Math.max(0, (data.settings.points || 0) + n); save();
+  $('coinChip').textContent = fmt(data.settings.points);
+  if (why) toast('+' + fmt(n) + ' punten: ' + why);
 }
 /* Een ranglijst per sport met verzonnen spelers, zoals de echte toptoernooien: #1 heeft zo'n 12.500 punten */
 var RANK_N = 300, rankCache = {};
@@ -1910,10 +2026,18 @@ function nextOpponent(sp) {
 }
 function rankGain(sp, o) { var mr = myRank(sp) || RANK_N + 1; return Math.round(25 + o.pts * 0.04 + Math.max(0, mr - o.rank) * 1.5); }
 function rankLoss(sp) { var c = data.settings.career[sp]; return Math.min(c.pts, Math.round(5 + c.pts * 0.01)); }
+function rankAfter(sp, pts) { var pool = rankPool(sp), n = 1; for (var i = 0; i < pool.length; i++) if (pool[i].pts > pts) n++; return n; }
+function rankText(before, after) {
+  if (!after) return 'Nog geen ranking.';
+  if (!before) return 'Je komt binnen op plaats ' + after + '.';
+  if (after < before) return 'Je stijgt ' + (before - after) + (before - after === 1 ? ' plaats' : ' plaatsen') + ' naar plaats ' + after + '.';
+  if (after > before) return 'Je zakt ' + (after - before) + (after - before === 1 ? ' plaats' : ' plaatsen') + ' naar plaats ' + after + '.';
+  return 'Je blijft op plaats ' + after + '.';
+}
 function applyRankResult(sp, won) {
   var c = data.settings.career[sp], o = nextOpponent(sp), before = myRank(sp);
-  if (won) { c.pts += o.win; c.w++; addCoins(30 + Math.round(o.lvl * 40)); }
-  else { c.pts = Math.max(0, c.pts - o.loss); c.l++; addCoins(5); }
+  if (won) { c.pts += o.win; c.w++; }
+  else { c.pts = Math.max(0, c.pts - o.loss); c.l++; }
   c.next = 0;
   var after = myRank(sp);
   if (after && (!c.best || after < c.best)) c.best = after;
@@ -1923,28 +2047,28 @@ function applyRankResult(sp, won) {
 function renderRankCard() {
   var sp = data.settings.sport, r = myRank(sp), c = data.settings.career[sp];
   $('rankBig').textContent = r ? '#' + r : '–';
-  $('rankSub').textContent = r ? fmt(c.pts) + ' punten, ' + c.w + ' gewonnen' : 'Win je eerste wedstrijd';
-  $('coinChip').textContent = fmt(data.settings.coins || 0);
+  $('rankSub').textContent = r ? c.w + ' gewonnen, ' + c.l + ' verloren' : 'Win je eerste wedstrijd';
+  $('coinChip').textContent = fmt(data.settings.points || 0);
   drawAvatar($('avatarMini'), data.settings.avatars[sp], sp);
 }
 function openRank() {
   var sp = data.settings.sport, r = myRank(sp), c = data.settings.career[sp], o = nextOpponent(sp), pool = rankPool(sp);
   $('rkSport').textContent = SPORTS[sp].name; $('rkRank').textContent = r ? '#' + r : '–';
-  $('rkPts').textContent = r ? fmt(c.pts) + ' rankingpunten' : 'Nog geen ranking';
+  $('rkPts').textContent = r ? 'Plaats ' + r + ' van de wereld' : 'Nog geen ranking';
   $('rkRecord').textContent = c.w + ' gewonnen, ' + c.l + ' verloren' + (c.best ? ', beste ranking #' + c.best : '');
-  $('rkNext').textContent = 'Volgende tegenstander: ' + o.name + ' (' + o.cc + '), nummer ' + o.rank + ' met ' + fmt(o.pts) + ' punten' +
-    (sp !== 'tennis' ? ', samen met ' + o.partner : '') + '. Winst levert +' + o.win + ' punten op' + (o.loss ? ', verlies kost ' + o.loss : '') + '.';
+  $('rkNext').textContent = 'Volgende tegenstander: ' + o.name + ' (' + o.cc + '), nummer ' + o.rank +
+    (sp !== 'tennis' ? ', samen met ' + o.partner : '') + '. Win je, dan sta je daarna ongeveer op plaats ' + rankAfter(sp, c.pts + o.win) + '. In de ranking verdien je geen punten, alleen plaatsen.';
   var rows = [], show = {};
   for (var i = 0; i < 5; i++) show[i] = true;
   var mi = r ? r - 1 : RANK_N; for (var j = mi - 3; j <= mi + 3; j++) if (j >= 0 && j < RANK_N) show[j] = true;
   var last = -1, mine = r ? r - 1 : -1;
   Object.keys(show).map(Number).sort(function (a, b) { return a - b; }).forEach(function (i2) {
     if (last >= 0 && i2 > last + 1) rows.push('<div class="rankrow"><span class="r">…</span><span></span><span></span></div>');
-    if (i2 === mine) rows.push('<div class="rankrow me"><span class="r">' + r + '</span><span class="p">' + esc(ME && ME.profile ? ME.profile.display_name : 'Jij') + '</span><span>' + fmt(c.pts) + '</span></div>');
-    var q = pool[i2]; rows.push('<div class="rankrow"><span class="r">' + (i2 >= mine && mine >= 0 ? q.rank + 1 : q.rank) + '</span><span class="p">' + esc(q.name) + ' <span class="pf-small">' + q.cc + '</span></span><span>' + fmt(q.pts) + '</span></div>');
+    if (i2 === mine) rows.push('<div class="rankrow me"><span class="r">' + r + '</span><span class="p">' + esc(ME && ME.profile ? ME.profile.display_name : 'Jij') + '</span><span></span></div>');
+    var q = pool[i2]; rows.push('<div class="rankrow"><span class="r">' + (i2 >= mine && mine >= 0 ? q.rank + 1 : q.rank) + '</span><span class="p">' + esc(q.name) + '</span><span class="pf-small">' + q.cc + '</span></div>');
     last = i2;
   });
-  if (!r) rows.push('<div class="rankrow me"><span class="r">–</span><span class="p">Jij</span><span>0</span></div>');
+  if (!r) rows.push('<div class="rankrow me"><span class="r">–</span><span class="p">Jij</span><span></span></div>');
   $('rkList').innerHTML = rows.join('');
   $('rankSheet').hidden = false;
 }
@@ -1952,12 +2076,12 @@ function openRank() {
 /* Jouw speler: per sport een eigen figuurtje, met kleren die je vrijspeelt */
 var AV = {
   skin: [['s0', 'Licht', 0, '#f1c9a5'], ['s1', 'Getint', 0, '#e0ac85'], ['s2', 'Midden', 0, '#c68863'], ['s3', 'Bruin', 0, '#8d5a3b'], ['s4', 'Donker', 0, '#5c3a26'], ['s5', 'Bleek', 0, '#f6d7bd']],
-  hair: [['kort', 'Kort', 0], ['krullen', 'Krullen', 0], ['staart', 'Staart', 0], ['kaal', 'Kaal', 0], ['knot', 'Knot', 40], ['lang', 'Lang', 60], ['hanenkam', 'Hanenkam', 150]],
-  hairCol: [['zwart', 'Zwart', 0, '#1d1a17'], ['bruin', 'Bruin', 0, '#5a3a22'], ['blond', 'Blond', 0, '#d8b25a'], ['rood', 'Rood', 0, '#a8452a'], ['grijs', 'Grijs', 0, '#9a9a9a'], ['blauw', 'Blauw', 80, '#2f7bff'], ['roze', 'Roze', 80, '#ff5aa8']],
-  shirt: [['sport', 'Sportkleur', 0], ['wit', 'Wit', 0, '#f4f4f4'], ['zwart', 'Zwart', 0, '#1b1d22'], ['streep', 'Strepen', 50], ['pro', 'Pro', 120], ['camo', 'Camo', 180], ['goud', 'Goud', 300], ['regenboog', 'Regenboog', 400]],
-  shorts: [['zwart', 'Zwart', 0, '#16181c'], ['wit', 'Wit', 0, '#f2f2f2'], ['navy', 'Marine', 0, '#1d2a4a'], ['rood', 'Rood', 40, '#c43b3b'], ['camo', 'Camo', 150, '#4a5a32']],
-  shoes: [['wit', 'Wit', 0, '#f4f4f4'], ['zwart', 'Zwart', 0, '#111111'], ['neon', 'Neon', 90, '#c6ff3a'], ['goud', 'Goud', 250, '#e6b53a']],
-  extra: [['geen', 'Niets', 0], ['zweetband', 'Zweetband', 40], ['polsband', 'Polsbandjes', 30], ['pet', 'Pet', 60], ['zonnebril', 'Zonnebril', 120], ['medaille', 'Top 10', 0, null, 10], ['kroon', 'Nummer 1', 0, null, 1]]
+  hair: [['kort', 'Kort', 0], ['krullen', 'Krullen', 0], ['staart', 'Staart', 0], ['kaal', 'Kaal', 0], ['knot', 'Knot', 6000], ['lang', 'Lang', 10000], ['hanenkam', 'Hanenkam', 25000]],
+  hairCol: [['zwart', 'Zwart', 0, '#1d1a17'], ['bruin', 'Bruin', 0, '#5a3a22'], ['blond', 'Blond', 0, '#d8b25a'], ['rood', 'Rood', 0, '#a8452a'], ['grijs', 'Grijs', 0, '#9a9a9a'], ['blauw', 'Blauw', 12000, '#2f7bff'], ['roze', 'Roze', 12000, '#ff5aa8']],
+  shirt: [['sport', 'Sportkleur', 0], ['wit', 'Wit', 0, '#f4f4f4'], ['zwart', 'Zwart', 0, '#1b1d22'], ['streep', 'Strepen', 8000], ['pro', 'Pro', 20000], ['camo', 'Camo', 30000], ['goud', 'Goud', 60000], ['regenboog', 'Regenboog', 80000]],
+  shorts: [['zwart', 'Zwart', 0, '#16181c'], ['wit', 'Wit', 0, '#f2f2f2'], ['navy', 'Marine', 0, '#1d2a4a'], ['rood', 'Rood', 6000, '#c43b3b'], ['camo', 'Camo', 25000, '#4a5a32']],
+  shoes: [['wit', 'Wit', 0, '#f4f4f4'], ['zwart', 'Zwart', 0, '#111111'], ['neon', 'Neon', 15000, '#c6ff3a'], ['goud', 'Goud', 50000, '#e6b53a']],
+  extra: [['geen', 'Niets', 0], ['zweetband', 'Zweetband', 6000], ['polsband', 'Polsbandjes', 4000], ['pet', 'Pet', 10000], ['zonnebril', 'Zonnebril', 20000], ['medaille', 'Top 10', 0, null, 10], ['kroon', 'Nummer 1', 0, null, 1]]
 };
 var avCat = 'skin';
 function avItem(cat, id) { var l = AV[cat]; for (var i = 0; i < l.length; i++) if (l[i][0] === id) return l[i]; return l[0]; }
@@ -2029,12 +2153,12 @@ function drawAvatar(cv, av, sp) {
 function openAvatar() { $('avatarSheet').hidden = false; renderAvatarSheet(); }
 function renderAvatarSheet() {
   var sp = data.settings.sport, av = data.settings.avatars[sp];
-  $('avSport').textContent = SPORTS[sp].name; $('avCoins').textContent = fmt(data.settings.coins || 0);
+  $('avSport').textContent = SPORTS[sp].name; $('avCoins').textContent = fmt(data.settings.points || 0);
   drawAvatar($('avatarBig'), av, sp);
   Array.prototype.forEach.call(document.querySelectorAll('#avCats button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-cat') === avCat)); });
   $('avItems').innerHTML = AV[avCat].map(function (it) {
     var own = avOwned(avCat, it), col = avCat === 'shirt' && it[0] === 'sport' ? SPORT_COL[sp] : it[3];
-    var price = own ? '' : (it[4] ? '<span class="price">' + (it[4] === 1 ? 'Word nummer 1' : 'Haal de top ' + it[4]) + '</span>' : '<span class="price">' + it[2] + ' munten</span>');
+    var price = own ? '' : (it[4] ? '<span class="price">' + (it[4] === 1 ? 'Word nummer 1' : 'Haal de top ' + it[4]) + '</span>' : '<span class="price">' + fmt(it[2]) + ' punten</span>');
     return '<button type="button" data-id="' + it[0] + '" aria-pressed="' + (av[avCat] === it[0]) + '" class="' + (own ? '' : 'locked') + '">' + (col ? '<span class="sw" style="background:' + col + '"></span>' : '') + it[1] + price + '</button>';
   }).join('');
 }
@@ -2042,9 +2166,9 @@ function avatarPick(id) {
   var sp = data.settings.sport, it = avItem(avCat, id);
   if (!avOwned(avCat, it)) {
     if (it[4]) { toast(it[4] === 1 ? 'Word nummer 1 in de ranking om dit vrij te spelen.' : 'Haal de top ' + it[4] + ' van de ranking om dit vrij te spelen.'); return; }
-    if ((data.settings.coins || 0) < it[2]) { toast('Je hebt nog ' + (it[2] - (data.settings.coins || 0)) + ' munten nodig.'); return; }
-    if (!confirm(it[1] + ' kopen voor ' + it[2] + ' munten?')) return;
-    data.settings.coins -= it[2]; data.settings.owned.push(avCat + ':' + it[0]);
+    if ((data.settings.points || 0) < it[2]) { toast('Je hebt nog ' + fmt(it[2] - (data.settings.points || 0)) + ' punten nodig.'); return; }
+    if (!confirm(it[1] + ' vrijspelen voor ' + fmt(it[2]) + ' punten?')) return;
+    data.settings.points -= it[2]; data.settings.owned.push(avCat + ':' + it[0]);
   }
   data.settings.avatars[sp][avCat] = id; save();
   renderAvatarSheet(); renderRankCard();
@@ -2616,7 +2740,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 19, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 21, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 

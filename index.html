@@ -55,6 +55,12 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid
 h2{font-family:var(--num);font-variation-settings:"wdth" 112;font-weight:800;font-size:28px;letter-spacing:-.02em;margin:8px 0 18px}
 h3{font-size:15px;font-weight:600;color:var(--ink2);margin:28px 0 10px}
 
+/* Melding nieuwe versie */
+.update{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:14px 14px 14px 16px;border-radius:20px;background:var(--surface);box-shadow:inset 4px 0 0 var(--lime),0 0 0 1px var(--line)}
+.update p{margin:0;flex:1;font-size:15px;line-height:1.35;font-weight:600}
+.update button{flex:none;padding:12px 16px;border-radius:99px;background:var(--lime);color:#000;font-size:15px;font-weight:700}
+.update button:disabled{opacity:.6}
+
 /* Home: today */
 .today{display:flex;align-items:center;gap:22px;padding:22px;background:var(--surface);border-radius:28px}
 .ring{width:132px;height:132px;flex:none}
@@ -168,6 +174,7 @@ details[open] summary::after{transform:rotate(225deg)}
 /* Speel op tv (telefoon) */
 .tvbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:10px;padding:17px;border-radius:22px;background:var(--surface);color:var(--ink);font-size:17px;font-weight:600;box-shadow:0 0 0 1px var(--line)}
 .tvbtn svg{width:22px;height:22px}
+.tvbtn.top{margin-top:14px;background:var(--lime);color:#000;box-shadow:none;font-size:18px;font-weight:700;padding:18px}
 .tvp{touch-action:manipulation;overflow:auto}
 .tclose{font-size:15px;font-weight:600;color:var(--ink);padding:6px 0}
 .tv-step{flex:1;width:100%;max-width:420px;display:flex;flex-direction:column;justify-content:center;padding:12px 0}
@@ -191,6 +198,9 @@ details[open] summary::after{transform:rotate(225deg)}
 .tv-big{font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:34px;line-height:1.1;text-align:center}
 .tv-sub{color:var(--ink2);font-size:15px;text-align:center;margin:12px 0 0}
 .ready-ill{width:110px;height:110px;align-self:center;margin-bottom:8px}
+.readytap{cursor:pointer;-webkit-user-select:none;user-select:none}
+.readytap:active .tapbig{transform:scale(.97)}
+.tapbig{margin:26px auto 0;padding:22px 26px;border-radius:24px;background:var(--lime);color:#000;font-size:20px;font-weight:800;text-align:center;transition:transform .1s}
 .steady{height:10px;border-radius:99px;background:var(--track);overflow:hidden;margin:26px 20px 0}
 .steady i{display:block;height:100%;width:0;background:var(--lime);border-radius:99px;transition:width .1s linear}
 .dots{display:flex;gap:16px;justify-content:center;margin-top:28px}
@@ -277,6 +287,11 @@ summary .badge{margin-right:auto}
     <h1>SwingLab</h1>
   </header>
 
+  <div class="update" id="updateBar" role="status" hidden>
+    <p>Er is een nieuwe versie beschikbaar, klik op de knop hiernaast om hem te activeren!</p>
+    <button type="button" id="updateBtn">Activeren</button>
+  </div>
+
   <section class="today" aria-label="Dagdoel">
     <svg class="ring" viewBox="0 0 132 132" aria-hidden="true">
       <circle class="tr" cx="66" cy="66" r="54"/>
@@ -288,6 +303,11 @@ summary .badge{margin-right:auto}
       <div class="done" id="todayDone" hidden>Dagdoel gehaald</div>
     </div>
   </section>
+
+  <button type="button" class="tvbtn top" id="btnTv">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/></svg>
+    Speel op tv
+  </button>
 
   <div class="facts">
     <div><b id="factStreak">0</b><span id="factStreakLbl">dagen op rij</span></div>
@@ -312,10 +332,6 @@ summary .badge{margin-right:auto}
   <button type="button" class="start" id="btnStart">
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
     Start training
-  </button>
-  <button type="button" class="tvbtn" id="btnTv">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/></svg>
-    Speel op tv
   </button>
 </main>
 
@@ -395,7 +411,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 7</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 9</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -554,16 +570,6 @@ summary .badge{margin-right:auto}
     <p class="iostip" id="iosTip" hidden>Zet SwingLab op je beginscherm via Delen en Zet op beginscherm, en open hem daar. In Safari kan iOS bij een zwaai "Herstel typen" tonen.</p>
     <p class="tv-lead">Open deze pagina op je tv of laptop:</p>
     <button type="button" class="urlbox" id="tvUrl" aria-label="Link kopiëren"></button>
-    <div class="tv-lbl" id="lblTvSport">Sport</div>
-    <div class="seg" role="group" aria-labelledby="lblTvSport" id="segTvSport"><button type="button" data-sport="padel">Padel</button><button type="button" data-sport="tennis">Tennis</button><button type="button" data-sport="pickleball">Pickleball</button></div>
-    <div class="tv-lbl" id="lblDrill">Training</div>
-    <div class="chips" role="group" aria-labelledby="lblDrill" id="tvDrills"></div>
-    <div class="tv-row">
-      <div><div class="tv-lbl" id="lblHand">Ik speel met</div>
-        <div class="seg" role="group" aria-labelledby="lblHand" id="segHand"><button type="button" data-hand="right">Rechts</button><button type="button" data-hand="left">Links</button></div></div>
-      <div><div class="tv-lbl" id="lblLevel">Tempo</div>
-        <div class="seg" role="group" aria-labelledby="lblLevel" id="segLevel"><button type="button" data-level="rustig">Rustig</button><button type="button" data-level="normaal">Normaal</button><button type="button" data-level="snel">Snel</button></div></div>
-    </div>
     <div class="tv-lbl" id="lblCode">Tik de code van je tv in</div>
     <div class="codeboxes num" id="tvCode" role="status" aria-labelledby="lblCode"><span></span><span></span><span></span><span></span></div>
     <div class="keypad" id="tvKeys" aria-label="Cijfers">
@@ -574,16 +580,30 @@ summary .badge{margin-right:auto}
     </div>
   </div>
 
+  <div class="tv-step" id="tvSettings" hidden>
+    <div class="tv-big">Verbonden met je tv</div>
+    <p class="tv-sub">Kies wat je wil spelen. Je ziet het meteen op je tv.</p>
+    <div class="tv-lbl" id="lblTvSport">Sport</div>
+    <div class="seg" role="group" aria-labelledby="lblTvSport" id="segTvSport"><button type="button" data-sport="padel">Padel</button><button type="button" data-sport="tennis">Tennis</button><button type="button" data-sport="pickleball">Pickleball</button></div>
+    <div class="tv-lbl" id="lblDrill">Training</div>
+    <div class="chips" role="group" aria-labelledby="lblDrill" id="tvDrills"></div>
+    <div class="tv-lbl" id="lblHand">Ik speel met</div>
+    <div class="seg" role="group" aria-labelledby="lblHand" id="segHand"><button type="button" data-hand="left">Links</button><button type="button" data-hand="right">Rechts</button></div>
+    <div class="tv-lbl" id="lblLevel">Tempo</div>
+    <div class="seg" role="group" aria-labelledby="lblLevel" id="segLevel"><button type="button" data-level="rustig">Rustig</button><button type="button" data-level="normaal">Normaal</button><button type="button" data-level="snel">Snel</button></div>
+    <button type="button" class="start" id="tvSettingsOk">Verder</button>
+  </div>
+
   <div class="tv-step" id="tvBusy" hidden><div class="tv-big">Verbinden…</div><p class="tv-sub">Even geduld.</p></div>
 
-  <div class="tv-step" id="tvReady" hidden>
+  <div class="tv-step readytap" id="tvReady" role="button" tabindex="0" aria-label="Tik in de wachthouding" hidden>
     <svg class="ready-ill" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
       <circle cx="60" cy="22" r="10"/><path d="M60 32v40M60 72l-14 30M60 72l14 30M60 44l-16 14h22"/>
       <path d="M66 58h30" stroke="#B9E631" stroke-width="5"/><ellipse cx="104" cy="58" rx="9" ry="6" stroke="#B9E631"/>
     </svg>
     <div class="tv-big">Neem de wachthouding aan</div>
-    <p class="tv-sub">Houd je telefoon als je racket op navelhoogte voor je, recht naar voren naar de tv, loodrecht op je buik. Hou hem even stil.</p>
-    <div class="steady"><i id="tvSteady"></i></div>
+    <p class="tv-sub">Houd je telefoon als je racket op navelhoogte voor je, recht naar voren naar de tv, loodrecht op je buik.</p>
+    <div class="tapbig">Tik dan ergens op het scherm</div>
     <p class="tv-sub small" id="tvReadyHint">Begin ook elke slag vanuit deze houding.</p>
   </div>
 
@@ -599,6 +619,7 @@ summary .badge{margin-right:auto}
     <div class="tv-lbl" id="lblNextDrill">Training voor de volgende ronde</div>
     <div class="chips" role="group" aria-labelledby="lblNextDrill" id="tvDrillsPlay"></div>
     <p class="tv-sub small" id="tvDrillHint">Kiezen kan zodra de ronde voorbij is.</p>
+    <button type="button" class="start" id="tvNext" hidden>Wachthouding aannemen en tikken voor de volgende ronde</button>
     <button type="button" class="textbtn" id="tvRecal">Wachthouding opnieuw instellen</button>
   </div>
 
@@ -760,6 +781,15 @@ function streaks(days) {
 /* ---------- DETECTOR START ---------- */
 function speedKmh(omegaDegPerSec, radius) {
   return omegaDegPerSec * Math.PI / 180 * radius * 3.6;
+}
+/* Snelheid van de racketkop. Draaien rond de lengte-as van je telefoon verplaatst de racketkop niet,
+   en een slag beweegt met het slagvlak vooruit. Rondtollen of plat ronddraaien telt dus niet. */
+function strokeSpeed(wx, wy, wz, radius) {
+  var perp = Math.sqrt(wx * wx + wz * wz);
+  var v = speedKmh(perp, radius);
+  if (perp > 0 && Math.abs(wx) / perp < 0.4) v *= 0.25;
+  if (v > 180) return -1; // onmogelijk snel voor een racket: weggooien
+  return v;
 }
 function judgeSwing(peak, mode, th) {
   if (mode === 'control') {
@@ -1048,12 +1078,13 @@ function onMotion(e) {
   var rr = e.rotationRate;
   if (!rr || (rr.alpha == null && rr.beta == null && rr.gamma == null)) return;
   if (!T.gotSensor) { T.gotSensor = true; $('noSensor').hidden = true; }
-  var a = rr.alpha || 0, b = rr.beta || 0, g = rr.gamma || 0;
-  var v = speedKmh(Math.sqrt(a * a + b * b + g * g), T.radius);
+  var v = strokeSpeed(rr.beta || 0, rr.gamma || 0, rr.alpha || 0, T.radius);
   feed(v, performance.now());
 }
 
 function feed(v, t) {
+  if (v < 0) { T.blockUntil = t + 600; detector.reset(); return; } // rondgetold of gegooid
+  if (T.blockUntil && t < T.blockUntil) return;
   if (v > T.live) T.live = v;
   var ev = detector.push(v, t, T.mode, T.th);
   if (ev) onSwing(ev);
@@ -1220,19 +1251,22 @@ function drillChips(el, enabled) {
 }
 function renderPlayDrills() {
   var ok = !!TVS && (TVS.tvPhase === 'done' || TVS.tvPhase === 'connected');
+  $('tvNext').hidden = !(TVS && TVS.tvPhase === 'done' && TVS.mode === 'ready');
   drillChips($('tvDrillsPlay'), ok);
   $('tvDrillHint').textContent = ok ? 'Tik een training aan: de volgende ronde begint ermee.' : 'Kiezen kan zodra de ronde voorbij is.';
 }
 function renderTvSetup() {
+  $('tvUrl').textContent = tvPageUrl().replace(/^https?:\/\//, '');
+}
+function renderTvSettings() {
   var s = data.settings;
   Array.prototype.forEach.call(document.querySelectorAll('#segTvSport button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-sport') === s.sport)); });
   drillChips($('tvDrills'), true);
-  $('tvUrl').textContent = tvPageUrl().replace(/^https?:\/\//, '');
   Array.prototype.forEach.call(document.querySelectorAll('#segHand button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-hand') === s.hand)); });
   Array.prototype.forEach.call(document.querySelectorAll('#segLevel button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-level') === s.level)); });
 }
 function tvStep(n) {
-  ['Setup', 'Busy', 'Ready', 'Calib', 'Play'].forEach(function (k) { $('tv' + k).hidden = k.toLowerCase() !== n; });
+  ['Setup', 'Busy', 'Settings', 'Ready', 'Calib', 'Play'].forEach(function (k) { $('tv' + k).hidden = k.toLowerCase() !== n; });
   var live = n === 'ready' || n === 'calib' || n === 'play';
   $('tvStop').hidden = !live;
   $('tvClose').hidden = live;
@@ -1305,7 +1339,11 @@ function tvStartSession(code) {
       window.addEventListener('devicemotion', tvOnMotion);
       window.addEventListener('deviceorientation', tvOnOrient);
       if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(function (w) { if (TVS === me) me.wake = w; else w.release(); }, function () {});
-      tvBeginReady();
+      // eerst de instellingen kiezen, dan pas de wachthouding
+      if (TVS.sport !== data.settings.sport) { TVS.sport = data.settings.sport; TVS.radius = SPORTS[TVS.sport].radius; }
+      renderTvSettings();
+      tvStep('settings');
+      tvSend({ type: 'step', step: 'settings' });
     });
     c.on('data', tvOnData);
     c.on('close', function () { if (TVS === me && me.step !== 'busy') tvEnd('Verbinding met de tv verbroken.'); });
@@ -1360,26 +1398,36 @@ function tvBeginReady() {
   if (TVS.pend) clearTimeout(TVS.pend.timer);
   TVS.mode = ''; TVS.readySince = 0; TVS.readyRef = null; TVS.pend = null;
   tvDet.reset();
-  $('tvSteady').style.width = '0%';
   tvStep('ready');
+  tvSend({ type: 'step', step: 'ready' });
   // geen standgegevens van dit toestel? Dan kalibreren we zoals vroeger met twee forehands
   clearTimeout(TVS.readyTimer);
   TVS.readyTimer = setTimeout(function () { if (TVS && TVS.step === 'ready' && !TVS.R) tvBeginCalib(); }, 1500);
 }
 function tvReadyCheck(R) {
-  var y = [R[1], R[4], R[7]], now = performance.now();
-  var level = Math.abs(y[2]) < 0.6; // ongeveer horizontaal naar voren, niet naar boven of beneden
-  if (!level || !TVS.readyRef || dot3(y, TVS.readyRef) < 0.985) { TVS.readyRef = y; TVS.readySince = now; }
-  var f = level ? Math.min(1, (now - TVS.readySince) / 900) : 0;
-  $('tvSteady').style.width = Math.round(f * 100) + '%';
-  $('tvReadyHint').textContent = level ? 'Even stil houden…' : 'Richt je telefoon recht naar voren, naar de tv.';
-  if (f >= 1) tvCaptureReady(y);
+  var level = Math.abs(R[7]) < 0.6; // ongeveer horizontaal naar voren, niet naar boven of beneden
+  $('tvReadyHint').textContent = level ? 'Goed zo. Tik ergens op het scherm.' : 'Richt je telefoon meer recht naar voren, naar de tv.';
+}
+/* Tik in de wachthouding: nu weet SwingLab precies hoe je staat */
+function tvReadyTap() {
+  if (!TVS) return;
+  if (!TVS.R) { tvBeginCalib(); return; }   // toestel zonder standsensor
+  var R = TVS.R, y = [R[1], R[4], R[7]];
+  if (Math.abs(y[2]) > 0.85) { toast('Richt je telefoon meer naar voren, naar de tv, en tik opnieuw.'); return; }
+  tvCaptureReady(y);
 }
 function tvCaptureReady(y) {
   TVS.yaw = heading(y);          // de telefoon wijst recht naar de tv: dat is "naar voren"
   TVS.mode = 'ready';
   TVS.liftCal = LIFT_NEUTRAL;
   tvGoPlay();
+}
+function tvSendConfig() {
+  tvSend(Object.assign({ type: 'config', sport: data.settings.sport, hand: data.settings.hand, level: data.settings.level, drill: curTvDrill() }, tvPlayerInfo()));
+}
+function tvSettingsChanged() {
+  save(); renderTvSettings();
+  if (TVS) { TVS.sport = data.settings.sport; TVS.radius = SPORTS[TVS.sport].radius; tvSendConfig(); }
 }
 function tvGoPlay() {
   tvStep('play');
@@ -1412,7 +1460,7 @@ function tvOnMotion(e) {
   if (TVS.R) vec = vec.concat(TVS.R);
   tvTrack(e);
   tvLearnSigma(wx, wy, wz);
-  tvFeed(speedKmh(Math.sqrt(wx * wx + wy * wy + wz * wz), TVS.radius), performance.now(), vec);
+  tvFeed(strokeSpeed(wx, wy, wz, TVS.radius), performance.now(), vec);
 }
 /* Draairichting van dit toestel leren: vergelijk de gyroscoop met hoe de stand echt verandert */
 function tvLearnSigma(wx, wy, wz) {
@@ -1460,6 +1508,8 @@ function tvOnOrient(e) {
   }
 }
 function tvFeed(v, t, vec) {
+  if (v < 0) { TVS.blockUntil = t + 600; tvDet.reset(); return; }
+  if (TVS.blockUntil && t < TVS.blockUntil) return;
   var ev = tvDet.push(v, t, 'power', TV_TH, vec);
   if (ev) tvSwing(ev);
 }
@@ -1479,6 +1529,11 @@ function tvSwing(ev) {
   }
   if (TVS.step === 'play' && (TVS.vec || TVS.mode === 'ready')) {
     var dir;
+    // alleen slagen van achter naar voor, of van boven je hoofd naar beneden, tellen
+    if (TVS.mode === 'ready' && TVS.sigma && ev.vec.length >= 12) {
+      var vf = norm3(toCourt(mulRv(ev.vec.slice(3, 12), [-TVS.sigma * ev.vec[2], 0, TVS.sigma * ev.vec[0]]), TVS.yaw));
+      if (vf && !(vf[1] > 0.1 || vf[2] < -0.55)) return; // achteruit (uithaal) of zijwaarts: geen slag
+    }
     if (TVS.mode === 'ready' && ev.vec.length >= 12) {
       // forehand of backhand: aan welke kant van je lichaam de racketkop is op het moment van de slag
       var Rp = ev.vec.slice(3, 12), hs = data.settings.hand === 'left' ? -1 : 1;
@@ -2032,11 +2087,21 @@ function bind() {
     var url = tvPageUrl();
     if (navigator.clipboard) navigator.clipboard.writeText(url).then(function () { toast('Link gekopieerd.'); }, function () {});
   });
-  $('segHand').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.hand = b.getAttribute('data-hand'); save(); renderTvSetup(); });
-  $('segLevel').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.level = b.getAttribute('data-level'); save(); renderTvSetup(); });
+  $('segHand').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.hand = b.getAttribute('data-hand'); tvSettingsChanged(); });
+  $('segLevel').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.level = b.getAttribute('data-level'); tvSettingsChanged(); });
   $('tvRecal').addEventListener('click', function () { if (TVS) tvBeginReady(); });
-  $('segTvSport').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.sport = b.getAttribute('data-sport'); save(); renderTvSetup(); });
-  $('tvDrills').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.drills[data.settings.sport] = b.getAttribute('data-drill'); save(); renderTvSetup(); });
+  $('segTvSport').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.sport = b.getAttribute('data-sport'); tvSettingsChanged(); });
+  $('tvDrills').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.drills[data.settings.sport] = b.getAttribute('data-drill'); tvSettingsChanged(); });
+  $('tvSettingsOk').addEventListener('click', function () { if (TVS) tvBeginReady(); });
+  $('tvReady').addEventListener('click', tvReadyTap);
+  $('tvReady').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tvReadyTap(); } });
+  $('tvNext').addEventListener('click', function () {
+    if (!TVS || !TVS.R) return;
+    var R = TVS.R, y = [R[1], R[4], R[7]];
+    if (Math.abs(y[2]) > 0.85) { toast('Richt je telefoon meer naar voren, naar de tv, en tik opnieuw.'); return; }
+    TVS.yaw = heading(y); tvSendConfig(); tvSend({ type: 'ready' }); buzz([30, 40, 30]);
+    $('tvNext').hidden = true;
+  });
   $('tvDrillsPlay').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b || b.disabled || !TVS) return;
     data.settings.drills[data.settings.sport] = b.getAttribute('data-drill'); save();
@@ -2094,12 +2159,43 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 7, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 9, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 
+/* Nieuwe versie: de service worker installeert hem op de achtergrond en wacht.
+   Dan tonen we de melding; pas na "Activeren" schakelt de app over en laadt ze opnieuw. */
+var waitingWorker = null, updateRequested = false;
+function showUpdate(w) {
+  waitingWorker = w;
+  $('updateBar').hidden = false;
+  $('updateBtn').disabled = false; $('updateBtn').textContent = 'Activeren';
+}
+$('updateBtn').addEventListener('click', function () {
+  if (!waitingWorker) { location.reload(); return; }
+  updateRequested = true;
+  $('updateBtn').disabled = true; $('updateBtn').textContent = 'Even geduld…';
+  waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+  setTimeout(function () { if (updateRequested) location.reload(); }, 4000); // reserve als de overschakeling uitblijft
+});
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (updateRequested) { updateRequested = false; location.reload(); }
+  });
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').then(function (reg) {
+      function check(w) { if (w && navigator.serviceWorker.controller) showUpdate(w); }
+      check(reg.waiting);
+      reg.addEventListener('updatefound', function () {
+        var nw = reg.installing; if (!nw) return;
+        nw.addEventListener('statechange', function () { if (nw.state === 'installed') check(nw); });
+      });
+      // kijk bij elke keer openen (en elk halfuur) of er een nieuwe versie is
+      var look = function () { if (!T && !TVS) reg.update().catch(function () {}); };
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) look(); });
+      setInterval(look, 30 * 60 * 1000);
+    }).catch(function () {});
+  });
 }
 
 /* alleen voor tests */

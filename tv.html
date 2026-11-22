@@ -165,11 +165,14 @@ var COURTS = {
 };
 var LEVELS = { rustig: 2.0, normaal: 1.55, snel: 1.2 };
 var BALLS = 20, G = 9.81, NET_MS = 30;
-var WIN_PERFECT = 90, WIN_GOOD = 220, LATE_FINAL = 600;
+var WIN_PERFECT = 130, WIN_GOOD = 330, LATE_FINAL = 750;   // het blijft een spel: ruime marges
+var WIN_K = { rustig: 1.2, normaal: 1.0, snel: 0.85 };
+function winP() { return WIN_PERFECT * (WIN_K[S.level] || 1); }
+function winG() { return WIN_GOOD * (WIN_K[S.level] || 1); }
 var DRAG = 0.022;                                   // luchtweerstand van de bal
 var BALL_K = { padel: 1.0, tennis: 1.15, pickleball: 0.65 }; // racketsnelheid naar balsnelheid
 var REBOUND = { rustig: 9, normaal: 11, snel: 14 };          // km/u die de inkomende bal zelf meegeeft
-var RACKET_SCALE = 2.2;                             // racket iets groter tekenen zodat je hem goed ziet
+var RACKET_SCALE = 2.5;                             // racket iets groter tekenen zodat je hem goed ziet
 
 /* ---------- Trainingen per sport ----------
    type: ground (na een stuits), volley (zonder stuits), overhead (hoge bal boven je hoofd),
@@ -467,7 +470,7 @@ function simulateShot(p0, speedKmh, elDeg, azDeg, dr) {
 
 /* Hoek waarbij een neutrale zwaai (zonder opwaartse beweging) het net ruim haalt.
    Waar de bal dan landt, volgt vanzelf uit je snelheid: traag is kort, heel hard gaat uit. */
-var NET_CLEAR = 0.6;
+var NET_CLEAR = 0.8;
 function ballSpeed(racketKmh, dr) {
   var reb = dr && dr.reb != null ? dr.reb : (REBOUND[S.level] || 11);
   return clamp((racketKmh * (BALL_K[S.sport] || 1) + reb) / 3.6, 4, 42);
@@ -500,8 +503,8 @@ function heightAtNet(p0, speedKmh, elDeg, dr) {
   return -1;
 }
 
-function hitBall(b, d, speed, lift, now) {
-  var c = court(), perfect = Math.abs(d) <= WIN_PERFECT, nY = c.L / 2;
+function hitBall(b, d, speed, lift, now, otherSide) {
+  var c = court(), perfect = !otherSide && Math.abs(d) <= winP(), nY = c.L / 2;
   var p = ballPos(b, now);
   b.judged = true; b.kind = 'out'; b.tr = now; b.trail = []; b.bounceIdx = 0;
   var el0 = neutralElevation(p, speed, b.dr);
@@ -509,10 +512,14 @@ function hitBall(b, d, speed, lift, now) {
   if (hasLift && b.dr.liftOffset) lift += b.dr.liftOffset; // een smash gaat van nature omlaag: dat is hier neutraal
   var el = hasLift ? launchAngle(el0, lift) : el0;
   // vroeg = cross, laat = langs de lijn
-  var az = b.side * clamp(d / WIN_GOOD, -1, 1) * 16 - b.side * 3 + (Math.random() - 0.5) * 6;
+  var az = b.side * clamp(d / winG(), -1, 1) * 16 - b.side * 3 + (Math.random() - 0.5) * 6;
   b.sim = simulateShot(p, speed, el, az, b.dr);
+  if (b.sim.outcome !== 'in' && (!hasLift || Math.abs(lift) < 25) && speed < 115) {
+    var safe = simulateShot(p, Math.min(speed, 95), el0, az * 0.6, b.dr);
+    if (safe.outcome === 'in') b.sim = safe;
+  }
 
-  var timingPts = perfect ? 100 : 60;
+  var timingPts = otherSide ? 40 : (perfect ? 100 : 60);
   if (perfect) R.perfect++; else R.good++;
   if (speed > R.best) R.best = Math.round(speed);
   R.pending++;
@@ -522,7 +529,7 @@ function hitBall(b, d, speed, lift, now) {
   showVerdict(perfect ? 'Perfect' : 'Goed', perfect ? 'perfect' : 'good');
   $('hudShot').className = 'shot';
   $('hudSpeed').textContent = Math.round(speed) + ' km/u';
-  $('hudSpeedLbl').textContent = (b.dr.type === 'overhead' ? 'boven je hoofd' : (b.side === sideFor('fh') ? 'forehand' : 'backhand')) + (hasLift ? ', ' + (lift >= 0 ? '+' : '') + Math.round(lift) + '° omhoog' : '');
+  $('hudSpeedLbl').textContent = (otherSide ? 'andere kant, ' : '') + (b.dr.type === 'overhead' ? 'boven je hoofd' : (b.side === sideFor('fh') ? 'forehand' : 'backhand')) + (hasLift ? ', ' + (lift >= 0 ? '+' : '') + Math.round(lift) + '° omhoog' : '');
   updateHud();
   send({ type: 'result', verdict: perfect ? 'Perfect' : 'Goed', hit: true, swung: true, perfect: perfect, points: 0, speed: Math.round(speed) });
   // langere slagen (lobs) krijgen meer tijd voor de volgende bal komt
@@ -589,8 +596,8 @@ function onSwing(side, speed, lagMs, lift) {
   var b = R.inc;
   if (!b || b.judged) return;
   var d = tp - b.tContact;
-  if (Math.abs(d) <= WIN_GOOD) {
-    if (side === b.side || b.anySide) hitBall(b, d, speed, lift, now); else b.wrong = true;
+  if (Math.abs(d) <= winG()) {
+    hitBall(b, d, speed, lift, now, !(side === b.side || b.anySide));
     return;
   }
   if ((side === b.side || b.anySide) && Math.abs(d) < 700 && (b.cand == null || Math.abs(d) < Math.abs(b.cand))) b.cand = d;
@@ -716,10 +723,10 @@ function drawZones(now) {
   var b = R && R.inc;
   if (S.phase === 'play' && b && !b.judged) {
     var left = (b.tContact - now) / 1000;
-    if (left < 0.9 && left > -WIN_GOOD / 1000) {
+    if (left < 0.9 && left > -winG() / 1000) {
       var q2 = proj(b.c[0], b.c[1], b.c[2]), br = 0.14 * q2.s;
       var r = br * (1 + 6 * clamp(left / 0.9, 0, 1));
-      var inPerfect = Math.abs(left * 1000) <= WIN_PERFECT;
+      var inPerfect = Math.abs(left * 1000) <= winP();
       ctx.beginPath(); ctx.arc(q2.x, q2.y, r, 0, Math.PI * 2);
       ctx.strokeStyle = inPerfect ? '#B9E631' : 'rgba(255,255,255,.55)'; ctx.lineWidth = Math.max(2, br * 0.35); ctx.stroke();
     }
@@ -769,65 +776,163 @@ function v3norm(a) { var n = Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) 
 function v3cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
 function v3dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 
+/* Racketmodellen in echte maten (meter), in het vlak van het racket: x = breedte, y = lengte (+ = naar de kop).
+   De oorsprong is het midden van de kop. Elk model wordt met zijn dikte als 3D-vorm getekend. */
+function ellipsePts(cx, cy, a, b, n, fn) { var o = []; for (var i = 0; i < n; i++) { var t = i / n * Math.PI * 2, x = Math.cos(t), y = Math.sin(t); o.push(fn ? fn(x, y, a, b) : [cx + a * x, cy + b * y]); } return o; }
+function roundRect(x0, y0, x1, y1, r, n) {
+  var o = [], cs = [[x1 - r, y1 - r, 0], [x0 + r, y1 - r, 90], [x0 + r, y0 + r, 180], [x1 - r, y0 + r, 270]];
+  cs.forEach(function (c) { for (var i = 0; i <= n; i++) { var a = (c[2] + i / n * 90) * Math.PI / 180; o.push([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)]); } });
+  return o;
+}
+var MODELS = (function () {
+  // padel: druppelvorm 26 x 30 cm, 3,8 cm dik, open hart in de hals, greep 13 cm
+  var padelHead = ellipsePts(0, 0, 0.13, 0.15, 40, function (x, y) { var yy = y > 0 ? 0.155 * y : 0.135 * y, k = y < 0 ? 1 - 0.22 * y * y : 1; return [0.13 * x * k, yy]; });
+  var padelHoles = [];
+  for (var r = -5; r <= 5; r++) for (var c = -5; c <= 5; c++) {
+    var hx = c * 0.022 + (r % 2 ? 0.011 : 0), hy = r * 0.021 + 0.01;
+    var nx = hx / 0.105, ny = hy > 0 ? hy / 0.125 : hy / 0.10;
+    if (nx * nx + ny * ny < 1) padelHoles.push([hx, hy]);
+  }
+  // tennis: ovale kop 25 x 32 cm, kader 1,3 cm breed en 2,4 cm dik, open V-hals, greep 20 cm
+  var tenOuter = ellipsePts(0, 0, 0.125, 0.16, 44), tenInner = ellipsePts(0, 0.004, 0.112, 0.146, 44);
+  // pickleball: afgeronde rechthoek 19 x 27 cm, 1,6 cm dik, greep 13 cm
+  var pickle = roundRect(-0.095, -0.135, 0.095, 0.135, 0.04, 6);
+  return {
+    padel: {
+      head: padelHead, t: 0.038, holes: padelHoles, holeR: 0.0065,
+      throat: { outer: [[-0.075, -0.112], [0.075, -0.112], [0.022, -0.2], [-0.022, -0.2]], hole: [[-0.034, -0.128], [0.034, -0.128], [0, -0.178]], t: 0.032 },
+      grip: { w: 0.035, y0: -0.2, y1: -0.33, t: 0.03 },
+      face: '#1f2226', faceHi: '#3a3f46', edge: '#0d0e10', accent: '#B9E631'
+    },
+    tennis: {
+      head: tenOuter, inner: tenInner, t: 0.024, strings: true,
+      beams: [[[-0.07, -0.13], [-0.055, -0.14], [-0.009, -0.3], [-0.018, -0.3]], [[0.07, -0.13], [0.055, -0.14], [0.009, -0.3], [0.018, -0.3]]],
+      grip: { w: 0.03, y0: -0.3, y1: -0.5, t: 0.03 },
+      face: '#16181b', faceHi: '#4a4f57', edge: '#08090a', accent: '#B9E631'
+    },
+    pickleball: {
+      head: pickle, t: 0.016, guard: true,
+      grip: { w: 0.034, y0: -0.135, y1: -0.265, t: 0.028 },
+      face: '#1a1c20', faceHi: '#2f343b', edge: '#0b0c0e', accent: '#B9E631'
+    }
+  };
+})();
+var LIGHT = v3norm([-0.35, -0.55, 0.75]);
+function shade(hex, f) {
+  var n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  f = clamp(f, 0, 1.6);
+  return 'rgb(' + Math.round(clamp(r * f, 0, 255)) + ',' + Math.round(clamp(g * f, 0, 255)) + ',' + Math.round(clamp(b * f, 0, 255)) + ')';
+}
+function pathPts(pts) { ctx.moveTo(pts[0].x, pts[0].y); for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y); ctx.closePath(); }
+
+/* Tekent een vlakke vorm met dikte: achterkant, zijkanten en voorkant in de juiste volgorde */
+function slab(F, outline, holes, t, col, detail) {
+  var k = RACKET_SCALE, half = t * k / 2;
+  function P(q, side) { return v3add(v3add(v3add(F.H, F.x, q[0] * k), F.y, q[1] * k), F.z, side * half); }
+  var camDir = v3norm([CAM.x - F.H[0], CAM.y - F.H[1], CAM.z - F.H[2]]);
+  var front = v3dot(F.z, camDir) > 0 ? 1 : -1;               // de kant die naar de camera kijkt
+  var near = outline.map(function (q) { return proj.apply(null, P(q, front)); });
+  var far = outline.map(function (q) { return proj.apply(null, P(q, -front)); });
+  // zijkant: per randstuk, alleen wat naar de camera kijkt
+  var c3 = F.H;
+  for (var i = 0; i < outline.length; i++) {
+    var j = (i + 1) % outline.length, a = P(outline[i], 0), b = P(outline[j], 0);
+    var mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
+    var out = v3norm(v3cross([b[0] - a[0], b[1] - a[1], b[2] - a[2]], F.z));
+    if (v3dot(out, [mid[0] - c3[0], mid[1] - c3[1], mid[2] - c3[2]]) < 0) out = [-out[0], -out[1], -out[2]];
+    if (v3dot(out, [CAM.x - mid[0], CAM.y - mid[1], CAM.z - mid[2]]) <= 0) continue;
+    ctx.beginPath(); ctx.moveTo(near[i].x, near[i].y); ctx.lineTo(near[j].x, near[j].y); ctx.lineTo(far[j].x, far[j].y); ctx.lineTo(far[i].x, far[i].y); ctx.closePath();
+    ctx.fillStyle = shade(col.edge, 1.6 + 1.4 * Math.max(0, v3dot(out, LIGHT))); ctx.fill();
+  }
+  // voorkant (met eventuele gaten als open ruimte)
+  var nf = front > 0 ? F.z : [-F.z[0], -F.z[1], -F.z[2]], lit = 0.55 + 0.6 * Math.max(0, v3dot(nf, LIGHT));
+  ctx.beginPath(); pathPts(near);
+  (holes || []).forEach(function (hl) { pathPts(hl.map(function (q) { return proj.apply(null, P(q, front)); })); });
+  var g = ctx.createLinearGradient(near[0].x, near[0].y, near[Math.floor(near.length / 2)].x, near[Math.floor(near.length / 2)].y);
+  g.addColorStop(0, shade(col.faceHi, lit)); g.addColorStop(1, shade(col.face, lit));
+  ctx.fillStyle = g; ctx.fill('evenodd');
+  ctx.strokeStyle = 'rgba(255,255,255,' + (0.1 + 0.25 * lit) + ')'; ctx.lineWidth = 1; ctx.stroke();
+  if (detail) detail(function (q) { return proj.apply(null, P(q, front)); }, near);
+}
+
 function drawRacket(H, yv, zv, mode) {
   yv = v3norm(yv);
   zv = v3norm(v3add(zv, yv, -v3dot(zv, yv)));
-  var xv = v3cross(yv, zv), k = RACKET_SCALE, sp = S.sport;
-  var hw = (sp === 'tennis' ? 0.135 : sp === 'pickleball' ? 0.10 : 0.13) * k;
-  var hl = (sp === 'tennis' ? 0.17 : sp === 'pickleball' ? 0.11 : 0.15) * k;
-  var handle = (sp === 'tennis' ? 0.2 : 0.14) * k;
-  var outline = [], shadow = [];
-  for (var i = 0; i < 28; i++) {
-    var a = i / 28 * Math.PI * 2, cx = Math.cos(a), sy = Math.sin(a);
-    var w = sp === 'pickleball' ? (Math.abs(cx) > 0.7 ? 0.98 : 1) : (sy < 0 ? 0.92 + 0.08 * (1 + sy) : 1); // padel/tennis iets smaller naar de hals
-    var P = v3add(v3add(H, xv, hw * cx * w), yv, hl * sy);
-    outline.push(proj.apply(null, P)); shadow.push(proj(P[0], P[1], 0));
-  }
-  var camDir = v3norm([CAM.x - H[0], CAM.y - H[1], CAM.z - H[2]]);
-  var facing = v3dot(zv, camDir) > 0;
-  var h0 = proj.apply(null, v3add(H, yv, -hl)), h1 = proj.apply(null, v3add(H, yv, -hl - handle));
-  ctx.lineCap = 'round';
+  var xv = v3cross(yv, zv), F = { H: H, x: xv, y: yv, z: zv }, M = MODELS[S.sport] || MODELS.padel, k = RACKET_SCALE;
+  function P2(q) { return proj.apply(null, v3add(v3add(H, xv, q[0] * k), yv, q[1] * k)); }
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+
   if (mode === 'ghost' || mode === 'ghost-hot') {
-    var col = mode === 'ghost-hot' ? 'rgba(185,230,49,.95)' : 'rgba(255,255,255,.5)';
-    ctx.setLineDash([6, 6]);
-    ctx.beginPath(); outline.forEach(function (q, j) { if (j) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
-    ctx.strokeStyle = col; ctx.lineWidth = Math.max(3, h0.s * 0.03); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(h0.x, h0.y); ctx.lineTo(h1.x, h1.y); ctx.stroke();
+    var col = mode === 'ghost-hot' ? 'rgba(185,230,49,.95)' : 'rgba(255,255,255,.55)';
+    ctx.setLineDash([6, 6]); ctx.strokeStyle = col;
+    var head = M.head.map(P2), g0 = P2([0, M.grip.y0]), g1 = P2([0, M.grip.y1]);
+    ctx.lineWidth = Math.max(2.5, head[0].s * 0.03);
+    ctx.beginPath(); pathPts(head); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(g0.x, g0.y); ctx.lineTo(g1.x, g1.y); ctx.stroke();
+    if (M.throat) { var th = M.throat.outer.map(P2); ctx.beginPath(); pathPts(th); ctx.stroke(); }
+    if (M.beams) M.beams.forEach(function (bm) { var q = bm.map(P2); ctx.beginPath(); pathPts(q); ctx.stroke(); });
     ctx.setLineDash([]);
     return;
   }
-  // eigen racket, met schaduw op de baan zodat je ziet waar hij is
-  ctx.beginPath(); shadow.forEach(function (q, j) { if (j) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
-  ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.fill();
-  ctx.beginPath(); ctx.moveTo(h0.x, h0.y); ctx.lineTo(h1.x, h1.y);
-  ctx.strokeStyle = '#E8E8EA'; ctx.lineWidth = Math.max(4, h0.s * 0.05); ctx.stroke();
-  ctx.beginPath(); outline.forEach(function (q, j) { if (j) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
-  ctx.fillStyle = facing ? 'rgba(24,24,28,.88)' : 'rgba(70,70,76,.88)'; ctx.fill();
-  ctx.strokeStyle = '#B9E631'; ctx.lineWidth = Math.max(3, h0.s * 0.035); ctx.stroke();
-  if (sp === 'padel') { // gaatjes
-    ctx.fillStyle = 'rgba(255,255,255,.35)';
-    for (var gx = -2; gx <= 2; gx++) for (var gy = -2; gy <= 2; gy++) {
-      if (gx * gx / 6 + gy * gy / 6 > 1) continue;
-      var q = proj.apply(null, v3add(v3add(H, xv, gx * hw * 0.32), yv, gy * hl * 0.32));
-      ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(1, q.s * 0.01), 0, Math.PI * 2); ctx.fill();
-    }
-  } else if (sp === 'tennis') { // snaren
-    ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1;
-    for (var sx = -3; sx <= 3; sx++) {
-      var f = sx / 4, hh = Math.sqrt(1 - f * f) * hl * 0.9;
-      var s1 = proj.apply(null, v3add(v3add(H, xv, f * hw), yv, -hh)), s2 = proj.apply(null, v3add(v3add(H, xv, f * hw), yv, hh));
-      ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
-    }
+
+  // schaduw op de baan
+  ctx.beginPath(); pathPts(M.head.map(function (q) { var w = v3add(v3add(H, xv, q[0] * k), yv, q[1] * k); return proj(w[0], w[1], 0); }));
+  ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fill();
+
+  var gr = M.grip, gripOutline = [[-gr.w / 2, gr.y0], [gr.w / 2, gr.y0], [gr.w / 2, gr.y1], [-gr.w / 2, gr.y1]];
+  var gripCol = { face: '#141414', faceHi: '#2b2b2b', edge: '#060606' };
+  function drawGrip() {
+    slab(F, gripOutline, null, gr.t, gripCol, function (Pf) {
+      ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1;
+      for (var i = 1; i < 7; i++) { var y = gr.y0 + (gr.y1 - gr.y0) * i / 7, a = Pf([-gr.w / 2, y]), b = Pf([gr.w / 2, y + 0.008]); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+      var cap = Pf([0, gr.y1]); ctx.fillStyle = M.accent; ctx.beginPath(); ctx.arc(cap.x, cap.y, Math.max(1.5, cap.s * 0.012), 0, Math.PI * 2); ctx.fill();
+    });
   }
+  function drawHead() {
+    if (M.throat) slab(F, M.throat.outer, [M.throat.hole], M.throat.t, M);
+    if (M.beams) M.beams.forEach(function (bm) { slab(F, bm, null, M.t, M); });
+    if (M.strings) {
+      // snaren in het midden van het kader
+      var inner = M.inner.map(P2);
+      ctx.save(); ctx.beginPath(); pathPts(inner); ctx.clip();
+      ctx.strokeStyle = 'rgba(225,228,232,.55)'; ctx.lineWidth = Math.max(0.7, inner[0].s * 0.0025);
+      for (var i = -8; i <= 8; i++) { var x = i * 0.0125, a = P2([x, -0.16]), b = P2([x, 0.17]); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+      for (var j = -10; j <= 10; j++) { var y = j * 0.0135, a2 = P2([-0.13, y]), b2 = P2([0.13, y]); ctx.beginPath(); ctx.moveTo(a2.x, a2.y); ctx.lineTo(b2.x, b2.y); ctx.stroke(); }
+      ctx.restore();
+      slab(F, M.head, [M.inner], M.t, M);
+      return;
+    }
+    slab(F, M.head, null, M.t, M, function (Pf, near) {
+      var s0 = near[0].s;
+      if (M.holes && s0 > 25) {
+        ctx.fillStyle = 'rgba(0,0,0,.75)';
+        M.holes.forEach(function (c) {
+          var hx = []; for (var i = 0; i < 6; i++) { var a = i / 6 * Math.PI * 2; hx.push(Pf([c[0] + Math.cos(a) * M.holeR, c[1] + Math.sin(a) * M.holeR])); }
+          ctx.beginPath(); pathPts(hx); ctx.fill();
+        });
+      }
+      // SwingLab-accent: een groene boog bovenaan de kop
+      ctx.strokeStyle = M.accent; ctx.lineWidth = Math.max(1.5, s0 * 0.008);
+      ctx.beginPath();
+      for (var t = 0; t <= 20; t++) { var a3 = Math.PI * (0.2 + 0.6 * t / 20), q = Pf([Math.cos(a3) * 0.105 * (M.guard ? 0.82 : 1), (M.guard ? 0.1 : 0.12) * Math.sin(a3) + (M.guard ? 0.005 : 0)]); if (t) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }
+      ctx.stroke();
+      if (M.guard) { ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = Math.max(1.5, s0 * 0.01); ctx.beginPath(); pathPts(near); ctx.stroke(); }
+    });
+  }
+  // wat het verst van de camera is eerst
+  var gc = v3add(H, yv, (gr.y0 + gr.y1) / 2 * k);
+  var dHead = v3dot([H[0] - CAM.x, H[1] - CAM.y, H[2] - CAM.z], [H[0] - CAM.x, H[1] - CAM.y, H[2] - CAM.z]);
+  var dGrip = v3dot([gc[0] - CAM.x, gc[1] - CAM.y, gc[2] - CAM.z], [gc[0] - CAM.x, gc[1] - CAM.y, gc[2] - CAM.z]);
+  if (dGrip > dHead) { drawGrip(); drawHead(); } else { drawHead(); drawGrip(); }
 }
 
 function drawGhost(now) {
   var b = R && R.inc;
   if (S.phase !== 'play' || !b || b.judged) return;
   var left = (b.tContact - now) / 1000;
-  if (left > 1.3 || left < -WIN_GOOD / 1000) return;
+  if (left > 1.3 || left < -winG() / 1000) return;
   var yv = b.dr.type === 'overhead' ? v3norm([0.25 * b.side, 0.15, 1]) : v3norm([b.side * 1, 0.28, 0.12]);
-  var hot = Math.abs(left * 1000) <= WIN_PERFECT;
+  var hot = Math.abs(left * 1000) <= winP();
   drawRacket(b.c, yv, [0, 1, 0], hot ? 'ghost-hot' : 'ghost');
 }
 
@@ -883,7 +988,7 @@ function drawFrame(now) {
   if (R && S.phase === 'play') {
     if (R.balls < BALLS && (!R.inc || R.inc.judged) && now >= R.nextLaunch) launchBall(now);
     var b = R.inc;
-    if (b && !b.judged && now > b.tContact + LATE_FINAL) finalizeMiss(b, now);
+    if (b && !b.judged && now > b.tContact + Math.max(LATE_FINAL, winG() + 350)) finalizeMiss(b, now);
     if (R.balls >= BALLS && R.inc && R.inc.judged && R.pending === 0 && now > R.lastJudge + 1300) endRound();
   }
   // ballen opruimen
@@ -954,7 +1059,12 @@ function handleData(m) {
     if (S.phase !== 'play') setCamera();
     if (S.phase === 'done') $('doneAgain').textContent = 'Volgende ronde: ' + curDrill().name.toLowerCase() + '. Zwaai om te starten.';
     if (S.phase === 'pair') setPhase('connected');
+    showConnectedMsg();
     send({ type: 'phase', phase: S.phase });
+  } else if (m.type === 'step') {
+    if (S.phase === 'pair') setPhase('connected');
+    S.step = m.step;
+    showConnectedMsg();
   } else if (m.type === 'ready') {
     if (S.phase === 'connected' || S.phase === 'done' || S.phase === 'pair') startCountdown();
   } else if (m.type === 'again') {
@@ -968,6 +1078,12 @@ function handleData(m) {
   }
 }
 
+function showConnectedMsg() {
+  var what = SPORTNAME() + ', ' + curDrill().name.toLowerCase() + ', tempo ' + S.level + ', ' + (S.hand === 'left' ? 'linkshandig' : 'rechtshandig') + '.';
+  $('connectedMsg').textContent = S.step === 'ready'
+    ? 'Neem de wachthouding aan: racket op navelhoogte voor je, recht naar voren naar de tv, loodrecht op je buik. Tik dan ergens op het scherm van je telefoon.'
+    : 'Kies op je telefoon je sport, training en tempo. Nu: ' + what;
+}
 function phoneGone() {
   conn = null;
   if (S.demo) return;

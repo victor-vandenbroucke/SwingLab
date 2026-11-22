@@ -1,11 +1,15 @@
 /* SwingLab service worker: werkt offline na het eerste bezoek.
    Verhoog CACHE bij elke nieuwe versie zodat oude bestanden opgeruimd worden. */
-const CACHE = 'swinglab-v7';
+const CACHE = 'swinglab-v9';
 const ASSETS = ['./', './index.html', './tv.html', './manifest.webmanifest', './peerjs.min.js', './supabase.js', './591.supabase.js',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
+// Een nieuwe versie wacht tot de gebruiker in de app op "Activeren" tikt (zie index.html)
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+});
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {

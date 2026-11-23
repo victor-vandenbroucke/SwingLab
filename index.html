@@ -508,6 +508,15 @@ summary .badge{margin-right:auto}
     </div>
   </details>
   <details>
+    <summary>Spelregels in SwingLab</summary>
+    <div class="dbody">
+      <p><b>Tennis</b> (regels van Tennis Vlaanderen): 15, 30, 40, spel; bij 40-40 gelijk en voordeel. Sets tot 6 games met 2 games verschil en een tie-break bij 6-6 (tot 7, met 2 punten verschil). Een korte set gaat tot 4 met een tie-break bij 4-4. Bij 2 gewonnen sets is de derde set een beslissende tie-break tot 10. Opslag van achter de baseline, afwisselend van rechts en links, beginnend rechts, in het diagonale servicevak; een tweede opslag na een fout; twee fouten is een dubbele fout. Raakt de opslag het net en valt hij in het vak, dan is het een let en serveer je opnieuw. In de tie-break serveert de eerste 1 punt, daarna serveert elk team om beurt 2 punten. Een bal op de lijn is in. Enkelspel gebruikt de enkellijnen; het servicevak is altijd dat van het enkelspel. Na elke oneven game en elke 6 punten in een tie-break wissel je van kant.</p>
+      <p><b>Padel</b> (regels van Padel Vlaanderen): telling zoals tennis. Bij 40-40 kies je zelf: gouden punt (het volgende punt beslist), voordeel, of star point (na de derde deuce beslist één punt). Sets tot 6 met een tie-break bij 6-6, of 1 set tot 9 met een tie-break bij 8-8; bij 1-1 in sets volgt een super tie-break tot 10. De opslag gebeurt onderhands, na een stuit, van achter de servicelijn, diagonaal in het vak. Een opslag die na de stuit het gaas raakt, is fout; het glas mag wel. Een let wordt overgedaan. Tijdens de rally moet de bal eerst stuiten voor hij een wand raakt; daarna mag hij via het glas terugkomen.</p>
+      <p><b>Pickleball</b>: alleen het serverende team kan punten maken. Een game gaat tot 11 met 2 punten verschil. Opslag onderhands van achter de baseline, diagonaal, voorbij de kitchen (de kitchenlijn is fout); één opslag per beurt, een net-opslag speelt gewoon door. In het dubbel serveren beide spelers (server 1 en 2), behalve bij de start van een game (0-0-2). Na een side-out begint het andere team van rechts. De return en de derde bal moeten eerst stuiten (twee-stuitsregel); in de kitchen volleer je niet. De stand roep je af als: eigen punten, punten tegenstander, servernummer.</p>
+      <p>Wat een spel op je tv niet kan nagaan, zoals voetfouten, het net aanraken, de bal tegen je lichaam of de tijdregels, zit er niet in.</p>
+    </div>
+  </details>
+  <details>
     <summary>Punten en je speler</summary>
     <div class="dbody">
       <p>Met trainingen en wedstrijden verdien je <b>punten</b>. Daarmee speel je bij <b>Jouw speler</b> kleren, kapsels en extra's vrij. Elke sport heeft een eigen speler.</p>
@@ -546,7 +555,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 28</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 33</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -748,6 +757,8 @@ summary .badge{margin-right:auto}
         <div class="seg" role="group" aria-labelledby="lblTeam" id="segTeam"><button type="button" data-team="samen">Samen</button><button type="button" data-team="tegen">Tegen elkaar</button></div></div>
       <div class="tv-lbl" id="lblBots">Niveau van de bots</div>
       <div class="seg" role="group" aria-labelledby="lblBots" id="segBots"><button type="button" data-bots="makkelijk">Makkelijk</button><button type="button" data-bots="normaal">Normaal</button><button type="button" data-bots="moeilijk">Moeilijk</button></div>
+      <div id="deuceBox"><div class="tv-lbl" id="lblDeuce">Bij 40-40</div>
+        <div class="seg" role="group" aria-labelledby="lblDeuce" id="segDeuce"><button type="button" data-deuce="golden">Gouden punt</button><button type="button" data-deuce="star">Star point</button><button type="button" data-deuce="adv">Voordeel</button></div></div>
       <div class="tv-lbl" id="lblLen">Lengte</div>
       <div class="seg" role="group" aria-labelledby="lblLen" id="segLen"><button type="button" data-len="kort">Kort</button><button type="button" data-len="middel">Middel</button><button type="button" data-len="lang">Lang</button></div>
       <p class="tv-sub small" id="lineupHint"></p>
@@ -932,7 +943,7 @@ function clone(o) { return JSON.parse(JSON.stringify(o)); }
 function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
 
 var DEFAULTS = {
-  settings: { points: 0, owned: [], avatars: {}, career: {}, sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, hand: 'right', level: 'normaal', drills: { padel: 'basis', tennis: 'basis', pickleball: 'basis' }, match: { mode: 'train', team: 'samen', bots: 'normaal', length: 'kort', tennis: 'enkel' }, thresholds: clone(DEFAULT_THRESHOLDS) },
+  settings: { points: 0, owned: [], avatars: {}, career: {}, sport: 'padel', mode: 'power', goal: 100, sound: true, vibrate: true, onboarded: false, hand: 'right', level: 'normaal', drills: { padel: 'basis', tennis: 'basis', pickleball: 'basis' }, match: { mode: 'train', team: 'samen', bots: 'normaal', length: 'kort', tennis: 'enkel', deuce: 'golden' }, thresholds: clone(DEFAULT_THRESHOLDS) },
   meta: { settingsAt: 0 },
   stats: { total: 0, hits: 0, timeMs: 0, perSport: { padel: 0, tennis: 0, pickleball: 0 }, best: { padel: 0, tennis: 0, pickleball: 0 }, days: {}, sessions: [] }
 };
@@ -1718,7 +1729,14 @@ function renderTvSettings() {
   Array.prototype.forEach.call(document.querySelectorAll('#segTeam button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-team') === mt.team)); });
   Array.prototype.forEach.call(document.querySelectorAll('#segBots button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-bots') === mt.bots)); });
   Array.prototype.forEach.call(document.querySelectorAll('#segLen button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-len') === mt.length)); });
-  var lenTxt = s.sport === 'pickleball' ? ({ kort: 'tot 5 punten', middel: 'tot 11 punten', lang: 'tot 15 punten' })[mt.length] : ({ kort: '1 game', middel: '3 games', lang: '6 games' })[mt.length];
+  var LEN = {
+    tennis: { kort: '1 korte set tot 4 games (tie-break bij 4-4)', middel: '1 set tot 6 games (tie-break bij 6-6)', lang: '2 gewonnen sets, met een super tie-break tot 10 als derde set' },
+    padel: { kort: '1 korte set tot 4 games (tie-break bij 4-4)', middel: '1 set tot 9 games (tie-break bij 8-8)', lang: '2 gewonnen sets, met een super tie-break tot 10 als derde set' },
+    pickleball: { kort: '1 game tot 11', middel: '2 gewonnen games tot 11', lang: '3 gewonnen games tot 11' }
+  };
+  var lenTxt = LEN[s.sport][mt.length] || LEN[s.sport].kort;
+  $('deuceBox').hidden = s.sport !== 'padel';
+  Array.prototype.forEach.call(document.querySelectorAll('#segDeuce button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-deuce') === (mt.deuce || 'golden'))); });
   $('lineupHint').textContent = lineupText() + ' Je speelt ' + lenTxt + '.';
   $('tvSportBadge').textContent = SPORTS[s.sport].name;
   drillChips($('tvDrills'), true);
@@ -1911,7 +1929,7 @@ function tvQuickRecal() {
 function tvConfigMsg(type) {
   var s = data.settings, mt = s.match;
   return Object.assign({ type: type || 'config', sport: s.sport, hand: s.hand, level: s.level, drill: curTvDrill(),
-    mode: playMode(), team: mt.team, bots: mt.bots, length: playMode() === 'ranked' ? 'middel' : mt.length, tennis: lobbyCount() > 2 ? 'dubbel' : mt.tennis,
+    mode: playMode(), team: mt.team, bots: mt.bots, length: playMode() === 'ranked' ? 'kort' : mt.length, tennis: lobbyCount() > 2 ? 'dubbel' : mt.tennis, deuce: mt.deuce || 'golden',
     opp: playMode() === 'ranked' ? nextOpponent(s.sport) : null, av: s.avatars[s.sport] }, tvPlayerInfo());
 }
 function tvSendConfig() {
@@ -2864,7 +2882,7 @@ function bind() {
     $(id).addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b || b.disabled) return; data.settings.match[key] = b.getAttribute(attr); tvSettingsChanged(); });
   }
   matchSeg('segPlayMode', 'data-pm', 'mode'); matchSeg('segTennisFmt', 'data-fmt', 'tennis'); matchSeg('segTeam', 'data-team', 'team');
-  matchSeg('segBots', 'data-bots', 'bots'); matchSeg('segLen', 'data-len', 'length');
+  matchSeg('segBots', 'data-bots', 'bots'); matchSeg('segLen', 'data-len', 'length'); matchSeg('segDeuce', 'data-deuce', 'deuce');
   $('segHand2').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; data.settings.hand = b.getAttribute('data-hand'); save(); renderWait(); tvSendConfig(); });
   $('tvReady').addEventListener('click', tvReadyTap);
   $('tvReady').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tvReadyTap(); } });
@@ -2939,7 +2957,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 28, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 33, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 

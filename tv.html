@@ -324,6 +324,26 @@ function neonize() {
   });
 }
 function accHex(E) { return E && /^#[0-9a-f]{6}$/i.test(E.accent || '') ? E.accent : NEON; }
+/* SwingLab-logo (het app-icoon) als reclame op de borden */
+var SL_LOGO = new Image(), SL_V = 0;
+SL_LOGO.onload = function () { SL_V = 1; envCache.key = ''; if (G3 && G3.arena) G3.arena.key = ''; if (G3) G3.stadKey = ''; refreshScreen(); };
+SL_LOGO.src = window.SWINGLAB_LOGO || 'icon-192.png';
+function drawSL(c, x, y, s) {
+  // logo in een afgerond vierkant (x, y = linksboven)
+  var r = s * 0.22;
+  c.save(); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + s, y, x + s, y + s, r); c.arcTo(x + s, y + s, x, y + s, r); c.arcTo(x, y + s, x, y, r); c.arcTo(x, y, x + s, y, r); c.closePath(); c.clip();
+  if (SL_V) c.drawImage(SL_LOGO, x, y, s, s);
+  else { c.fillStyle = '#B9E631'; c.fillRect(x, y, s, s); c.fillStyle = '#0b1222'; c.font = '900 ' + Math.round(s * 0.7) + 'px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('S', x + s / 2, y + s * 0.55); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; }
+  c.restore();
+}
+/* SwingLab-reclame: logo met het woord SWINGLAB (x, y = linksonder), geeft de breedte terug */
+function drawSLAd(c, x, y, h, col) {
+  drawSL(c, x, y - h, h);
+  c.fillStyle = col || '#ffffff'; c.font = '800 ' + Math.round(h * 0.56) + 'px system-ui, -apple-system, Segoe UI, sans-serif'; c.textBaseline = 'alphabetic';
+  c.fillText('SWINGLAB', x + h * 1.2, y - h * 0.27);
+  return h * 1.2 + c.measureText('SWINGLAB').width;
+}
+function slAdWidth(c, h) { c.font = '800 ' + Math.round(h * 0.56) + 'px system-ui, -apple-system, Segoe UI, sans-serif'; return h * 1.2 + c.measureText('SWINGLAB').width; }
 function sportLabel() { return ({ padel: 'PADEL', tennis: 'TENNIS', pickleball: 'PICKLEBALL' })[S.sport] || 'PADEL'; }
 /* eigen logo: een padelracket met gaatjes, met een woord ernaast (x, y = linksonder) */
 function drawLogo(c, x, y, h, label, col, bg) {
@@ -1440,7 +1460,10 @@ function drawEnvironment(c, E) {
   if (E.neon) {
     c.fillStyle = '#0b1222'; quad(c, fb0, fb1, ft1, ft0); c.fill();
     var lab2 = sportLabel(), lw2 = lab2.length > 6 ? 3.8 : 2.6;
-    for (var lg = 0; lg < 3; lg++) { var lx0 = bd[0][0] + (bd[1][0] - bd[0][0]) * (0.2 + lg * 0.25) - (lw2 - 2.6) / 2; drawOnPlane(c, proj(lx0, bd[0][1], 0.12), proj(lx0 + lw2, bd[0][1], 0.12), proj(lx0, bd[0][1], 0.78), lw2 * 100, 66, function (cc) { drawLogo(cc, 0, 62, 62, lab2); }); }
+    for (var lg = 0; lg < 3; lg++) {
+      var ad = lg !== 1, wq = ad ? 3.4 : lw2, lx0 = bd[0][0] + (bd[1][0] - bd[0][0]) * (0.2 + lg * 0.3) - wq / 2;
+      drawOnPlane(c, proj(lx0, bd[0][1], 0.12), proj(lx0 + wq, bd[0][1], 0.12), proj(lx0, bd[0][1], 0.78), wq * 100, 66, function (cc) { if (ad) drawSLAd(cc, 0, 62, 60); else drawLogo(cc, 0, 62, 62, lab2); });
+    }
     c.save(); c.shadowColor = accHex(E); c.shadowBlur = 10; c.strokeStyle = accHex(E); c.lineWidth = Math.max(1, (fb0.y - ft0.y) * 0.05); c.beginPath(); c.moveTo(ft0.x, ft0.y); c.lineTo(ft1.x, ft1.y); c.stroke(); c.restore();
   } else {
   c.fillStyle = E.accent; c.globalAlpha = 0.85;
@@ -1583,15 +1606,25 @@ function liveDetails(E, now) {
 /* ---------- Ondergrond: kunstgras met zand, gras met maaistroken, gravel met korrel of hardcourt ---------- */
 var surfCache = { key: '', cv: null };
 /* het terrein is overal hetzelfde per sport (zoals op de foto's); de omgeving eromheen verschilt per locatie */
-var COURT_STYLE = {
-  padel:      { court: '#1d56b2', out: null },
-  tennis:     { court: '#2356a2', out: '#4a87c9' },
-  pickleball: { court: '#2a5fae', out: '#2f6abb', kitchen: '#f08a33' }
-};
-function courtCol(E) { var st = COURT_STYLE[S.sport] || {}; return { court: st.court, out: st.out || (E ? E.out : court().out), kitchen: st.kitchen || null }; }
-function surfaceType(E) { return S.sport === 'padel' ? 'turf' : 'hard'; }
+/* elke locatie heeft weer zijn eigen baan: kleur, rand, kitchen en bij tennis gras, gravel of hardcourt */
+var COURT_STYLE = { padel: {}, tennis: {}, pickleball: {} };   // leeg: de kleuren komen van de locatie zelf
+function courtCol(E) {
+  var st = COURT_STYLE[S.sport] || {}, def = court();
+  return { court: st.court || (E && E.court) || def.court || '#2a5fae', out: st.out || (E && E.out) || def.out || '#3a3f46',
+           kitchen: S.sport === 'pickleball' ? (st.kitchen || (E && E.kitchen) || null) : null };
+}
+function hexRgb(hx) { var m = /^#?([0-9a-f]{6})$/i.exec(hx || ''); if (!m) return null; var n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function surfaceType(E) {
+  if (S.sport === 'padel') return 'turf';
+  if (S.sport !== 'tennis') return 'hard';
+  if (E && E.surface) return E.surface;
+  var c = hexRgb(courtCol(E).court); if (!c) return 'hard';
+  if (c[1] > c[0] && c[1] > c[2]) return 'grass';                         // groen: gras
+  if (c[0] > 140 && c[0] > c[1] * 1.4 && c[0] > c[2] * 2) return 'clay';  // rood-oranje: gravel
+  return 'hard';
+}
 function surfaceTexture(E) {
-  var c = court(), hw = c.Wd / 2, L = c.L, key = (E ? E.city + E.venue : 'x') + S.sport + 'v23';
+  var c = court(), hw = c.Wd / 2, L = c.L, cc0 = courtCol(E), key = (E ? E.city + E.venue : 'x') + S.sport + 'v34' + cc0.court + cc0.out + cc0.kitchen + surfaceType(E);
   if (surfCache.key === key && surfCache.cv) return surfCache.cv;
   var ppm = 36, X0 = -hw - 3, X1 = hw + 3, Y0 = -2, Y1 = L + 3;
   var cv2 = document.createElement('canvas'); cv2.width = Math.round((X1 - X0) * ppm); cv2.height = Math.round((Y1 - Y0) * ppm);
@@ -3326,10 +3359,11 @@ function skyTexture(E) {
   return canvasTex('sky' + top + bot, 8, 256, function (c, w, h2) { var g = c.createLinearGradient(0, 0, 0, h2); g.addColorStop(0, top); g.addColorStop(0.55, bot); g.addColorStop(1, shadeHex(bot.charAt(0) === '#' ? bot : '#333333', 0.7)); c.fillStyle = g; c.fillRect(0, 0, w, h2); });
 }
 function ledTexture(E) {
-  return canvasTex('led' + E.city + E.venue + S.sport, 1024, 64, function (c, w, h2) {
+  return canvasTex('led' + E.city + E.venue + S.sport + SL_V, 1024, 64, function (c, w, h2) {
     c.fillStyle = '#07090c'; c.fillRect(0, 0, w, h2); c.fillStyle = E.accent && E.accent.charAt(0) === '#' ? E.accent : SPORT_HEX[S.sport];
     c.font = '800 40px system-ui, sans-serif'; c.textBaseline = 'middle';
-    var txt = ('SWINGLAB   ' + E.city + '   ' + E.venue + '   ').toUpperCase(), x = 10; while (x < w) { c.fillText(txt, x, h2 / 2); x += c.measureText(txt).width; }
+    var txt = ('SWINGLAB   ' + E.city + '   ' + E.venue + '   ').toUpperCase(), x = 10, col = c.fillStyle;
+    while (x < w) { drawSL(c, x, 8, 48); x += 60; c.fillStyle = col; c.fillText(txt, x, h2 / 2); x += c.measureText(txt).width; }
   });
 }
 function buildStadium3D(E) {
@@ -3345,7 +3379,7 @@ function buildStadium3D(E) {
   var floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), M3(E.floor && E.floor.charAt(0) === '#' ? E.floor : '#3a3f46', { roughness: 0.95 }));
   floor.rotation.x = -Math.PI / 2; floor.position.copy(T3([0, nY, -0.02])); floor.receiveShadow = true; g.add(floor);
   var ct = courtLinesTexture(E), X0 = surfCache.X0, X1 = surfCache.X1, Y0 = surfCache.Y0, Y1 = surfCache.Y1;
-  var cplane = new THREE.Mesh(new THREE.PlaneGeometry(X1 - X0, Y1 - Y0), new THREE.MeshStandardMaterial({ map: ct, roughness: 0.95, color: new THREE.Color(E.neon ? 0x6a6a6a : 0x9c9c9c) }));   // niet overbelicht onder de spots
+  var cplane = new THREE.Mesh(new THREE.PlaneGeometry(X1 - X0, Y1 - Y0), new THREE.MeshStandardMaterial({ map: ct, roughness: 0.95, color: new THREE.Color(0x8c8c8c) }));   // niet overbelicht onder de spots
   cplane.rotation.x = -Math.PI / 2; cplane.position.copy(T3([(X0 + X1) / 2, (Y0 + Y1) / 2, 0])); cplane.receiveShadow = true; g.add(cplane);
   // ledborden rondom de baan
   var led = new THREE.MeshStandardMaterial({ map: ledTexture(E), emissive: new THREE.Color('#ffffff'), emissiveMap: ledTexture(E), emissiveIntensity: 0.9 });
@@ -3559,27 +3593,31 @@ function updateCrowd(now, tour) {
 }
 
 /* Arena-stijl in 3D: alles wat voor het publiek hangt, zodat het juist over en achter de mensen komt */
-var TILE_ASPECT = 1024 / 144;
+var TILE_ASPECT = 2048 / 144;   // twee vakken per tegel: SwingLab en de sport
 function logoWidth(c, h, label) { c.font = 'italic 800 ' + Math.round(h * 0.62) + 'px system-ui, -apple-system, Segoe UI, sans-serif'; return h * 0.82 + c.measureText(label).width; }
 function stripes(c, x, y, w, hh, col) { c.fillStyle = col || '#2f7bff'; for (var k = 0; k < 2; k++) { var x0 = x + k * w * 0.55; c.beginPath(); c.moveTo(x0 + w * 0.45, y); c.lineTo(x0 + w * 0.7, y); c.lineTo(x0 + w * 0.25, y + hh); c.lineTo(x0, y + hh); c.closePath(); c.fill(); } }
 function tileTex(E) {
   var lab = sportLabel(), acc = accHex(E);
-  var tex = canvasTex('tegel-' + lab + acc, 1024, 144, function (c, w, hh) {
+  var tex = canvasTex('tegel-' + lab + acc + SL_V, 2048, 144, function (c, w, hh) {
     var g = c.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, '#0d1528'); g.addColorStop(1, '#070b16'); c.fillStyle = g; c.fillRect(0, 0, w, hh);
-    var lh = hh * 0.62, lw = logoWidth(c, lh, lab); drawLogo(c, (w - lw) / 2 - 40, hh * 0.82, lh, lab);
-    stripes(c, w - 150, hh * 0.18, 90, hh * 0.64, acc);
+    var half = w / 2, ah = hh * 0.66, aw = slAdWidth(c, ah); drawSLAd(c, (half - aw) / 2 - 30, hh * 0.83, ah);       // vak 1: SwingLab
+    var lh = hh * 0.62, lw = logoWidth(c, lh, lab); drawLogo(c, half + (half - lw) / 2 - 40, hh * 0.82, lh, lab);   // vak 2: de sport
+    stripes(c, half - 150, hh * 0.18, 90, hh * 0.64, acc); stripes(c, w - 150, hh * 0.18, 90, hh * 0.64, acc);
   });
   return tex;
 }
 function swingPlate() {
-  return canvasTex('swinglab-plaat', 512, 144, function (c, w, hh) { var g = c.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, '#0e1730'); g.addColorStop(1, '#070b16'); c.fillStyle = g; c.fillRect(0, 0, w, hh); c.fillStyle = '#fff'; c.font = '800 74px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('SWINGLAB', w / 2, hh / 2 + 4); c.textAlign = 'left'; });
+  return canvasTex('swinglab-plaat' + SL_V, 640, 144, function (c, w, hh) { var g = c.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, '#0e1730'); g.addColorStop(1, '#070b16'); c.fillStyle = g; c.fillRect(0, 0, w, hh); var ah = hh * 0.7, aw = slAdWidth(c, ah); drawSLAd(c, (w - aw) / 2, hh * 0.85, ah); });
 }
 function bigBoardTex(E) {
   var lab = sportLabel(), acc = accHex(E);
-  return canvasTex('groot-bord-' + lab + acc, 1024, 220, function (c, w, hh) {
+  return canvasTex('groot-bord-' + lab + acc + SL_V, 1024, 220, function (c, w, hh) {
     var g = c.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, '#101a33'); g.addColorStop(1, '#070b16'); c.fillStyle = g; c.fillRect(0, 0, w, hh);
-    stripes(c, 40, 30, 120, hh - 60, acc); stripes(c, w - 200, 30, 120, hh - 60, acc);
-    var lh = hh * 0.55, lw = logoWidth(c, lh, lab); drawLogo(c, (w - lw) / 2, hh * 0.76, lh, lab, '#fff', '#0b1222');
+    stripes(c, 30, 30, 100, hh - 60, acc); stripes(c, w - 160, 30, 100, hh - 60, acc);
+    var sz = hh * 0.62, lh = hh * 0.5, lw = logoWidth(c, lh, lab), tot = sz + 40 + lw, x0 = (w - tot) / 2;
+    drawSL(c, x0, (hh - sz) / 2, sz);                                                         // SwingLab-logo
+    c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(x0 + sz + 18, hh * 0.24, 3, hh * 0.52);
+    drawLogo(c, x0 + sz + 40, hh * 0.74, lh, lab, '#fff', '#0b1222');
     c.strokeStyle = 'rgba(80,150,255,.9)'; c.lineWidth = 6; c.strokeRect(3, 3, w - 6, hh - 6);
   });
 }
@@ -3589,16 +3627,17 @@ function paintScreen(cv) {
     var g = c.createLinearGradient(0, 0, w, hh); g.addColorStop(0, '#04122e'); g.addColorStop(0.55, '#0a2a6a'); g.addColorStop(1, '#0446c8'); c.fillStyle = g; c.fillRect(0, 0, w, hh);
     for (var k = 0; k < 4; k++) { c.strokeStyle = 'rgba(90,160,255,' + (0.5 - k * 0.1) + ')'; c.lineWidth = 6 - k; c.beginPath(); c.arc(w * 1.05, hh * 1.4, hh * (1.1 + k * 0.12), Math.PI * 1.05, Math.PI * 1.55); c.stroke(); }
     if (!MS) {
-      var lw = 0; c.font = 'italic 800 ' + Math.round(170 * 0.62) + 'px system-ui, sans-serif'; lw = 170 * 0.82 + c.measureText('PADEL').width;
-      drawLogo(c, (w - lw) / 2, hh * 0.68, 170, 'PADEL');
-      c.fillStyle = 'rgba(255,255,255,.75)'; c.font = '700 34px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('SWINGLAB', w / 2, hh * 0.88); c.textAlign = 'left';
+      var lab = sportLabel(), lw = logoWidth(c, 150, lab), sz = 170, tot = sz + 50 + lw, x0 = (w - tot) / 2;
+      drawSL(c, x0, hh * 0.5 - sz / 2 - 20, sz);
+      drawLogo(c, x0 + sz + 50, hh * 0.5 + 40, 150, lab);
+      c.fillStyle = 'rgba(255,255,255,.8)'; c.font = '800 38px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('SWINGLAB', w / 2, hh * 0.9); c.textAlign = 'left';
     }
     c.strokeStyle = 'rgba(120,180,255,.9)'; c.lineWidth = 8; c.strokeRect(4, 4, w - 8, hh - 8);
   })(c, w, hh);
   if (MS) {
     // live stand op het scherm, zoals in een echte arena
     c.fillStyle = 'rgba(3,8,22,.72)'; c.fillRect(40, hh * 0.08, w - 80, hh * 0.84);
-    drawLogo(c, 70, hh * 0.24, 70, sportLabel());
+    drawSL(c, 62, hh * 0.24 - 66, 66); drawLogo(c, 146, hh * 0.24, 70, sportLabel());
     [0, 1].forEach(function (t) {
       var y = hh * (0.47 + t * 0.27);
       c.fillStyle = MS.server === t ? '#B9E631' : 'rgba(255,255,255,.25)'; c.beginPath(); c.arc(84, y - 18, 10, 0, Math.PI * 2); c.fill();
@@ -3677,7 +3716,7 @@ function buildArena3D(E) {
     stripAt(dTop - 0.05, topZ + 0.04);                                             // bovenrand van de eerste ring
     if (sd.upper) {
       panelAt(dTop + 1.54, topZ + 2.2, 0.95);                                      // band boven de loges
-      if (si === 0) { var sp = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.96, 0.06), new THREE.MeshBasicMaterial({ map: swingPlate() })); var pc = segPt(sd, 0.5, dTop + 1.5); sp.position.copy(T3([pc[0], pc[1], topZ + 2.68])); item(sp, beh); }
+      if (si === 0) { var sp = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.96, 0.06), new THREE.MeshBasicMaterial({ map: swingPlate() })); var pc = segPt(sd, 0.5, dTop + 1.5); sp.position.copy(T3([pc[0], pc[1], topZ + 2.68])); item(sp, beh); }
       stripAt(dTop + 1.5, topZ + 2.22); stripAt(dTop + 1.5, topZ + 3.17);
       stripAt(dTop + 2.9 + 11 * sd.step - 0.05, topZ + 2.2 + 11 * 0.48 * 1.15 + 0.05); // bovenrand van de tweede ring
     }
@@ -3686,10 +3725,10 @@ function buildArena3D(E) {
   if (S.sport !== 'padel') { arenaExtras(E, g, item, post, lay, hw, L); G3.arena = { g: g, key: E.city + E.venue + S.sport, scr: null }; G3.scene.add(g); return; }
   // portaal boven de achterwand met SWINGLAB
   [-1, 1].forEach(function (sd) { var pm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 8.4, 0.18), post); pm.position.copy(T3([sd * (hw + 0.15), L + 0.15, 4.2])); pm.castShadow = true; item(pm); });
-  var bt = canvasTex('portaal', 2048, 160, function (cc, w, hh) {
+  var bt = canvasTex('portaal' + SL_V, 2048, 160, function (cc, w, hh) {
     var gg = cc.createLinearGradient(0, 0, 0, hh); gg.addColorStop(0, '#0e1730'); gg.addColorStop(1, '#070b16'); cc.fillStyle = gg; cc.fillRect(0, 0, w, hh);
     drawLogo(cc, 120, hh * 0.84, hh * 0.72, 'PADEL'); drawLogo(cc, w - 120 - logoWidth(cc, hh * 0.72, 'PADEL'), hh * 0.84, hh * 0.72, 'PADEL');
-    cc.fillStyle = '#fff'; cc.font = '800 92px system-ui, sans-serif'; cc.textAlign = 'center'; cc.textBaseline = 'middle'; cc.fillText('SWINGLAB', w / 2, hh / 2 + 4); cc.textAlign = 'left';
+    var ah = hh * 0.74, aw = slAdWidth(cc, ah); drawSLAd(cc, (w - aw) / 2, hh * 0.87, ah);
   });
   panel(2 * hw + 0.3, 0.95, [0, L + 0.15, 7.75], 0, bt);
   strip(2 * hw + 0.3, [0, L + 0.08, 7.25], 0); strip(2 * hw + 0.3, [0, L + 0.08, 8.25], 0);
@@ -4304,7 +4343,8 @@ window.__view = {
     handleData({ type: 'hello', sport: sport, hand: 'right', level: 'normaal', drill: 'basis' }, { host: true, name: 'Viewer', hand: 'right' });
     S.venue = VENUES[sport][i]; S.venueUsed = false; this.refresh();
   },
-  refresh: function () { envCache.key = ''; surfCache.key = ''; if (G3) { G3.venue = null; } },
+  refresh: function () { envCache.key = ''; surfCache.key = ''; if (G3) { G3.venue = null; G3.stadKey = ''; } },
+  surfaceType: function () { return surfaceType(env()); },
   setCam: function (o) { camTarget = { x: o.x, y: o.y, z: o.z }; CAM = { x: o.x, y: o.y, z: o.z }; envCache.key = ''; },
   baseCam: function () { var c = camFor(1); return { x: 0, y: c.y, z: c.z }; },
   court: function () { return court(); },

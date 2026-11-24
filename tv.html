@@ -22,6 +22,7 @@ body[data-sport="pickleball"]{--lime:#2fbf5b;--lime-ink:#002a10}
 button{font:inherit;color:inherit;border:0;cursor:pointer}
 button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
 
+body.studio .layer,body.studio .hud-top,body.studio .hud-bottom,body.studio .mboard,body.studio .shot{display:none!important}
 .layer{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6vh 6vw}
 .dim{background:rgba(0,0,0,.72)}
 .topmsg{justify-content:flex-start;padding-top:7vh;background:linear-gradient(rgba(0,0,0,.8),rgba(0,0,0,0) 45%)}
@@ -2137,7 +2138,65 @@ function cameraMotion(now) {
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { dx = dy = rot = 0; }
   el.style.transform = 'translate3d(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px,0) rotate(' + rot.toFixed(3) + 'deg) scale(1.025)';
 }
+/* Karakterstudio: een man en een vrouw naast elkaar op een podium, om ze te bestuderen en beter te maken */
+var STUDIO = null;
+var STUDIO_DEF = function () { return { anim: 'staan', rot: 0, zoom: 1, chars: [
+  { label: 'Man', av: { gender: 'm', model: 'm_licht', skin: 's0', hair: 'eigen', hairCol: 'bruin', shirt: 'sport', shorts: 'zwart', shoes: 'wit', extra: 'geen', rok: false, body: JSON.parse(JSON.stringify(BODY.m)) } },
+  { label: 'Vrouw', av: { gender: 'v', model: 'v_licht', skin: 's0', hair: 'eigen', hairCol: 'bruin', shirt: 'sport', shorts: 'zwart', shoes: 'wit', extra: 'geen', rok: false, body: JSON.parse(JSON.stringify(BODY.v)) } }] }; };
+function studioSetup() {
+  if (!G3) return false;
+  if (!G3.studio) {
+  var sc = new THREE.Scene(); sc.background = new THREE.Color('#141922');
+  sc.add(new THREE.HemisphereLight(0xe8f0ff, 0x2a2e36, 0.8));
+  var key = new THREE.DirectionalLight(0xffffff, 1.35); key.position.set(2.5, 6, -5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+  var kc = key.shadow.camera; kc.left = -3; kc.right = 3; kc.top = 3; kc.bottom = -1; kc.near = 1; kc.far = 20; key.shadow.bias = -0.0005; sc.add(key);
+  var rim = new THREE.DirectionalLight(0x9fc4ff, 0.9); rim.position.set(-4, 3, 5); sc.add(rim);
+  var floor = new THREE.Mesh(new THREE.CircleGeometry(3.2, 72), new THREE.MeshStandardMaterial({ color: 0x14181f, roughness: 0.85 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; sc.add(floor);
+  var ring = new THREE.Mesh(new THREE.RingGeometry(3.1, 3.2, 72), new THREE.MeshBasicMaterial({ color: new THREE.Color(SPORT_HEX[S.sport]) })); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.002; sc.add(ring);
+  G3.studio = { scene: sc, cam: new THREE.PerspectiveCamera(30, 1, 0.1, 60), chars: [null, null], ring: ring,
+    w: [{ x: 0.75, y: 0, team: 0, hand: 'right', spd: 0, runPh: 0, name: 'Man' }, { x: -0.75, y: 0, team: 0, hand: 'right', spd: 0, runPh: 0, name: 'Vrouw' }] };
+  }
+  var st = G3.studio, ok = true;
+  STUDIO.chars.forEach(function (c, i) {
+    var id = modelFor(c.av), M = PLAYERS3D[id];
+    if (!M.ready) { loadModel(id); ok = false; return; }
+    var H3 = st.chars[i];
+    if (!H3 || H3.modelId !== id) {
+      if (H3) { st.scene.remove(H3.g); st.scene.remove(H3.cloth.g); if (H3.racket) st.scene.remove(H3.racket); }
+      H3 = makeRigged(c.av); st.scene.add(H3.g); st.scene.add(H3.cloth.g); st.chars[i] = H3;
+    }
+  });
+  return ok;
+}
+function renderStudio(now) {
+  ctx.fillStyle = '#141922'; ctx.fillRect(0, 0, W, H);
+  if (!studioSetup()) { ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.font = '600 22px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(!USE3D ? 'De karakters hebben 3D nodig' : (STUDIO.chars.some(function (c) { return PLAYERS3D[modelFor(c.av)].failed; }) ? 'Een 3D-model kon niet geladen worden' : 'Karakters laden…'), W / 2, H / 2); ctx.textAlign = 'left'; return; }
+  var st = G3.studio, dt = Math.min(0.05, Math.max(0, (now - (st.last || now)) / 1000)); st.last = now;
+  var px = Math.min(DPR, 1.5); if (G3.w !== W || G3.h !== H || G3.px !== px) { G3.r.setPixelRatio(px); G3.r.setSize(W, H, false); G3.w = W; G3.h = H; G3.px = px; }
+  st.ring.material.color.set(SPORT_HEX[S.sport]);
+  STUDIO.chars.forEach(function (c, i) {
+    var w = st.w[i], a = STUDIO.anim, thc = (STUDIO.rot || 0) * Math.PI / 180, sg = i === 0 ? 1 : -1; w.av = c.av;
+    w.x = sg * 0.75 * Math.cos(thc); w.y = -sg * 0.75 * Math.sin(thc);          // altijd naast elkaar, ook als de camera rond draait
+    w.spd = a === 'wandelen' ? 1.3 : a === 'lopen' ? 4.6 : 0; w.runPh = (w.runPh || 0) + dt * w.spd * 2.4;
+    if (a === 'forehand' || a === 'backhand' || a === 'smash') { w.sk = a === 'forehand' ? 'fh' : a === 'backhand' ? 'bh' : 'over'; if (!w.cT || now > w.cT + 1400) w.cT = now + 520 + i * 140; } else w.cT = 0;
+    w.cheer = a === 'juichen';
+    var H3 = st.chars[i]; updateRigged(H3, w, now, null, dt);
+    if (H3.racket && H3.racket.parent !== st.scene) st.scene.add(H3.racket);
+  });
+  var th = (STUDIO.rot || 0) * Math.PI / 180, R = 6.6 / (STUDIO.zoom || 1), cam = st.cam, ty = 0.92 + (1 - 1 / (STUDIO.zoom || 1)) * 0.35;
+  cam.aspect = W / H; cam.fov = 30; if (window.__studioLook) ty = window.__studioLook; cam.position.set(Math.sin(th) * R, 1.05, -Math.cos(th) * R); cam.lookAt(0, ty, 0); cam.updateProjectionMatrix();
+  G3.r.render(st.scene, cam);
+  ctx.drawImage(G3.r.domElement, 0, 0, W, H);
+  // naam boven elk karakter
+  st.chars.forEach(function (H3, i) {
+    var hd = H3.B.head ? wpos(H3.B.head) : new THREE.Vector3(st.w[i].x, 1.7, 0); hd.y += 0.32; hd.project(cam);
+    var sx = (hd.x + 1) / 2 * W, sy = (1 - hd.y) / 2 * H, lab = STUDIO.chars[i].label, b = bodyOf(STUDIO.chars[i].av);
+    ctx.font = '700 ' + Math.round(H * 0.03) + 'px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.fillText(lab, sx, sy);
+    ctx.font = '500 ' + Math.round(H * 0.02) + 'px system-ui, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillText(b.h + ' cm', sx, sy + H * 0.028); ctx.textAlign = 'left';
+  });
+}
 function drawFrame(now) {
+  if (STUDIO) { var cvs = document.getElementById('cv'); if (cvs && cvs.style.transform) cvs.style.transform = ''; renderStudio(now); return; }
   cameraMotion(now);
   var fade = 0;
   if (S.tour) {
@@ -2897,6 +2956,12 @@ var AVC = {
   shorts: { zwart: '#16181c', wit: '#f2f2f2', navy: '#1d2a4a', rood: '#c43b3b', camo: '#4a5a32' },
   shoes: { wit: '#f4f4f4', zwart: '#111111', neon: '#c6ff3a', goud: '#e6b53a' }
 };
+/* lichaamsbouw per karakter (in cm en procent); de vrouw is kleiner, smallere schouders, bredere heupen, smallere taille */
+var BODY = { m: { h: 184, sh: 100, hip: 100, waist: 100, bust: 100, arm: 100, leg: 100 }, v: { h: 172, sh: 100, hip: 100, waist: 100, bust: 100, arm: 100, leg: 100 } };   // de echte modellen hebben hun eigen vorm
+function bodyOf(av) {
+  var base = BODY[av && av.gender === 'v' ? 'v' : 'm'], b = (av && av.body) || {}, o = {};
+  Object.keys(base).forEach(function (k) { o[k] = typeof b[k] === 'number' ? b[k] : base[k]; }); return o;
+}
 function avSkin(k) { return AVC.skin[k] || '#e0ac85'; }
 function avShirt(av, hip, sh, s) {
   if (av.shirt === 'goud') { var g = ctx.createLinearGradient(hip.x - s * 0.2, sh.y, hip.x + s * 0.2, hip.y); g.addColorStop(0, '#fff1a8'); g.addColorStop(0.5, '#e6b53a'); g.addColorStop(1, '#a8761a'); return g; }
@@ -3001,8 +3066,10 @@ function makeHuman3D() {
     neck: part(geo.cyl, mat.skin), head: part(geo.sph, mat.skin), hairCap: part(geo.cap, mat.hair), tail: part(geo.cyl, mat.hair), knot: part(geo.sph, mat.hair),
     curls: [0, 1, 2, 3, 4, 5].map(function () { return part(geo.sph, mat.hair); }), mohawk: part(geo.box, mat.hair),
     eyes: [part(geo.sph, mat.eye, false), part(geo.sph, mat.eye, false)], nose: part(geo.sph, mat.skin, false),
-    cap: part(geo.cap, mat.acc), visor: part(geo.box, mat.acc), band: part(geo.band, mat.acc), glasses: part(geo.box, mat.eye, false), crown: part(new THREE.CylinderGeometry(1, 1.1, 1, 10, 1, true), mat.gold)
+    cap: part(geo.cap, mat.acc), visor: part(geo.box, mat.acc), band: part(geo.band, mat.acc), glasses: part(geo.box, mat.eye, false), crown: part(new THREE.CylinderGeometry(1, 1.1, 1, 10, 1, true), mat.gold),
+    skirt: part(new THREE.CylinderGeometry(1, 1.5, 1, 20, 1, true), mat.shorts), earring: [part(geo.sph, mat.gold, false), part(geo.sph, mat.gold, false)]
   };
+  P.skirt.visible = false; P.earring.forEach(function (m) { m.visible = false; });
   G3.scene.add(g);
   return { g: g, mat: mat, P: P, racket: null, racketSport: null, avKey: '' };
 }
@@ -3021,6 +3088,7 @@ function applyAvatar3D(H3, av, sport) {
   P.curls.forEach(function (c) { c.visible = hair === 'krullen'; }); P.mohawk.visible = hair === 'hanenkam';
   P.cap.visible = av.extra === 'pet'; P.visor.visible = av.extra === 'pet'; P.band.visible = av.extra === 'zweetband';
   P.glasses.visible = av.extra === 'zonnebril'; P.crown.visible = av.extra === 'kroon';
+  if (P.skirt) { P.skirt.visible = false; P.earring.forEach(function (m) { m.visible = false; }); }   // alleen op het 3D-model (zie tintRig)
 }
 /* het skelet in 3D: dezelfde bewegingen als voorheen (lopen, wachthouding, slag), nu als gewrichten */
 function computePose(w, now, live) {
@@ -3118,47 +3186,119 @@ function updateHuman3D(H3, w, now, live) {
    Staan, wandelen en lopen komen uit opgenomen bewegingen van echte mensen. Daarbovenop sturen we de
    slagarm via schouder, elleboog en pols (inverse kinematica), zodat de hand het racket vasthoudt
    precies zoals jij je telefoon houdt. Is er geen model, dan blijven de zelfgebouwde figuren. */
-var CHAR = { ready: false, failed: false, loading: false, gltf: null, clips: {}, height: 1.8 };
-function loadCharacter() {
-  if (!window.THREE || !THREE.GLTFLoader || !THREE.SkeletonUtils || CHAR.loading) return;
-  CHAR.loading = true;
-  new THREE.GLTFLoader().load(window.SPELER_GLB || 'speler.glb', function (g) {
-    CHAR.gltf = g; g.animations.forEach(function (a) { CHAR.clips[a.name.toLowerCase()] = a; });
-    g.scene.updateMatrixWorld(true);
-    // lengte meten aan het skelet: van de voeten tot het hoofd (het hoofdbot zit op zo'n 92% van de lengte)
-    var head = findBone(g.scene, 'Head'), feet = ['LeftToeBase', 'RightToeBase', 'LeftFoot', 'RightFoot'].map(function (n) { return findBone(g.scene, n); }).filter(Boolean);
-    if (head && feet.length) {
-      var hy = wpos(head).y, fy = Math.min.apply(null, feet.map(function (f) { return wpos(f).y; }));
-      CHAR.height = Math.max(0.01, (hy - fy) / 0.92); CHAR.footY = fy;
-    } else { var box = new THREE.Box3().setFromObject(g.scene); CHAR.height = (box.max.y - box.min.y) || 1.8; CHAR.footY = box.min.y; }
-    CHAR.ready = true;
-  }, undefined, function () { CHAR.failed = true; });
+/* Realistische spelers (gemaakt met ara3d uit MakeHuman-gegevens, CC0): vier modellen, gekozen op man/vrouw en huidskleur */
+var PLAYERS3D = {
+  m_licht:  { file: 'speler-man-licht.glb',   g: 'm', dark: false, label: 'Licht, kort haar' },
+  m_donker: { file: 'speler-man-donker.glb',  g: 'm', dark: true,  label: 'Donker, buzzcut' },
+  v_licht:  { file: 'speler-vrouw-licht.glb', g: 'v', dark: false, label: 'Licht, paardenstaart' },
+  v_donker: { file: 'speler-vrouw-donker.glb', g: 'v', dark: true, label: 'Donker, vlechten' }
+};
+Object.keys(PLAYERS3D).forEach(function (k) { var M = PLAYERS3D[k]; M.id = k; M.ready = false; M.failed = false; M.loading = false; M.gltf = null; M.clips = {}; M.height = 1.8; M.footY = 0; });
+var CHAR = { ready: false, failed: false };   // "minstens een model geladen"
+function modelFor(av) {
+  av = av || {};
+  var g = av.gender === 'v' ? 'v' : 'm';
+  if (av.model && PLAYERS3D[av.model] && PLAYERS3D[av.model].g === g) return av.model;
+  return g + (av.skin === 's3' || av.skin === 's4' ? '_donker' : '_licht');
 }
+function loadModel(id) {
+  var M = PLAYERS3D[id];
+  if (!M || M.loading || M.ready || !window.THREE || !THREE.GLTFLoader || !THREE.SkeletonUtils) return;
+  M.loading = true;
+  var onGltf = function (g) {
+    M.gltf = g; g.animations.forEach(function (a) { M.clips[a.name.toLowerCase()] = a; });
+    g.scene.updateMatrixWorld(true);
+    var top = findBone(g.scene, 'HeadTop_End'), head = findBone(g.scene, 'Head'), feet = ['LeftToeBase', 'RightToeBase', 'LeftFoot', 'RightFoot'].map(function (n) { return findBone(g.scene, n); }).filter(Boolean);
+    if (feet.length && (top || head)) {
+      var fy = Math.min.apply(null, feet.map(function (f) { return wpos(f).y; }));
+      M.height = Math.max(0.01, top ? (wpos(top).y - fy) : (wpos(head).y - fy) / 0.92); M.footY = fy;
+    } else { var box = new THREE.Box3().setFromObject(g.scene); M.height = (box.max.y - box.min.y) || 1.8; M.footY = box.min.y; }
+    M.ready = true; CHAR.ready = true;
+  };
+  var onFail = function (e) { M.failed = true; M.loading = false; CHAR.failed = Object.keys(PLAYERS3D).every(function (k) { return PLAYERS3D[k].failed; }); if (window.console) console.warn('SwingLab: speler ' + id + ' niet geladen', e); };
+  var src = (window.SPELER_GLBS && window.SPELER_GLBS[id]) || M.file;
+  if (/^data:/.test(src)) {
+    // ingebouwd model (veldenviewer): zelf omzetten naar bytes, zonder netwerkverzoek (gepubliceerde pagina's laten dat niet toe)
+    try {
+      var bin = atob(src.slice(src.indexOf(',') + 1)), buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      // afbeeldingen als gewone afbeelding laden (geen netwerkverzoek, dat blokkeert een gepubliceerde pagina)
+      var cib = window.createImageBitmap; try { window.createImageBitmap = undefined; } catch (e2) {}
+      try { new THREE.GLTFLoader().parse(buf.buffer, '', onGltf, onFail); } finally { try { window.createImageBitmap = cib; } catch (e3) {} }
+    } catch (e) { onFail(e); }
+  } else new THREE.GLTFLoader().load(src, onGltf, undefined, onFail);
+}
+function loadCharacter() { Object.keys(PLAYERS3D).forEach(loadModel); }
+/* huidtint per model: binnen een model kan je de huid lichter of donkerder kiezen */
+var SKIN_TINT = { licht: { s5: '#fff3ea', s0: '#ffffff', s1: '#f0dac8', s2: '#d6b193', s3: '#a97c5d', s4: '#7d583f' }, donker: { s5: '#ffffff', s0: '#ffffff', s1: '#ffffff', s2: '#ffffff', s3: '#ffffff', s4: '#c4a999' } };
 var BONE = { hips: 'Hips', spine1: 'Spine1', spine2: 'Spine2', neck: 'Neck', head: 'Head', rArm: 'RightArm', rFore: 'RightForeArm', rHand: 'RightHand', lArm: 'LeftArm', lFore: 'LeftForeArm', lHand: 'LeftHand',
-  lUp: 'LeftUpLeg', lLeg: 'LeftLeg', lFoot: 'LeftFoot', lToe: 'LeftToeBase', rUp: 'RightUpLeg', rLeg: 'RightLeg', rFoot: 'RightFoot', rToe: 'RightToeBase' };
+  lUp: 'LeftUpLeg', lLeg: 'LeftLeg', lFoot: 'LeftFoot', lToe: 'LeftToeBase', rUp: 'RightUpLeg', rLeg: 'RightLeg', rFoot: 'RightFoot', rToe: 'RightToeBase',
+  spine0: 'Spine', lSh: 'LeftShoulder', rSh: 'RightShoulder' };
 function findBone(root, name) {
   var f = null;
   root.traverse(function (o) { if (!f && o.isBone && (o.name === 'mixamorig:' + name || o.name === 'mixamorig' + name || o.name === name || /[:_]/.test(o.name) && o.name.split(/[:_]/).pop() === name)) f = o; });
   return f;
 }
-function makeRigged() {
-  var model = THREE.SkeletonUtils.clone(CHAR.gltf.scene), root = new THREE.Group();
-  var sc = 1.84 / CHAR.height; model.scale.setScalar(sc); model.position.y = -(CHAR.footY || 0) * sc + 0.02; root.add(model);
-  var mats = [];
-  model.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); mats.push(o.material); } });
+function makeRigged(av) {
+  var id = modelFor(av), M = PLAYERS3D[id]; if (!M || !M.ready) return null;
+  var model = THREE.SkeletonUtils.clone(M.gltf.scene), root = new THREE.Group();
+  var sc = 1.84 / M.height; model.scale.setScalar(sc); model.position.y = -(M.footY || 0) * sc + 0.02; root.add(model);
+  var mats = [], cat = { shirt: [], bottom: [], shoes: [], hair: [], hairMesh: [], skin: [] };
+  model.traverse(function (o) {
+    if (!o.isMesh) return;
+    o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false;
+    var list = [].concat(o.material).map(function (m0) {
+      var m = m0.clone(), n = m.name || ''; m.userData.map0 = m.map; m.userData.r0 = m.roughness; mats.push(m);
+      if (/^skin$/i.test(n)) cat.skin.push(m);
+      else if (/hair|buzz|braid|afro|cornrow|mohawk/i.test(n)) { cat.hair.push(m); cat.hairMesh.push(o); }
+      else if (/sneaker leather/i.test(n)) cat.shoes.push(m);
+      else if (/shorts fabric|mini skirt$|skirt$|legging|pants/i.test(n)) cat.bottom.push(m);
+      else if (/tee$|tank top|top$|shirt$|jersey|singlet/i.test(n)) cat.shirt.push(m);
+      return m;
+    });
+    o.material = Array.isArray(o.material) ? list : list[0];
+  });
   var B = {}; Object.keys(BONE).forEach(function (k) { B[k] = findBone(model, BONE[k]); });
-  var paint = prepRigPaint(model);
+  var base = {}; ['lArm', 'rArm', 'lUp', 'rUp'].forEach(function (k) { if (B[k]) base[k] = B[k].position.clone(); });
+  // vingers per hand, met hun rusthouding (om elk beeld opnieuw te kunnen sluiten)
+  var fing = {}, rest = [];
+  ['Left', 'Right'].forEach(function (sd) {
+    var get = function (n) { var b = findBone(model, sd + 'Hand' + n); if (b) rest.push([b, b.quaternion.clone()]); return b; };
+    var hand = findBone(model, sd + 'Hand'); if (!hand) return;
+    var chain = function (n) { return [1, 2, 3, 4].map(function (i) { return get(n + i); }); };
+    fing[sd === 'Left' ? 'L' : 'R'] = { hand: hand, thumb: chain('Thumb'), fingers: ['Index', 'Middle', 'Ring', 'Pinky'].map(chain) };
+  });
   var mixer = new THREE.AnimationMixer(model), act = {};
-  ['idle', 'walk', 'run'].forEach(function (n) { if (CHAR.clips[n]) { var a = mixer.clipAction(CHAR.clips[n]); a.play(); a.setEffectiveWeight(n === 'idle' ? 1 : 0); act[n] = a; } });
+  ['idle', 'walk', 'run'].forEach(function (n) { if (M.clips[n]) { var a = mixer.clipAction(M.clips[n]); a.play(); a.setEffectiveWeight(n === 'idle' ? 1 : 0); act[n] = a; } });
   G3.scene.add(root);
-  var cloth = makeHuman3D();               // geeft shirt, broek, schoenen, haar en accessoires met de juiste stoffen
-  var P = cloth.P;
-  [P.thighL, P.knee, P.shin, P.sock, P.hipJ, P.armM, P.elbow, P.fore, P.hand, P.ears].forEach(function (arr) { arr.forEach(function (m) { m.visible = false; }); });
-  [P.neck, P.head, P.jaw, P.nose].forEach(function (m) { m.visible = false; });
-  // shirt, broek, schoenen en haar worden op de huid geschilderd; de losse stukken zijn dan niet meer nodig
-  [P.torso, P.trap, P.pelvis, P.hairCap].forEach(function (m) { m.visible = false; m.userData.off = true; });
-  [P.shoulder, P.armU, P.thighU, P.foot, P.sole].forEach(function (arr) { arr.forEach(function (m) { m.visible = false; m.userData.off = true; }); });
-  return { rig: true, g: root, model: model, B: B, mixer: mixer, act: act, mats: mats, cloth: cloth, paint: paint, wi: 1, ww: 0, wr: 0, racket: null, racketSport: null, avKey: '' };
+  // van de zelfgebouwde kleding houden we alleen de accessoires over (pet, zonneklep, zweetband, bril, kroon, oorbellen)
+  var cloth = makeHuman3D(), P = cloth.P, keep = [P.cap, P.visor, P.band, P.glasses, P.crown].concat(P.earring || []);
+  Object.keys(P).forEach(function (k) { [].concat(P[k]).forEach(function (m) { if (keep.indexOf(m) < 0) { m.visible = false; m.userData.off = true; } }); });
+  return { rig: true, real: true, modelId: id, g: root, model: model, B: B, base: base, fing: fing, fingRest: rest, sc0: sc, py0: -(M.footY || 0) * sc, mixer: mixer, act: act, mats: mats, cat: cat, cloth: cloth, paint: null, wi: 1, ww: 0, wr: 0, racket: null, racketSport: null, avKey: '' };
+}
+/* kleuren op het echte model: shirt, broek of rokje, schoenen, haar en huid */
+function realLook(H3, av, sport) {
+  var C = H3.cat, sc = SPORT_HEX[sport];
+  var shirtCol = av.shirt === 'sport' || av.shirt === 'pro' ? sc : ({ wit: '#f4f4f4', zwart: '#1d1f24', streep: '#ffffff', camo: '#ffffff', goud: '#e6b53a', regenboog: '#ffffff' })[av.shirt] || sc;
+  var pat = (av.shirt === 'streep' || av.shirt === 'camo' || av.shirt === 'regenboog') ? shirtTex(av.shirt, sport) : null;
+  C.shirt.forEach(function (m) { m.map = pat || m.userData.map0; m.color.set(shirtCol); m.metalness = av.shirt === 'goud' ? 0.6 : 0; m.roughness = av.shirt === 'goud' ? 0.35 : m.userData.r0; m.needsUpdate = true; });
+  var bc = av.shorts === 'camo' ? '#ffffff' : (AVC.shorts[av.shorts] || '#16181c');
+  C.bottom.forEach(function (m) { m.map = av.shorts === 'camo' ? shirtTex('camo', sport) : m.userData.map0; m.color.set(bc); m.needsUpdate = true; });
+  C.shoes.forEach(function (m) { m.color.set(AVC.shoes[av.shoes] || '#f4f4f4'); });
+  C.hair.forEach(function (m) { m.color.set(AVC.hairCol[av.hairCol] || '#5a3a22'); });
+  C.hairMesh.forEach(function (o) { o.visible = av.hair !== 'kaal'; });
+  var tint = SKIN_TINT[PLAYERS3D[H3.modelId].dark ? 'donker' : 'licht'][av.skin] || '#ffffff';
+  C.skin.forEach(function (m) { m.color.set(tint); });
+}
+/* lichaamsbouw toepassen op het skelet: na elke animatiestap, zodat het tijdens het bewegen klopt */
+function applyBody(H3, b) {
+  var B = H3.B, base = H3.base; if (!base) return;
+  var hs = b.h / 184, s = b.sh / 100, hp = b.hip / 100, ar = b.arm / 100, lg = b.leg / 100, wa = b.waist / 100, bu = b.bust / 100;
+  H3.model.scale.setScalar(H3.sc0 * hs); H3.model.position.y = H3.py0 * hs + 0.02;
+  ['lArm', 'rArm'].forEach(function (k) { if (B[k] && base[k]) { B[k].position.copy(base[k]).multiplyScalar(s); B[k].scale.set(ar, 1, ar); } });          // schouderbreedte en armen
+  ['lUp', 'rUp'].forEach(function (k) { if (B[k] && base[k]) { B[k].position.copy(base[k]); B[k].position.x *= hp; B[k].scale.set(lg, 1, lg); } });     // heupbreedte en benen
+  if (B.spine0 && B.spine1) { B.spine0.scale.set(wa, 1, wa); B.spine1.scale.set(1 / wa, 1, 1 / wa); }                                                // taille
+  if (B.spine2) { B.spine2.scale.set(1, 1, bu); if (B.neck) B.neck.scale.set(1, 1, 1 / bu); }                                                        // borst
 }
 function courtOf(v) { return [v.x, -v.z, v.y]; }
 function comp4(a, i, k) { return k === 0 ? a.getX(i) : k === 1 ? a.getY(i) : k === 2 ? a.getZ(i) : a.getW(i); }
@@ -3205,13 +3345,14 @@ function paintRig(paint, av, sport) {
   var rb = ['#e53b3b', '#ff9a2a', '#ffd93a', '#3ac45a', '#2f7bff', '#8a3ac8'].map(function (x) { return new THREE.Color(x); });
   paint.forEach(function (P) {
     var col = P.g.attributes.color, H = Math.max(1e-6, P.ymax - P.ymin);
+    if (P.sMin == null) { P.sMin = 1; P.sMax = 0; for (var j = 0; j < P.region.length; j++) if (P.region[j] === 1) { var fj = (P.yv[j] - P.ymin) / H; if (fj < P.sMin) P.sMin = fj; if (fj > P.sMax) P.sMax = fj; } }   // hoogte van het shirt
     for (var i = 0; i < P.region.length; i++) {
       var r = P.region[i], f = (P.yv[i] - P.ymin) / H;
       if (r === 1) {
         if (av.shirt === 'wit') c.copy(white); else if (av.shirt === 'zwart') c.set('#1d1f24');
         else if (av.shirt === 'streep') c.copy(Math.floor(f * 40) % 2 ? sc : white);
         else if (av.shirt === 'camo') c.set(['#4a5a32', '#2f3a20', '#6b7a45'][Math.floor((Math.sin(i * 12.9898) * 43758.5) % 3 + 3) % 3]);
-        else if (av.shirt === 'goud') c.set('#e6b53a'); else if (av.shirt === 'regenboog') c.copy(rb[Math.min(5, Math.floor((f - 0.55) / 0.3 * 6 + 3)) < 0 ? 0 : Math.min(5, Math.floor((f - 0.55) / 0.3 * 6 + 3))]);
+        else if (av.shirt === 'goud') c.set('#e6b53a'); else if (av.shirt === 'regenboog') c.copy(rb[Math.max(0, Math.min(5, Math.floor((1 - (f - P.sMin) / Math.max(1e-6, P.sMax - P.sMin)) * 6)))]);
         else c.copy(sc);
       } else if (r === 2) c.copy(shorts);
       else if (r === 3) c.copy(white);
@@ -3247,7 +3388,7 @@ function placeClothing(H3, fs) {
   });
   // haar, ogen en accessoires op het hoofd
   if (head) {
-    var hc = [head[0], head[1], head[2] + 0.06], Hc = T3(hc), fwd = [0, fs, 0], side = [fs, 0, 0], Fv = T3(fwd), Upv = new THREE.Vector3(0, 1, 0);
+    var hc = [head[0], head[1], head[2] + (H3.real ? 0.085 : 0.06)], Hc = T3(hc), fwd = [0, fs, 0], side = [fs, 0, 0], Fv = T3(fwd), Upv = new THREE.Vector3(0, 1, 0);
     var tilt = 0.45, Yh = Upv.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(Fv, -Math.sin(tilt)).normalize(), Xh = T3(side), Zh = new THREE.Vector3().crossVectors(Xh, Yh);
     setBasis(P.hairCap, Hc.clone().addScaledVector(Yh, 0.005), Xh, Yh, Zh, 0.112, 0.12, 0.116);
     setSph(P.eyes[0], [hc[0] + side[0] * 0.035, hc[1] + fwd[1] * 0.09, hc[2] + 0.005], 0.012);
@@ -3259,8 +3400,14 @@ function placeClothing(H3, fs) {
     setBasis(P.cap, Hc.clone().addScaledVector(Upv, 0.01), Xh, Upv, new THREE.Vector3().crossVectors(Xh, Upv), 0.118, 0.11, 0.118);
     setBasis(P.visor, Hc.clone().addScaledVector(Upv, 0.03).addScaledVector(Fv, 0.13), Xh, Upv, Fv, 0.16, 0.012, 0.095);
     setBasis(P.band, Hc.clone().addScaledVector(Upv, 0.035), Xh, new THREE.Vector3().crossVectors(Upv, Xh), Upv, 0.108, 0.108, 0.2);
-    setBasis(P.glasses, Hc.clone().addScaledVector(Fv, 0.095).addScaledVector(Upv, 0.005), Xh, Upv, Fv, 0.15, 0.033, 0.02);
+    setBasis(P.glasses, Hc.clone().addScaledVector(Fv, H3.rig ? 0.118 : 0.095).addScaledVector(Upv, 0.005), Xh, Upv, Fv, H3.rig ? 0.17 : 0.15, 0.036, 0.02);
     setBasis(P.crown, Hc.clone().addScaledVector(Upv, 0.12), Xh, Upv, new THREE.Vector3().crossVectors(Xh, Upv), 0.08, 0.065, 0.08);
+    if (P.earring) { setSph(P.earring[0], [hc[0] + side[0] * 0.088, hc[1], hc[2] - 0.055], 0.012); setSph(P.earring[1], [hc[0] - side[0] * 0.088, hc[1], hc[2] - 0.055], 0.012); }
+  }
+  if (P.skirt && hips) {
+    // rokje: van de heupen schuin naar buiten
+    var Upk = new THREE.Vector3(0, 1, 0), Xk = Xt.clone(); Xk.y = 0; if (Xk.lengthSq() < 1e-6) Xk.set(1, 0, 0); Xk.normalize(); var Zk = new THREE.Vector3().crossVectors(Xk, Upk);
+    setBasis(P.skirt, T3([hips[0], hips[1], hips[2] - 0.11]), Xk, Upk, Zk, 0.175, 0.3, 0.14);
   }
   H3.cloth.g.visible = true;
   H3.cloth.g.children.forEach(function (m) { if (m.userData.off) m.visible = false; });
@@ -3268,6 +3415,12 @@ function placeClothing(H3, fs) {
 function tintRig(H3, av, sport) {
   applyAvatar3D(H3.cloth, av, sport);                                 // kapsel en accessoires
   var P = H3.cloth.P; P.hairCap.visible = false;
+  if (P.skirt) { P.skirt.visible = !!av.rok && !H3.real; P.earring.forEach(function (m) { m.visible = av.extra === 'oorbellen'; }); }
+  if (H3.real) {
+    [P.torso, P.trap, P.pelvis, P.tail, P.knot, P.mohawk].forEach(function (m) { m.visible = false; }); P.curls.forEach(function (c) { c.visible = false; });
+    var rk = JSON.stringify(av) + sport; if (H3.avKey !== rk) { H3.avKey = rk; realLook(H3, av, sport); }
+    return;
+  }
   [P.torso, P.trap, P.pelvis].forEach(function (m) { m.visible = false; });
   var key = JSON.stringify(av) + sport; if (H3.avKey === key) return; H3.avKey = key;
   H3.mats.forEach(function (m) { m.roughness = 0.55; m.metalness = 0; m.needsUpdate = true; });
@@ -3297,6 +3450,49 @@ function ikArm(A, Bn, C, target, pole) {
   aimBone(A, b, e);
   aimBone(Bn, wpos(C), t);
 }
+/* ---------- de hand omsluit het handvat ---------- */
+function rotBoneWorld(bone, qw) {
+  var pq = new THREE.Quaternion(), wq = new THREE.Quaternion();
+  bone.parent.updateMatrixWorld(true); bone.parent.getWorldQuaternion(pq); bone.getWorldQuaternion(wq);
+  bone.quaternion.copy(pq.invert().multiply(qw.clone().multiply(wq))); bone.updateMatrixWorld(true);
+}
+function handFrame(Fg) {
+  var W = wpos(Fg.hand), M = Fg.fingers[1][0] ? wpos(Fg.fingers[1][0]) : null, I = Fg.fingers[0][0] ? wpos(Fg.fingers[0][0]) : null, P = Fg.fingers[3][0] ? wpos(Fg.fingers[3][0]) : null, T = Fg.thumb[0] ? wpos(Fg.thumb[0]) : null;
+  if (!M || !I || !P || !T) return null;
+  var f = M.clone().sub(W).normalize(), s = I.clone().sub(P); s.addScaledVector(f, -s.dot(f)).normalize();
+  var n = new THREE.Vector3().crossVectors(f, s); if (n.dot(T.clone().sub(W)) < 0) n.negate();      // palmkant: waar de duim zit
+  return { W: W, f: f, s: s, n: n, len: M.distanceTo(W), chir: Math.sign(n.dot(new THREE.Vector3().crossVectors(f, s))) || 1 };
+}
+/* draai de hand zodat ze dwars om het handvat staat (wijsvingerkant naar het blad), met zo weinig mogelijk knik in de pols */
+function orientHand(Fg, Yr) {
+  var fr = handFrame(Fg); if (!fr) return null;
+  var ft = fr.f.clone().addScaledVector(Yr, -fr.f.dot(Yr)); if (ft.lengthSq() < 1e-6) ft = fr.n.clone(); ft.normalize();
+  var st = Yr.clone(), nt = new THREE.Vector3().crossVectors(ft, st).multiplyScalar(fr.chir);
+  var Mf = new THREE.Matrix4().makeBasis(fr.f, fr.s, fr.n), Mt = new THREE.Matrix4().makeBasis(ft, st, nt);
+  var R = Mt.multiply(Mf.clone().transpose()); rotBoneWorld(Fg.hand, new THREE.Quaternion().setFromRotationMatrix(R));
+  return handFrame(Fg);
+}
+function bendToward(bone, child, axis, ang, toward) {
+  if (!bone || !child) return;
+  var d = wpos(child).sub(wpos(bone)).normalize(), r = d.clone().applyAxisAngle(axis, ang);
+  if (r.dot(toward) < d.dot(toward)) ang = -ang;
+  rotBoneWorld(bone, new THREE.Quaternion().setFromAxisAngle(axis, ang));
+}
+/* vingers sluiten om het handvat, duim eroverheen */
+function curlFingers(Fg, fr, amount) {
+  if (!fr) return;
+  var A = [1.2, 1.45, 0.95];
+  Fg.fingers.forEach(function (ch, fi) {
+    for (var i = 0; i < 3; i++) { var ax = new THREE.Vector3().crossVectors(wpos(ch[i + 1] || ch[i]).sub(wpos(ch[i])).normalize(), fr.n); if (ax.lengthSq() < 1e-6) ax = fr.s.clone(); ax.normalize(); bendToward(ch[i], ch[i + 1], ax, A[i] * amount * (fi === 3 ? 1.05 : 1), fr.n); }
+  });
+  var t = Fg.thumb;
+  if (t[0] && t[1]) bendToward(t[0], t[1], fr.f, 0.55 * amount, fr.n);
+  for (var k = 1; k < 3; k++) if (t[k] && t[k + 1]) { var ax2 = new THREE.Vector3().crossVectors(wpos(t[k + 1]).sub(wpos(t[k])).normalize(), fr.n); if (ax2.lengthSq() > 1e-6) bendToward(t[k], t[k + 1], ax2.normalize(), 0.45 * amount, fr.f.clone().add(fr.n)); }
+}
+function gripPoint(fr, Yr, hl) {
+  // midden van de vuist, en het handvat zo dat de hand vlak boven het uiteinde zit
+  return fr.W.clone().addScaledVector(fr.f, fr.len * 0.6).addScaledVector(fr.n, 0.026).addScaledVector(Yr, hl / 2 - 0.045);
+}
 function updateRigged(H3, w, now, live, dt) {
   var q = computePose(w, now, live), B = H3.B, spd = w.spd || 0;
   tintRig(H3, w.av || botAvatar(w), S.sport);
@@ -3308,18 +3504,34 @@ function updateRigged(H3, w, now, live, dt) {
   if (H3.act.walk) H3.act.walk.setEffectiveWeight(H3.ww);
   if (H3.act.run) { H3.act.run.setEffectiveWeight(H3.wr); H3.act.run.timeScale = clamp(spd / 4.8, 0.7, 1.4); }
   H3.mixer.update(dt);
+  applyBody(H3, bodyOf(w.av || botAvatar(w)));
+  if (w.cheer) {
+    // juichen: armen omhoog, racket in de lucht, kleine sprongetjes
+    var jj = Math.max(0, Math.sin(now / 1000 * 7 + (w.x || 0))) * 0.12;
+    q.wrD = [w.x + 0.28 * q.hs * q.fs, w.y + 0.06 * q.fs, 2.1 + jj]; q.wrO = [w.x - 0.28 * q.hs * q.fs, w.y + 0.06 * q.fs, 2.1 + jj];
+    q.ry = [0.15 * q.hs * q.fs, 0.1 * q.fs, 1]; q.rz = [0, q.fs, 0]; H3.g.position.y += jj;
+  }
   H3.g.updateMatrixWorld(true);
   // romp mee draaien bij een slag
   if (q.tw && B.spine1 && B.spine2) { B.spine1.rotateY(q.tw * 0.45); B.spine2.rotateY(q.tw * 0.45); B.spine1.updateMatrixWorld(true); }
   // slagarm naar het racket, de andere arm in balans of mee aan het racket
   var dom = q.hs > 0 ? [B.rArm, B.rFore, B.rHand] : [B.lArm, B.lFore, B.lHand], off = q.hs > 0 ? [B.lArm, B.lFore, B.lHand] : [B.rArm, B.rFore, B.rHand];
-  ikArm(dom[0], dom[1], dom[2], T3(q.wrD), T3([q.hs * q.fs * 0.6, 0, -0.8]).normalize());
+  var poleD = T3([q.hs * q.fs * 0.6, 0, -0.8]).normalize();
+  var Yr = T3(q.ry).normalize(), Zr = T3(q.rz); Zr.addScaledVector(Yr, -Zr.dot(Yr)); if (Zr.lengthSq() < 1e-4) Zr = new THREE.Vector3(0, 0, -1); Zr.normalize();
+  var hl = (S.sport === 'tennis' ? 0.19 : S.sport === 'pickleball' ? 0.13 : 0.16) * 1.15, Fg = H3.fing && H3.fing[q.hs > 0 ? 'R' : 'L'], target = T3(q.wrD), grip = null, fr = null;
+  if (H3.fingRest) H3.fingRest.forEach(function (r) { r[0].quaternion.copy(r[1]); });          // vingers eerst in rust, dan opnieuw sluiten
+  ikArm(dom[0], dom[1], dom[2], target, poleD);
+  if (Fg) {
+    // twee keer: hand om het handvat draaien, dan de arm zo bijsturen dat het handvat op de plek van de slag zit
+    fr = orientHand(Fg, Yr);
+    if (fr) { grip = gripPoint(fr, Yr, hl); ikArm(dom[0], dom[1], dom[2], target.clone().sub(grip.clone().sub(fr.W)), poleD); fr = orientHand(Fg, Yr); }
+    if (fr) { grip = gripPoint(fr, Yr, hl); curlFingers(Fg, fr, 1); }
+  }
   ikArm(off[0], off[1], off[2], T3(q.wrO), T3([-q.hs * q.fs * 0.6, 0, -0.8]).normalize());
   // racket in de hand
-  if (H3.racketSport !== S.sport) { if (H3.racket) G3.scene.remove(H3.racket); H3.racket = makeRacket3D(S.sport); G3.scene.add(H3.racket); H3.racketSport = S.sport; }
-  var hand = dom[2] ? wpos(dom[2]) : T3(q.wrD);
-  var Yr = T3(q.ry).normalize(), Zr = T3(q.rz); Zr.addScaledVector(Yr, -Zr.dot(Yr)); if (Zr.lengthSq() < 1e-4) Zr = new THREE.Vector3(0, 0, -1); Zr.normalize();
-  setBasis(H3.racket, hand.clone().addScaledVector(Yr, 0.04), new THREE.Vector3().crossVectors(Yr, Zr), Yr, Zr, 1.15, 1.15, 1.15);
+  if (H3.racketSport !== S.sport) { var par = H3.racket && H3.racket.parent; if (par) par.remove(H3.racket); H3.racket = makeRacket3D(S.sport); (par || G3.scene).add(H3.racket); H3.racketSport = S.sport; }   // het oude racket weg, waar het ook hing
+  var hand = grip || (dom[2] ? wpos(dom[2]).addScaledVector(Yr, 0.04) : T3(q.wrD));
+  setBasis(H3.racket, hand, new THREE.Vector3().crossVectors(Yr, Zr), Yr, Zr, 1.15, 1.15, 1.15);
   H3.racket.visible = true;
   H3.g.visible = true;
   placeClothing(H3, q.fs);
@@ -4097,10 +4309,13 @@ function render3D(now, tourCam) {
       if (!w._wid) w._wid = ++WID;
       var H3 = null; for (var i = 0; i < G3.humans.length; i++) if (G3.humans[i].wid === w._wid) H3 = G3.humans[i];
       if (!H3) { for (var j = 0; j < G3.humans.length; j++) if (!G3.humans[j].used && !list.some(function (o) { return o._wid === G3.humans[j].wid; })) { H3 = G3.humans[j]; break; } }
-      if (H3 && CHAR.ready && !H3.rig) {          // het echte model is intussen geladen: vervang het zelfgebouwde figuur
-        G3.scene.remove(H3.g); if (H3.racket) H3.g.remove(H3.racket); var ix = G3.humans.indexOf(H3); H3 = makeRigged(); G3.humans[ix] = H3;
+      var avw = w.av || botAvatar(w), want = modelFor(avw), Mw = PLAYERS3D[want];
+      if (!Mw.ready) loadModel(want);
+      if (H3 && Mw.ready && (!H3.real || H3.modelId !== want)) {   // het echte model is geladen of het uiterlijk is veranderd: vervangen
+        G3.scene.remove(H3.g); if (H3.cloth) G3.scene.remove(H3.cloth.g); if (H3.racket) { G3.scene.remove(H3.racket); if (H3.g) H3.g.remove(H3.racket); } if (H3.blob) G3.scene.remove(H3.blob);
+        var ix = G3.humans.indexOf(H3); H3 = makeRigged(avw); G3.humans[ix] = H3;
       }
-      if (!H3) { H3 = CHAR.ready ? makeRigged() : makeHuman3D(); G3.humans.push(H3); }
+      if (!H3) { H3 = Mw.ready ? makeRigged(avw) : makeHuman3D(); G3.humans.push(H3); }
       H3.wid = w._wid; H3.used = true; H3.w = w;
       if (!H3.blob) H3.blob = contactBlob();
       H3.blob.visible = true; H3.blob.position.copy(T3([w.x, w.y, 0.006])); H3.blob.scale.set(0.95, 0.95, 1);
@@ -4169,7 +4384,8 @@ function swingPhase(w, now) {
 function botAvatar(w) {
   if (w.av) return w.av;
   var hsh = hashStr((w.name || 'bot') + w.team + w.idx), skins = ['s0', 's1', 's2', 's3', 's4', 's5'], hairs = ['kort', 'krullen', 'staart', 'kaal', 'knot'], hc = ['zwart', 'bruin', 'blond', 'rood'];
-  w.av = { skin: skins[hsh % 6], hair: hairs[(hsh >> 3) % 5], hairCol: hc[(hsh >> 6) % 4], shirt: w.team === 0 ? 'sport' : 'wit', shorts: w.team === 0 ? 'zwart' : 'navy', shoes: 'wit', extra: (hsh >> 9) % 3 === 0 ? 'zweetband' : 'geen' };
+  var fem = (hsh >> 12) % 2 === 0, hairsG = fem ? ['staart', 'lang', 'knot', 'krullen'] : ['kort', 'krullen', 'kaal', 'kort'];
+  w.av = { gender: fem ? 'v' : 'm', skin: skins[hsh % 6], hairCol0: 0, hair: hairsG[(hsh >> 3) % 4], hairCol: hc[(hsh >> 6) % 4], shirt: w.team === 0 ? 'sport' : 'wit', shorts: w.team === 0 ? 'zwart' : 'navy', shoes: 'wit', extra: (hsh >> 9) % 3 === 0 ? 'zweetband' : (fem && (hsh >> 9) % 3 === 1 ? 'oorbellen' : 'geen') };
   return w.av;
 }
 function limb(a, b, r0, r1, col) {
@@ -4345,6 +4561,12 @@ window.__view = {
   },
   refresh: function () { envCache.key = ''; surfCache.key = ''; if (G3) { G3.venue = null; G3.stadKey = ''; } },
   surfaceType: function () { return surfaceType(env()); },
+  studio: function (on, cfg) { STUDIO = on ? (cfg || STUDIO || STUDIO_DEF()) : null; document.body.classList.toggle('studio', !!STUDIO); envCache.key = ''; return STUDIO; },
+  studioState: function () { return STUDIO; },
+  studioDefaults: function () { return STUDIO_DEF(); },
+  bodyDefaults: function () { return JSON.parse(JSON.stringify(BODY)); },
+  models: function () { var o = {}; Object.keys(PLAYERS3D).forEach(function (k) { o[k] = { g: PLAYERS3D[k].g, label: PLAYERS3D[k].label }; }); return o; },
+  avOptions: function () { return { skin: Object.keys(AVC.skin), hair: ['eigen', 'kaal'], hairCol: Object.keys(AVC.hairCol), shirt: ['sport', 'wit', 'zwart', 'streep', 'pro', 'camo', 'goud', 'regenboog'], shorts: Object.keys(AVC.shorts), shoes: Object.keys(AVC.shoes), extra: ['geen', 'zweetband', 'pet', 'zonnebril', 'oorbellen', 'kroon'] }; },
   setCam: function (o) { camTarget = { x: o.x, y: o.y, z: o.z }; CAM = { x: o.x, y: o.y, z: o.z }; envCache.key = ''; },
   baseCam: function () { var c = camFor(1); return { x: 0, y: c.y, z: c.z }; },
   court: function () { return court(); },
@@ -4359,7 +4581,7 @@ window.__view = {
   unlock: function () { try { unlockAudio(); } catch (e) {} },
   tour: function () { if (USE3D && G3) S.tour = { t0: performance.now(), dur: TOUR_MS }; return !!S.tour; }
 };
-window.__tv = { serveDebug: function (ph, speed) { var box = serviceBoxFor(ph[0]), tx = (box.x0 + box.x1) / 2, ty = box.y0 + (box.y1 - box.y0) * 0.65, az = Math.atan2(tx - ph[0], ty - ph[1]) * 180 / Math.PI, el = serveElevation(ph, speed, az, ty), s = simulateShot(ph, speed, el, az, null); return { box: box, el: el, az: az, outcome: s.outcome, land: s.land, netClear: s.netClear }; }, serverNow: function () { return serverNow(); }, pkCall: function () { return pkCall(); }, matchFormat: matchFormat, tour: function () { return !!S.tour; }, startTour: startTour, shake: shake, charInfo: function () { return { h: CHAR.height, foot: CHAR.footY, clips: Object.keys(CHAR.clips) }; }, charReady: function () { return CHAR.ready; }, blockPose: function (pl, mir) { return blockPose(pl, mir, performance.now()); }, use3d: function () { return USE3D; }, sim: function (a, b, c, d) { return simulateShot(a, b, c, d, null); }, netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
+window.__tv = { serveDebug: function (ph, speed) { var box = serviceBoxFor(ph[0]), tx = (box.x0 + box.x1) / 2, ty = box.y0 + (box.y1 - box.y0) * 0.65, az = Math.atan2(tx - ph[0], ty - ph[1]) * 180 / Math.PI, el = serveElevation(ph, speed, az, ty), s = simulateShot(ph, speed, el, az, null); return { box: box, el: el, az: az, outcome: s.outcome, land: s.land, netClear: s.netClear }; }, serverNow: function () { return serverNow(); }, pkCall: function () { return pkCall(); }, matchFormat: matchFormat, tour: function () { return !!S.tour; }, startTour: startTour, shake: shake, charInfo: function () { var M = PLAYERS3D.m_licht; return { h: M.height, foot: M.footY, clips: Object.keys(M.clips) }; }, charReady: function () { return CHAR.ready; }, modelsReady: function () { return Object.keys(PLAYERS3D).filter(function (k) { return PLAYERS3D[k].ready; }); }, blockPose: function (pl, mir) { return blockPose(pl, mir, performance.now()); }, use3d: function () { return USE3D; }, sim: function (a, b, c, d) { return simulateShot(a, b, c, d, null); }, netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
 })();
 </script>
 </body>

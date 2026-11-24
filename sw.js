@@ -1,7 +1,7 @@
 /* SwingLab service worker: werkt offline na het eerste bezoek.
    Verhoog CACHE bij elke nieuwe versie zodat oude bestanden opgeruimd worden. */
-const CACHE = 'swinglab-v35';
-const ASSETS = ['./', './index.html', './tv.html', './manifest.webmanifest', './peerjs.min.js', './three.min.js', './three-extra.js', './speler.glb', './supabase.js', './591.supabase.js',
+const CACHE = 'swinglab-v43';
+const ASSETS = ['./', './index.html', './tv.html', './manifest.webmanifest', './peerjs.min.js', './three.min.js', './three-extra.js', './speler-man-licht.glb', './speler-man-donker.glb', './speler-vrouw-licht.glb', './speler-vrouw-donker.glb', './supabase.js', './591.supabase.js',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
 // Een nieuwe versie wacht tot de gebruiker in de app op "Activeren" tikt (zie index.html)

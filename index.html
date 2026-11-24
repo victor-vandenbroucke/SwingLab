@@ -119,12 +119,112 @@ body[data-sport="pickleball"]{--lime:#2fbf5b;--lime-ink:#002a10}
 .start:active{transform:scale(.98)}
 
 /* Tab bar (glass) */
-.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:4px;padding:6px;border-radius:99px;background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:20}
-.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:74px;padding:8px 10px;border-radius:99px;font-size:12px;font-weight:600;color:var(--ink2)}
-.tabbar svg{width:22px;height:22px}
-.tabbar button[aria-current="page"]{background:var(--track);color:var(--ink)}
-.tabbar button{position:relative}
-.tabdot{position:absolute;top:6px;right:18px;width:9px;height:9px;border-radius:50%;background:#FF3B30}
+/* de oude balk blijft als bron voor de tabbalk, maar is zelf onzichtbaar */
+.tabbar{display:none}
+.tabdot{display:none}
+
+/* =====================================================================
+   ZWEVENDE TABBALK IN LIQUID GLASS-STIJL (iOS 26)
+   Overgenomen uit de Padel Interclub-app en aangepast aan SwingLab:
+   licht/donker volgt de telefoon, de actieve tab heeft de sportkleur.
+   ===================================================================== */
+/* 1. glas-tokens */
+:root{
+  --lg2-tint:rgba(255,255,255,.20);
+  --lg2-fill:linear-gradient(150deg, rgba(255,255,255,.58) 0%, rgba(255,255,255,.12) 38%, rgba(255,255,255,.06) 64%, rgba(255,255,255,.36) 100%);
+  --lg2-rand:rgba(255,255,255,.70);
+  --lg2-rim:inset 1.5px 1.5px 1px -1px #fff, inset -1px -1px 1px -1px rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 -24px 30px -26px rgba(40,90,170,.38);
+  --tb-uit:rgba(0,0,0,.66); --tb-pil:rgba(255,255,255,.70); --gloed:rgba(255,255,255,.75);
+  --vloei-a:.70; --vloei-sleep:.88;
+  --veer2:cubic-bezier(.34,1.56,.64,1);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --lg2-tint:rgba(255,255,255,.085);
+    --lg2-fill:linear-gradient(150deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.07) 36%, rgba(255,255,255,.04) 64%, rgba(255,255,255,.12) 100%);
+    --lg2-rand:rgba(255,255,255,.10);
+    --lg2-rim:inset 1.5px 1.5px 1px -1px rgba(255,255,255,.78), inset -1px -1px 1px -1px rgba(255,255,255,.42), inset 0 0 22px rgba(255,255,255,.05), inset 0 -26px 32px -28px rgba(0,24,70,.55);
+    --tb-uit:rgba(255,255,255,.78); --tb-pil:rgba(255,255,255,.17); --gloed:rgba(255,255,255,.42);
+    --vloei-a:.17; --vloei-sleep:.27;
+  }
+}
+@supports (transition-timing-function:linear(0, 1)){
+  :root{--veer2:linear(0, .009, .035 2.1%, .141 4.4%, .723 12.9%, .938 16.7%, 1.017 19.4%, 1.067, 1.099 24.3%, 1.108 26%, 1.104, 1.09 30.6%, 1.035 37.3%, 1.007 42.2%, .99 47.4%, .987 53.4%, .998 66.7%, 1);}
+}
+/* de actieve tab in de sportkleur (in licht thema iets donkerder voor leesbaarheid) */
+body{--tb-aan:color-mix(in srgb, var(--lime) 82%, #000)}
+@media (prefers-color-scheme:dark){ body{--tb-aan:var(--lime)} }
+
+/* 2. de balk, het pilletje en het indrukeffect */
+.tabbalk{
+  display:block;position:fixed;z-index:40;
+  left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  width:min(calc(100% - 24px),440px);
+  transform:translateX(-50%);
+  padding:6px;border-radius:999px;
+  background-color:var(--lg2-tint);background-image:var(--lg2-fill);
+  border:1px solid var(--lg2-rand);
+  box-shadow:var(--lg2-rim), 0 12px 28px -14px rgba(0,14,44,.36);
+  -webkit-backdrop-filter:blur(22px) saturate(200%) brightness(1.06);
+  backdrop-filter:blur(22px) saturate(200%) brightness(1.06);
+  transition:transform .5s var(--veer2), opacity .3s ease, width .5s var(--veer2), left .5s var(--veer2);
+  touch-action:none;-webkit-user-select:none;user-select:none;
+}
+.tabbalk.weg{transform:translate(-50%,calc(100% + 40px));opacity:0;pointer-events:none;transition:transform .3s ease, opacity .2s ease;}
+.tb-rij{position:relative;z-index:1;display:flex;}
+.tb{
+  position:relative;flex:1 1 0;min-width:0;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 2px 7px;border:0;border-radius:999px;background:none;
+  color:var(--tb-uit);font:600 11px/1.1 var(--ui);letter-spacing:.01em;
+  -webkit-tap-highlight-color:transparent;cursor:pointer;
+  transition:transform .55s var(--veer2), color .25s ease, opacity .25s ease, flex-grow .45s var(--veer2), padding .35s ease, gap .35s ease;
+}
+.tb svg{display:block;width:24px;height:24px;flex:none}
+.tb span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:opacity .2s ease, max-height .35s ease;max-height:16px}
+.tb.on{color:var(--tb-aan);font-weight:700;}
+.tb:focus-visible{outline:none;box-shadow:0 0 0 3px var(--tb-aan);}
+.tbb{position:absolute;top:4px;left:calc(50% + 7px);width:10px;height:10px;border-radius:50%;background:#FF3B30;box-shadow:0 0 0 2px rgba(10,30,45,.35)}
+.tb-pil{
+  position:absolute;z-index:0;top:6px;bottom:6px;left:0;width:0;border-radius:999px;pointer-events:none;
+  background:transparent;will-change:transform;
+  box-shadow:inset 1.5px 1.5px 1px -1px rgba(255,255,255,.85), inset -1px -1px 1px -1px rgba(255,255,255,.35), 0 3px 8px -6px rgba(0,14,44,.22);
+  opacity:0;transition:opacity .2s ease;
+}
+.tb-pil::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(70% 90% at calc(32% + var(--glans,0%)) 0%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 70%);opacity:.9}
+@media (prefers-color-scheme:dark){ .tb-pil::after{opacity:.75} }
+.tb:active{transform:scale(1.1);transition-duration:.22s}
+/* het licht komt van onder je vinger */
+.drukgloed{position:fixed;z-index:90;pointer-events:none;overflow:hidden;opacity:0;
+  background:radial-gradient(circle at var(--gx) var(--gy), var(--gloed) 0%, rgba(255,255,255,.12) 38%, rgba(255,255,255,0) 72%);
+  mix-blend-mode:normal;transform:scale(1);transition:opacity .45s ease, transform .55s var(--veer2);}
+@media (prefers-color-scheme:dark){ .drukgloed{mix-blend-mode:screen} }
+.drukgloed.aan{opacity:1;transform:scale(var(--dk,1.1));transition:opacity .12s ease, transform .22s var(--veer2);}
+
+/* 3. schuiven over de balk */
+.tabbalk.sleept .tb-pil{transition:none;box-shadow:inset 1.5px 1.5px 1px -1px rgba(255,255,255,.95), inset -1px -1px 1px -1px rgba(255,255,255,.45), 0 10px 24px -8px rgba(0,14,44,.5);}
+.tabbalk.sleept .tb.onder{color:var(--tb-aan);}
+.tabbalk.sleept .tb:active{transform:none;}
+
+/* 4. de vloeistof (veerfysica + goo-filter) */
+.tb-vloei{position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;filter:url(#tbGoo);opacity:var(--vloei-a);transition:opacity .25s ease;}
+.tabbalk.sleept .tb-vloei{opacity:var(--vloei-sleep);}
+.tb-kop,.tb-staart,.tb-brug{position:absolute;top:6px;bottom:6px;left:0;width:0;border-radius:999px;background:#fff;will-change:transform;}
+
+/* 5. krimpen bij naar beneden scrollen */
+.tabbalk.klein{width:64px;left:calc(12px + env(safe-area-inset-left,0px));transform:none;}
+.tabbalk.klein.weg{transform:translateY(calc(100% + 40px));}
+.tabbalk.klein .tb:not(.on){flex-grow:0;opacity:0;padding-left:0;padding-right:0;pointer-events:none;}
+.tabbalk.klein .tb{gap:0;}
+.tabbalk.klein .tb span{opacity:0;max-height:0;}
+.tabbalk.klein .tb.on .tbb{left:calc(50% + 4px);}
+.tabbalk.klein .tb-pil, .tabbalk.klein .tb-vloei, .tabbalk.wissel .tb-pil, .tabbalk.wissel .tb-vloei{opacity:0 !important;transition:opacity .15s ease;}
+@media (prefers-reduced-motion:reduce){
+  .tb:active,.drukgloed,.drukgloed.aan{transform:none !important;}
+  .tabbalk{transition:opacity .2s ease !important;}
+}
+/* ruimte onderaan zodat niets achter de balk verdwijnt */
+.view{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 
 /* Stats */
 .bars{display:flex;align-items:flex-end;gap:8px;height:150px;padding:18px 16px 12px;background:var(--surface);border-radius:24px}
@@ -555,7 +655,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 35</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 43</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -1256,6 +1356,218 @@ function toast(msg, ms) {
 }
 
 /* ---------- Navigatie ---------- */
+/* =====================================================================
+   ZWEVENDE TABBALK IN LIQUID GLASS-STIJL (uit de Padel Interclub-app)
+   Aangepast aan SwingLab: de vier tabs van .tabbar, showView() om te wisselen,
+   de rode stip bij Profiel, en weg tijdens training, tv en vensters.
+   ===================================================================== */
+var TOESTEL = /android/i.test(navigator.userAgent) ? 'android' : 'apple';
+/* tikjes: Android via vibrate, iPhone via de verborgen schakelaar van Safari 18 */
+var tril = (function () {
+  var lbl = null;
+  function maak() {
+    if (lbl) return lbl;
+    var w = document.createElement('div'); w.setAttribute('aria-hidden', 'true');
+    w.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;';
+    w.innerHTML = '<input type="checkbox" switch id="trilSchakel" tabindex="-1"><label for="trilSchakel"></label>';
+    document.body.appendChild(w); lbl = w.querySelector('label'); return lbl;
+  }
+  return function (stevig) { try { if (navigator.vibrate) { navigator.vibrate(stevig ? 18 : 8); return; } maak().click(); } catch (e) {} };
+})();
+/* iconen die even veren, zoals SF Symbols */
+function veerIcoon(svg) {
+  if (!svg || !svg.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  svg.animate([{ transform: 'scale(1)' }, { transform: 'scale(.78)', offset: .22, easing: 'cubic-bezier(.3,0,.6,1)' }, { transform: 'scale(1.18)', offset: .58, easing: 'cubic-bezier(.3,0,.5,1)' }, { transform: 'scale(1)' }], { duration: 520 });
+}
+function startTabbalk() {
+  var nav = document.querySelector('.tabbar'); if (!nav) return;
+  document.body.insertAdjacentHTML('beforeend',
+    '<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">' +
+    '<filter id="tbGoo" x="-6%" y="-40%" width="112%" height="180%" color-interpolation-filters="sRGB">' +
+    '<feGaussianBlur stdDeviation="5"/><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/>' +
+    '</filter></svg>');
+  var balk = document.createElement('nav');
+  balk.className = 'tabbalk weg'; balk.id = 'tabbalk'; balk.setAttribute('aria-label', 'Hoofdmenu');
+  balk.innerHTML = '<span class="tb-vloei" aria-hidden="true"><span class="tb-staart"></span><span class="tb-brug"></span><span class="tb-kop"></span></span>' +
+                   '<span class="tb-pil" aria-hidden="true"></span><div class="tb-rij"></div>';
+  document.body.appendChild(balk);
+  var rij = balk.querySelector('.tb-rij'), pil = balk.querySelector('.tb-pil'), vloei = balk.querySelector('.tb-vloei'),
+      kop = balk.querySelector('.tb-kop'), staart = balk.querySelector('.tb-staart'), brug = balk.querySelector('.tb-brug');
+  var rustig = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
+  var sleutel = '', vorig = null, sleep = null, netGesleept = false;
+  function knoppenVanNav() { return Array.prototype.slice.call(nav.querySelectorAll('button[data-view]')); }
+  function actiefDoel() { var a = nav.querySelector('button[aria-current="page"]'); return a ? a.getAttribute('data-view') : null; }
+
+  /* ---------- de vloeistof ---------- */
+  var F = { x: null, v: 0, xt: 0, vt: 0, doel: 0, w: 0, til: 0, tilNu: 0, loop: 0, last: 0 };
+  function vorm(x, sx, sy) {
+    var L = x + F.w * (1 - sx) / 2, R = x + F.w * (1 + sx) / 2;
+    if (F.max !== undefined) {
+      var Rmax = F.max + F.w, o;
+      if (R > Rmax) { o = R - Rmax; R = Rmax; L = Math.min(L, R - F.w * sx * .62); sy = Math.min(Math.max(sy, 1) * 1.1, sy * (1 + Math.min(.2, o / 60))); }
+      if (L < F.min) { o = F.min - L; L = F.min; R = Math.max(R, L + F.w * sx * .62); sy = Math.min(Math.max(sy, 1) * 1.1, sy * (1 + Math.min(.2, o / 60))); }
+      sx = (R - L) / F.w;
+    }
+    return 'translateX(' + (L - F.w * (1 - sx) / 2).toFixed(2) + 'px) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+  }
+  function teken() {
+    var s = Math.min(.32, Math.abs(F.v) / 2300), t = 1 + F.tilNu * .12;
+    var T = vorm(F.x, (1 + s) * t, (1 - s * .5) * t);
+    pil.style.transform = T; kop.style.transform = T;
+    var d = Math.abs(F.x - F.xt), ts = Math.max(.42, 1 - d / 240);
+    staart.style.transform = vorm(F.xt, ts, ts);
+    var bs = Math.max(.36, .92 - d / 330);
+    brug.style.transform = vorm((F.x + F.xt) / 2, bs * 1.15, bs);
+    pil.style.setProperty('--glans', Math.max(-36, Math.min(36, -F.v / 45)).toFixed(1) + '%');
+    if (pil.style.width !== F.w + 'px') { pil.style.width = kop.style.width = staart.style.width = brug.style.width = F.w + 'px'; }
+  }
+  function stap(tijd) {
+    var dt = F.last ? Math.min(.032, (tijd - F.last) / 1000) : .016; F.last = tijd;
+    var vast = sleep && sleep.actief, k = vast ? 950 : 330, c = vast ? 54 : 26;
+    F.v += (k * (F.doel - F.x) - c * F.v) * dt; F.x += F.v * dt;
+    F.vt += (340 * (F.x - F.xt) - 26 * F.vt) * dt; F.xt += F.vt * dt;
+    F.tilNu += (F.til - F.tilNu) * Math.min(1, dt * 14);
+    teken();
+    var rust = !vast && Math.abs(F.doel - F.x) < .3 && Math.abs(F.v) < 5 && Math.abs(F.x - F.xt) < .3 && Math.abs(F.vt) < 5 && Math.abs(F.til - F.tilNu) < .01;
+    if (rust) { F.x = F.xt = F.doel; F.v = F.vt = 0; F.tilNu = F.til; teken(); F.loop = 0; F.last = 0; return; }
+    F.loop = requestAnimationFrame(stap);
+  }
+  function start() { if (!F.loop) { F.last = 0; F.loop = requestAnimationFrame(stap); } }
+  function toonPil(ja) { pil.style.opacity = ja ? '1' : '0'; vloei.style.visibility = ja ? 'visible' : 'hidden'; }
+
+  function bouw() {
+    var knoppen = knoppenVanNav();
+    var nieuw = knoppen.map(function (b) { var d = b.querySelector('.tabdot'); return b.getAttribute('data-view') + '|' + (d && !d.hidden ? '!' : ''); }).join(',');
+    if (nieuw !== sleutel) {
+      sleutel = nieuw;
+      rij.innerHTML = knoppen.map(function (b) {
+        var doel = b.getAttribute('data-view'), svg = b.querySelector('svg'), d = b.querySelector('.tabdot'), naam = (b.textContent || '').trim();
+        return '<button class="tb" type="button" data-tgo="' + doel + '">' + (svg ? svg.outerHTML : '') + '<span>' + naam + '</span>' + (d && !d.hidden ? '<em class="tbb" aria-label="nieuw"></em>' : '') + '</button>';
+      }).join('');
+      Array.prototype.forEach.call(rij.querySelectorAll('[data-tgo]'), function (b) {
+        b.onclick = function () {
+          if (netGesleept) return;
+          if (balk.classList.contains('klein')) { zetKlein(false); return; }   /* de kleine balk eerst weer groot maken */
+          if (actiefDoel() !== b.getAttribute('data-tgo')) tril();
+          showView(b.getAttribute('data-tgo'));
+        };
+      });
+    }
+    zetActief();
+  }
+  function zetActief() {
+    if (sleep && sleep.actief) return;
+    var doel = actiefDoel(), knop = null;
+    Array.prototype.forEach.call(rij.querySelectorAll('.tb'), function (b) {
+      var ja = b.getAttribute('data-tgo') === doel; b.classList.toggle('on', ja);
+      if (ja) { b.setAttribute('aria-current', 'page'); knop = b; } else b.removeAttribute('aria-current');
+    });
+    schuif(knop, vorig !== null && doel !== vorig);
+    if (vorig !== null && doel !== vorig) veerIcoon(knop && knop.querySelector('svg'));
+    vorig = doel;
+  }
+  function schuif(knop, animeer) {
+    if (!knop || !balk.offsetWidth) { toonPil(false); return; }
+    var x = rij.offsetLeft + knop.offsetLeft, w = knop.offsetWidth, alle = rij.querySelectorAll('.tb');
+    F.min = rij.offsetLeft + alle[0].offsetLeft; F.max = rij.offsetLeft + alle[alle.length - 1].offsetLeft;
+    F.w = w; F.doel = x; toonPil(true);
+    if (F.x === null || rustig()) {
+      if (F.loop) { cancelAnimationFrame(F.loop); F.loop = 0; }
+      F.x = F.xt = x; F.v = F.vt = 0; F.tilNu = F.til = 0; teken(); return;
+    }
+    if (animeer) { start(); return; }
+    if (!F.loop) { F.x = F.xt = x; F.v = F.vt = 0; teken(); }
+  }
+
+  /* ===== schuiven over de tabbalk: de druppel volgt je vinger ===== */
+  balk.addEventListener('pointerdown', function (e) {
+    if (e.button > 0 || balk.classList.contains('klein') || TOESTEL === 'android') return;
+    sleep = { id: e.pointerId, x0: e.clientX, actief: false, idx: null };
+  }, { passive: true });
+  balk.addEventListener('pointermove', function (e) {
+    if (!sleep || e.pointerId !== sleep.id) return;
+    var tabs = Array.prototype.slice.call(rij.querySelectorAll('.tb')); if (!tabs.length) return;
+    if (!sleep.actief) {
+      if (Math.abs(e.clientX - sleep.x0) < 8) return;
+      sleep.actief = true; balk.classList.add('sleept');
+      try { balk.setPointerCapture(e.pointerId); } catch (_) {}
+      Array.prototype.forEach.call(document.querySelectorAll('.drukgloed'), function (g) { g.classList.remove('aan'); });
+      sleep.idx = tabs.findIndex(function (t) { return t.classList.contains('on'); });
+      if (F.x === null) { var a = tabs[Math.max(0, sleep.idx)]; F.x = F.xt = rij.offsetLeft + a.offsetLeft; F.w = a.offsetWidth; }
+    }
+    var rb = balk.getBoundingClientRect(), vinger = e.clientX - rb.left - balk.clientLeft;
+    var w = tabs[0].offsetWidth, min = rij.offsetLeft + tabs[0].offsetLeft, max = rij.offsetLeft + tabs[tabs.length - 1].offsetLeft;
+    var x = vinger - w / 2;
+    if (x < min) x = min - Math.min(14, (min - x) * .25);
+    if (x > max) x = max + Math.min(14, (x - max) * .25);
+    F.w = w; F.min = min; F.max = max; F.doel = x; F.til = 1; toonPil(true); start();
+    var idx = 0, best = 1e9;
+    tabs.forEach(function (t, i) { var d = Math.abs(rij.offsetLeft + t.offsetLeft + t.offsetWidth / 2 - vinger); if (d < best) { best = d; idx = i; } });
+    if (idx !== sleep.idx) { sleep.idx = idx; tabs.forEach(function (t, i) { t.classList.toggle('onder', i === idx); }); tril(); }
+  });
+  function stop(e) {
+    if (!sleep || e.pointerId !== sleep.id) return;
+    var s = sleep; sleep = null;
+    if (!s.actief) return;
+    balk.classList.remove('sleept'); F.til = 0;
+    var tabs = Array.prototype.slice.call(rij.querySelectorAll('.tb'));
+    tabs.forEach(function (t) { t.classList.remove('onder'); });
+    netGesleept = true; setTimeout(function () { netGesleept = false; }, 350);
+    var doelKnop = tabs[s.idx];
+    if (doelKnop && actiefDoel() !== doelKnop.getAttribute('data-tgo')) showView(doelKnop.getAttribute('data-tgo'));
+    else schuif(doelKnop || tabs.filter(function (t) { return t.classList.contains('on'); })[0], true);
+    start();
+  }
+  balk.addEventListener('pointerup', stop);
+  balk.addEventListener('pointercancel', stop);
+
+  /* weg tijdens training, spelen op tv en bij open vensters */
+  function zichtbaar() {
+    var weg = !$('train').hidden || !$('tvplay').hidden || !!document.querySelector('.backdrop:not([hidden])');
+    balk.classList.toggle('weg', weg);
+  }
+  var wacht = false;
+  var plan = function () { if (wacht) return; wacht = true; requestAnimationFrame(function () { wacht = false; bouw(); zichtbaar(); }); };
+  new MutationObserver(plan).observe(nav, { subtree: true, attributes: true, childList: true, characterData: true });
+  Array.prototype.forEach.call(document.querySelectorAll('#train, #tvplay, .backdrop'), function (el) { new MutationObserver(plan).observe(el, { attributes: true, attributeFilter: ['hidden'] }); });
+  addEventListener('resize', function () { F.x = null; plan(); });
+
+  /* ===== krimpen bij naar beneden scrollen, terugkomen bij omhoog ===== */
+  var laatsteY = window.scrollY, opgeteld = 0, wisselT = 0;
+  function klaarMetWissel() { clearTimeout(wisselT); balk.classList.remove('wissel'); F.x = null; plan(); }
+  function zetKlein(ja) {
+    if (balk.classList.contains('klein') === ja) return;
+    balk.classList.add('wissel'); balk.classList.toggle('klein', ja);
+    clearTimeout(wisselT); wisselT = setTimeout(klaarMetWissel, 650);
+  }
+  balk.addEventListener('transitionend', function (e) { if (e.target === balk && e.propertyName === 'width') klaarMetWissel(); });
+  addEventListener('scroll', function () {
+    var y = window.scrollY, dy = y - laatsteY; laatsteY = y;
+    if (sleep && sleep.actief) return;
+    if (y < 60) { opgeteld = 0; zetKlein(false); return; }
+    if ((dy > 0) !== (opgeteld > 0)) opgeteld = 0;
+    opgeteld += dy;
+    if (opgeteld > 40) zetKlein(true); else if (opgeteld < -24) zetKlein(false);
+  }, { passive: true });
+  plan();
+
+  /* ===== indrukken zoals Apple: het glas zwelt op en licht op vanaf je vinger ===== */
+  if (TOESTEL !== 'android') {
+    var gloed = null;
+    var weg = function () { if (!gloed) return; var g = gloed; gloed = null; g.classList.remove('aan'); setTimeout(function () { if (g.parentNode) g.parentNode.removeChild(g); }, 500); };
+    document.addEventListener('pointerdown', function (e) {
+      var el = e.target.closest && e.target.closest('.tb');
+      if (!el) return;
+      weg();
+      var r = el.getBoundingClientRect(), cs = getComputedStyle(el), g = document.createElement('span');
+      g.className = 'drukgloed'; g.setAttribute('aria-hidden', 'true');
+      g.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;border-radius:' + cs.borderRadius + ';--gx:' + (e.clientX - r.left) + 'px;--gy:' + (e.clientY - r.top) + 'px;--dk:1.1';
+      document.body.appendChild(g); gloed = g;
+      requestAnimationFrame(function () { if (gloed === g) g.classList.add('aan'); });
+    }, { passive: true });
+    ['pointerup', 'pointercancel', 'scroll', 'blur'].forEach(function (t) { addEventListener(t, weg, { passive: true, capture: true }); });
+  }
+}
 function showView(name) {
   ['home', 'stats', 'settings', 'profile'].forEach(function (v) {
     $('view-' + v).classList.toggle('active', v === name);
@@ -2830,6 +3142,7 @@ function bindProfile() {
 
 /* ---------- Gebeurtenissen ---------- */
 function bind() {
+  try { startTabbalk(); } catch (e) { if (window.console) console.warn('SwingLab tabbalk', e); }
   Array.prototype.forEach.call(document.querySelectorAll('.tabbar button'), function (b) {
     b.addEventListener('click', function () { showView(b.getAttribute('data-view')); });
   });
@@ -2957,7 +3270,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 35, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 43, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 

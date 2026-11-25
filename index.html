@@ -655,7 +655,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 43</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 47</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -1159,11 +1159,15 @@ function linTrack(e, R, tau) {
     LIN.vd = (LIN.vd - aUp * dt) * 0.95;
   } else LIN.vd = 0;
 }
+var SERVE_MODE = false;   // na "jouw opslag" op de tv: een rustige opslagzwaai telt ook (alleen voor die ene zwaai)
 function linCap() {
   if (!LIN.ok) return Infinity;              // toestel zonder versnellingsmeter: niet begrenzen
   var L = Math.max(Math.abs(LIN.vz), Math.max(0, LIN.vd));
-  if (L < 1.0) return 0;                      // de telefoon bewoog nauwelijks: geen slag
-  return Math.max(30, L * 3.6 * 3.2 + 10);    // korte, echte bewegingen (zoals een volley) tellen gewoon
+  if (SERVE_MODE) return L < 0.4 ? 0 : Infinity;
+  if (L < 1.0) return 0;                      // de telefoon bewoog nauwelijks: geen slag (polsflik, ronddraaien)
+  // een echte slag: de gyroscoop meet de snelheid van de racketkop; de geschatte armbeweging valt door de demping veel te laag uit,
+  // dus die begrenst alleen ruim (vroeger bleef een volle slag zo rond 40 km/u steken)
+  return Math.max(75, L * 3.6 * 10 + 40);
 }
 function judgeSwing(peak, mode, th) {
   if (mode === 'control') {
@@ -2342,7 +2346,7 @@ function tvFeed(v, t, vec, dTurn) {
   if (v < 0) { TVS.blockUntil = t + 600; tvDet.reset(); return; }
   if (TVS.blockUntil && t < TVS.blockUntil) return;
   var ev = tvDet.push(v, t, 'power', TV_TH, vec, dTurn);
-  if (ev) tvSwing(ev);
+  if (ev) { SERVE_MODE = false; tvSwing(ev); }
 }
 
 /* Hoe stond het racket op het moment van de slag, en welke kant bewoog de kop uit?
@@ -2465,7 +2469,7 @@ function tvOnData(m) {
     else if (TVS.step === 'wait') renderWait();
     return;
   }
-  if (m.type === 'serveTurn') { $('tvVerdict').textContent = m.second ? 'Tweede opslag' : 'Jouw opslag'; $('tvVerdict').className = 'tv-verdict num'; $('tvSub').textContent = 'Zwaai wanneer je klaar bent.'; buzz([30, 40, 30]); return; }
+  if (m.type === 'serveTurn') { SERVE_MODE = true; $('tvVerdict').textContent = m.second ? 'Tweede opslag' : 'Jouw opslag'; $('tvVerdict').className = 'tv-verdict num'; $('tvSub').textContent = 'Zwaai wanneer je klaar bent.'; buzz([30, 40, 30]); return; }
   if (m.type === 'goReady') { if (TVS.isHost === false && (TVS.step === 'wait' || TVS.step === 'play')) tvBeginReady(); return; }
   if (m.type === 'full') { tvFail(m.reason === 'vol' ? 'Deze tv zit vol: er spelen al 4 spelers.' : 'Op deze tv wordt nu gespeeld. Wacht tot de ronde voorbij is en probeer opnieuw.'); return; }
   if (m.type === 'score') { $('tvScore').hidden = false; $('tvScore').textContent = m.text; return; }
@@ -3270,7 +3274,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 43, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 47, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 

@@ -47,64 +47,67 @@ body.studio .layer,body.studio .hud-top,body.studio .hud-bottom,body.studio .mbo
 .btn.primary{background:var(--lime);color:var(--lime-ink)}
 
 /* Verbonden */
-#connected h1,#done h1{font-family:var(--num);font-variation-settings:"wdth" 112;font-weight:800;font-size:7vh;margin:0 0 2vh}
-#connected p{font-size:3.4vh;color:var(--ink2);margin:0;max-width:110vh}
+#connected h1,#done h1{font-family:var(--num);font-variation-settings:"wdth" 112;font-weight:800;font-size:4.3vh;margin:0 0 2vh}
+#connected p{font-size:2.1vh;color:var(--ink2);margin:0;max-width:110vh}
 
 /* Aftellen */
-#countdown .num{font-size:30vh;line-height:1;text-shadow:0 .6vh 3vh rgba(0,0,0,.6)}
+#countdown .num{font-size:18.6vh;line-height:1;text-shadow:0 .6vh 3vh rgba(0,0,0,.6)}
 #countdown{background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.15) 60%,rgba(0,0,0,.4))}
 .venue{margin-bottom:2vh;text-shadow:0 .4vh 2vh rgba(0,0,0,.7)}
-.v-tier{display:inline-block;padding:.6vh 1.8vh;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-weight:800;font-size:2.6vh;margin-bottom:1.6vh}
-.v-city{font-family:var(--num);font-variation-settings:"wdth" 118;font-weight:800;font-size:8vh;line-height:1}
-.v-name{font-size:3vh;color:rgba(255,255,255,.8);margin-top:1vh}
+.v-tier{display:inline-block;padding:.6vh 1.8vh;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-weight:800;font-size:1.6vh;margin-bottom:1.6vh}
+.v-city{font-family:var(--num);font-variation-settings:"wdth" 118;font-weight:800;font-size:5vh;line-height:1}
+.v-name{font-size:1.9vh;color:rgba(255,255,255,.8);margin-top:1vh}
 
 /* HUD */
 #hud{position:fixed;inset:0;pointer-events:none}
 .hud-top{position:absolute;top:4vh;left:4vw;right:4vw;display:flex;justify-content:space-between;align-items:flex-start}
-.score{font-size:9vh;line-height:.95}
-.drill{position:absolute;left:0;right:0;top:0;text-align:center;font-size:2.8vh;color:rgba(255,255,255,.7);pointer-events:none;white-space:pre-line;line-height:1.35}
+.score{font-size:5.6vh;line-height:.95}
+.drill{position:absolute;left:0;right:0;top:0;text-align:center;font-size:1.7vh;color:rgba(255,255,255,.7);pointer-events:none;white-space:pre-line;line-height:1.35}
 .target-note{color:var(--lime)}
 .lobby{display:flex;gap:2vh;justify-content:center;flex-wrap:wrap;margin:1vh 0 2.4vh}
-.lp{padding:1.4vh 2.4vh;border-radius:2vh;background:rgba(255,255,255,.1);font-size:3vh;font-weight:700;min-width:20vh}
-.lp small{display:block;font-size:2vh;font-weight:500;color:rgba(255,255,255,.65);margin-top:.4vh}
+.lp{padding:1.4vh 2.4vh;border-radius:2vh;background:rgba(255,255,255,.1);font-size:1.9vh;font-weight:700;min-width:20vh}
+.lp small{display:block;font-size:1.2vh;font-weight:500;color:rgba(255,255,255,.65);margin-top:.4vh}
 .lp.host{box-shadow:inset 0 0 0 .4vh var(--lime)}
-.mboard{position:absolute;left:3vh;top:3vh;background:rgba(6,8,12,.82);border-radius:1.6vh;padding:1.2vh 2vh;font-size:2.8vh;min-width:56vh;box-shadow:0 0 0 .2vh rgba(255,255,255,.12)}
+.mboard{position:absolute;left:3vh;top:3vh;max-width:46vh;background:rgba(6,8,12,.82);border-radius:1.6vh;padding:1.2vh 2vh;font-size:1.7vh;min-width:38vh;box-shadow:0 0 0 .2vh rgba(255,255,255,.12)}
 .mrow{display:grid;grid-template-columns:3vh 1fr auto 6vh 7vh;align-items:center;gap:1vh;padding:.4vh 0}
 .mrow .sts{display:flex;gap:.8vh;font-family:var(--num);font-weight:700;color:rgba(255,255,255,.55)}
-.mcall{margin-top:.4vh;text-align:center;font-size:2.2vh;font-weight:700;color:var(--lime)}
+.ptimer{position:absolute;left:3vh;bottom:3vh;display:flex;align-items:center;gap:1.2vh;padding:.8vh 1.6vh .8vh .8vh;border-radius:99px;background:rgba(6,8,12,.72);font-size:1.8vh;color:rgba(255,255,255,.85)}
+.ptimer i{width:4vh;height:4vh;border-radius:50%;background:conic-gradient(var(--lime) calc(var(--p,0)*360deg), rgba(255,255,255,.15) 0);-webkit-mask:radial-gradient(circle, transparent 52%, #000 54%);mask:radial-gradient(circle, transparent 52%, #000 54%)}
+.ptimer b{font-family:var(--num);font-weight:800;font-size:2.6vh;min-width:2vh;text-align:center}
+.mcall{margin-top:.4vh;text-align:center;font-size:1.4vh;font-weight:700;color:var(--lime)}
 .mrow .srv{width:1.4vh;height:1.4vh;border-radius:50%;background:var(--lime);visibility:hidden}
 .mrow.serving .srv{visibility:visible}
 .mrow .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
 .mrow .gm{font-family:var(--num);font-variation-settings:"wdth" 120;font-weight:800;text-align:center;color:rgba(255,255,255,.7)}
 .mrow .pt{font-family:var(--num);font-variation-settings:"wdth" 120;font-weight:800;text-align:center;background:var(--lime);color:var(--lime-ink);border-radius:.8vh}
 body.match .hud-top{display:none}
-.small{font-size:2.6vh;color:var(--ink2);margin-top:.6vh}
+.small{font-size:1.6vh;color:var(--ink2);margin-top:.6vh}
 .right{text-align:right}
-.ballcount{font-size:5vh;line-height:1}
-.combo{display:inline-block;margin-top:1.2vh;padding:.6vh 1.6vh;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-size:2.6vh;font-weight:700}
-.verdict{position:absolute;left:0;right:0;top:17vh;text-align:center;font-family:var(--num);font-variation-settings:"wdth" 125;font-weight:850;font-size:11vh;line-height:1;opacity:0}
+.ballcount{font-size:3.1vh;line-height:1}
+.combo{display:inline-block;margin-top:1.2vh;padding:.6vh 1.6vh;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-size:1.6vh;font-weight:700}
+.verdict{position:absolute;left:0;right:0;top:17vh;text-align:center;font-family:var(--num);font-variation-settings:"wdth" 125;font-weight:850;font-size:6.8vh;line-height:1;opacity:0}
 .verdict.show{animation:verdict 1s cubic-bezier(.2,.9,.3,1)}
 .verdict.perfect{color:var(--lime)}
 .verdict.good{color:#fff}
 .verdict.bad{color:var(--amber)}
 .verdict.miss{color:rgba(255,255,255,.55)}
 @keyframes verdict{0%{opacity:0;transform:scale(.8)}15%{opacity:1;transform:scale(1.05)}25%{transform:scale(1)}75%{opacity:1}100%{opacity:0}}
-.shot{position:absolute;left:0;right:0;top:29vh;text-align:center;font-size:3.6vh;font-weight:600;color:rgba(255,255,255,.85);opacity:0;transition:opacity .25s}
+.shot{position:absolute;left:0;right:0;top:29vh;text-align:center;font-size:2.2vh;font-weight:600;color:rgba(255,255,255,.85);opacity:0;transition:opacity .25s}
 .shot.show{opacity:1}
-.points{position:absolute;left:0;right:0;top:35vh;text-align:center;font-size:5vh;color:#fff;opacity:0}
+.points{position:absolute;left:0;right:0;top:35vh;text-align:center;font-size:3.1vh;color:#fff;opacity:0}
 .points.show{animation:pts 1s ease-out}
 @keyframes pts{0%{opacity:0;transform:translateY(2vh)}20%{opacity:1}100%{opacity:0;transform:translateY(-4vh)}}
 .hud-bottom{position:absolute;bottom:4vh;left:0;right:0;text-align:center}
-.speed{font-size:6vh;line-height:1}
-.demo{position:absolute;bottom:4vh;left:4vw;font-size:2.4vh;color:var(--ink2)}
+.speed{font-size:3.7vh;line-height:1}
+.demo{position:absolute;bottom:4vh;left:4vw;font-size:1.5vh;color:var(--ink2)}
 
 /* Resultaat */
 .stats{display:flex;gap:6vw;margin:4vh 0 5vh}
-.stats div b{display:block;font-family:var(--num);font-variation-settings:"wdth" 125;font-weight:800;font-size:7vh;line-height:1}
-.stats div span{font-size:2.6vh;color:var(--ink2)}
-.bigscore{font-size:16vh;line-height:1}
-.record{display:inline-block;margin-top:2vh;padding:.8vh 2vh;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-weight:700;font-size:2.8vh}
-.again{font-size:3.2vh;color:var(--ink2)}
+.stats div b{display:block;font-family:var(--num);font-variation-settings:"wdth" 125;font-weight:800;font-size:4.3vh;line-height:1}
+.stats div span{font-size:1.6vh;color:var(--ink2)}
+.bigscore{font-size:9.9vh;line-height:1}
+.record{display:inline-block;margin-top:2vh;padding:.8vh 2vh;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-weight:700;font-size:1.7vh}
+.again{font-size:2vh;color:var(--ink2)}
 
 @media (max-aspect-ratio:1/1){
   .pairgrid{grid-template-columns:1fr;gap:4vh}
@@ -158,6 +161,7 @@ body.match .hud-top{display:none}
     <div class="right"><div class="ballcount num" id="hudBall">0/20</div><div class="small">ballen</div><div class="combo" id="hudCombo" hidden>x1.0</div></div>
   </div>
   <div class="mboard" id="matchBoard" hidden></div>
+  <div class="ptimer" id="pauseTimer" hidden><i></i><b>3</b><span>Volgende punt</span></div>
   <div class="verdict" id="verdict"></div>
   <div class="shot" id="hudShot"></div>
   <div class="points num" id="points"></div>
@@ -635,6 +639,9 @@ function makeIncoming(dr, side, now) {
     wps = timed([W(rx, L - 1.2, 1.0), W(rx + (cx - rx) * 0.75, bY, 0, 'ground'), W(cx, P, 1.0)], [13 / lf, 9.5 / lf]);
   }
   // verticale snelheid per stuk zodat elke boog precies op het volgende punt uitkomt
+  // de bal vertrekt bij het racket van de trainer (die tegenover je staat met de ballenmand)
+  var fo = feedOrigin();
+  if (fo && dr.type !== 'serveown' && wps[0].p[1] > nY) wps[0].p = fo.slice();
   function solveVz() {
     for (var i = 0; i < wps.length - 1; i++) {
       var T = wps[i + 1].t - wps[i].t;
@@ -659,7 +666,7 @@ function makeIncoming(dr, side, now) {
     solveVz();
   }
   var Tf = wps[wps.length - 1].t;
-  return { kind: 'in', dr: dr, side: side, anySide: anySide, t0: now, Tf: Tf, wps: wps, evIdx: 1,
+  return { kind: 'in', dr: dr, side: side, anySide: anySide, t0: now, Tf: Tf, wps: wps, evIdx: 1, fromTrainer: !!feedOrigin(),
            c: wps[wps.length - 1].p.slice(), tContact: now + Tf * 1000, judged: false, wrong: false, cand: null, trail: [] };
 }
 
@@ -715,7 +722,7 @@ function simulateShot(p0, speedKmh, elDeg, azDeg, dr) {
   for (var i = 1; t < 3.4; i++) {
     var sp = Math.sqrt(vx * vx + vy * vy + vz * vz);
     vx -= DRAG * sp * vx * dt; vy -= DRAG * sp * vy * dt; vz -= (G + DRAG * sp * vz) * dt;
-    var py = y; x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
+    var px = x, py = y; x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
     if (z > apex) apex = z;
     if (netClear == null && py < nY && y >= nY) netClear = z - netTop(x);
     if (!netHit && py < nY && y >= nY && z < netTop(x) + 0.03) {
@@ -725,7 +732,7 @@ function simulateShot(p0, speedKmh, elDeg, azDeg, dr) {
     if (c.glass) {
       // de kooi is overal dicht: achterwanden 3 m glas + 1 m gaas, zijwanden 4 m (eerste 2 m) en daarna 3 m
       var W2 = c.Wd / 2;
-      if ((y > L && vy > 0) || (y < 0 && vy < 0)) {
+      if (((y > L && vy > 0) || (y < 0 && vy < 0)) && (y > L ? py <= L : py >= 0)) {   // alleen als de bal van binnen komt: wat over de kooi vliegt, blijft buiten
         if (z < 4) {
           var farW = y > L;
           if (farW && !bounces && !outcome) { outcome = 'out'; tEvent = t; }
@@ -733,7 +740,7 @@ function simulateShot(p0, speedKmh, elDeg, azDeg, dr) {
           wallHits.push({ t: t, p: [x, y, z], glass: z < 3 });
         }
       }
-      if (Math.abs(x) > W2 && (x > 0 ? vx > 0 : vx < 0)) {
+      if (Math.abs(x) > W2 && (x > 0 ? vx > 0 : vx < 0) && Math.abs(px) <= W2) {
         var dEnd = Math.min(y, L - y), hWall = dEnd < 2 ? 4 : 3, glassH = 3;   // panoramisch: glas rondom
         if (z < hWall) {
           if (y > nY && !bounces && !outcome) { outcome = 'out'; tEvent = t; }
@@ -766,12 +773,12 @@ function simulateVel(p0, v0, maxT) {
   for (var i = 1; t < (maxT || 3); i++) {
     var sp = Math.sqrt(vx * vx + vy * vy + vz * vz);
     vx -= DRAG * sp * vx * dt; vy -= DRAG * sp * vy * dt; vz -= (G + DRAG * sp * vz) * dt;
-    var py = y; x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
+    var px = x, py = y; x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
     if (z > apex) apex = z;
     if ((py - nY) * (y - nY) < 0 && z < netTop(x) + 0.03) { y = py; vy = -0.15 * vy; vx *= 0.3; }
     if (c.glass) {
-      if ((y > L && vy > 0) || (y < 0 && vy < 0)) { if (z < 4) { y = y > L ? L : 0; vy = -(z < 3 ? 0.7 : 0.3) * vy; vx *= 0.9; wallHits.push({ t: t, p: [x, y, z], glass: z < 3 }); } }
-      if (Math.abs(x) > W2 && (x > 0 ? vx > 0 : vx < 0)) { var dEnd = Math.min(y, L - y); if (z < (dEnd < 2 ? 4 : 3)) { x = (x > 0 ? 1 : -1) * W2; vx = -(z < 3 ? 0.7 : 0.3) * vx; vy *= 0.9; wallHits.push({ t: t, p: [x, y, z], glass: z < 3 }); } }
+      if (((y > L && vy > 0) || (y < 0 && vy < 0)) && (y > L ? py <= L : py >= 0)) { if (z < 4) { y = y > L ? L : 0; vy = -(z < 3 ? 0.7 : 0.3) * vy; vx *= 0.9; wallHits.push({ t: t, p: [x, y, z], glass: z < 3 }); } }
+      if (Math.abs(x) > W2 && (x > 0 ? vx > 0 : vx < 0) && Math.abs(px) <= W2) { var dEnd = Math.min(y, L - y); if (z < (dEnd < 2 ? 4 : 3)) { x = (x > 0 ? 1 : -1) * W2; vx = -(z < 3 ? 0.7 : 0.3) * vx; vy *= 0.9; wallHits.push({ t: t, p: [x, y, z], glass: z < 3 }); } }
     }
     if (z <= 0 && vz < 0) { z = 0; bounces++; bounceTimes.push(t); vz = -0.66 * vz; vx *= 0.85; vy *= 0.85; if (bounces >= 5) break; }
     if (i % 4 === 0) pts.push([x, y, z]);
@@ -861,9 +868,9 @@ function hitBall(b, d, speed, lift, now, otherSide, faceAz, chosenSide) {
   if (typeof faceAz === 'number') az = clamp(0.6 * faceAz + 0.4 * az, -30, 30);
   if (b.dr.type === 'serveown') {
     // opslag: richten op het diagonale servicevak; je zwaai bepaalt hoogte en richting
-    var sb = serviceBoxFor(p[0]), stx = (sb.x0 + sb.x1) / 2, sty = sb.y0 + (sb.y1 - sb.y0) * 0.65;
+    var sb = serviceBoxFor(p[0]), stx = (sb.x0 + sb.x1) / 2, sty = sb.y0 + (sb.y1 - sb.y0) * serveDepth();
     az = Math.atan2(stx - p[0], sty - p[1]) * 180 / Math.PI + (typeof faceAz === 'number' ? clamp(faceAz, -35, 35) * 0.3 : 0) + clamp(d / winG(), -1, 1) * 4;
-    el = serveElevation(p, speed, az, sty) + (hasLift ? clamp(lift, -30, 30) * 0.22 : 0); b.serveBox = sb;
+    speed = serveSpeed(speed); el = serveElevation(p, speed, az, sty) + (hasLift ? clamp(lift, -30, 30) * 0.11 : 0); b.serveBox = sb;
   }
   b.sim = simulateShot(p, speed, el, az, b.dr);
   if (b.serveBox) { if (!(b.sim.outcome === 'in' && inBox(b.sim.land, b.serveBox))) { b.serveFault = true; if (b.sim.outcome === 'in') b.sim.outcome = 'out'; } }
@@ -1625,7 +1632,7 @@ function surfaceType(E) {
   return 'hard';
 }
 function surfaceTexture(E) {
-  var c = court(), hw = c.Wd / 2, L = c.L, cc0 = courtCol(E), key = (E ? E.city + E.venue : 'x') + S.sport + 'v34' + cc0.court + cc0.out + cc0.kitchen + surfaceType(E);
+  var c = court(), hw = c.Wd / 2, L = c.L, cc0 = courtCol(E), key = (E ? E.city + E.venue : 'x') + S.sport + 'v46' + cc0.court + cc0.out + cc0.kitchen + surfaceType(E);
   if (surfCache.key === key && surfCache.cv) return surfCache.cv;
   var ppm = 36, X0 = -hw - 3, X1 = hw + 3, Y0 = -2, Y1 = L + 3;
   var cv2 = document.createElement('canvas'); cv2.width = Math.round((X1 - X0) * ppm); cv2.height = Math.round((Y1 - Y0) * ppm);
@@ -1645,23 +1652,48 @@ function surfaceTexture(E) {
     }
     for (i = 0; i < Wp * Hp / 60; i++) { t.fillStyle = 'rgba(230,210,170,' + (0.12 + rnd() * 0.18) + ')'; t.fillRect(rnd() * Wp, rnd() * Hp, 1.2, 1.2); }
     for (i = 0; i < 40; i++) { t.fillStyle = 'rgba(230,210,170,.05)'; t.beginPath(); t.ellipse(rnd() * Wp, rnd() * Hp, 30 + rnd() * 80, 10 + rnd() * 30, rnd() * 3, 0, Math.PI * 2); t.fill(); }
+    // padel: platgetrapt kunstgras met zand tussen de servicelijn en het net, links en rechts, aan beide kanten
+    [L / 2 - 4.9, L / 2 + 4.9].forEach(function (cy) {
+      [-1, 1].forEach(function (sx) {
+        var gx = X(sx * hw * 0.5), gy = Y(cy), rg = t.createRadialGradient(gx, gy, 0, gx, gy, 1.9 * ppm);
+        rg.addColorStop(0, 'rgba(236,220,186,.045)'); rg.addColorStop(0.6, 'rgba(236,220,186,.02)'); rg.addColorStop(1, 'rgba(236,220,186,0)');
+        t.save(); t.translate(gx, gy); t.scale(1, 1.25); t.translate(-gx, -gy); t.fillStyle = rg; t.beginPath(); t.arc(gx, gy, 1.9 * ppm, 0, Math.PI * 2); t.fill(); t.restore();
+        for (var dk = 0; dk < 40; dk++) { t.fillStyle = 'rgba(0,0,0,' + (0.015 + rnd() * 0.02) + ')'; t.beginPath(); t.ellipse(X(sx * hw * 0.5 + (rnd() - 0.5) * 2.6), Y(cy + (rnd() - 0.5) * 3.2), (0.15 + rnd() * 0.35) * ppm, (0.08 + rnd() * 0.2) * ppm, rnd() * 3, 0, Math.PI * 2); t.fill(); }
+      });
+    });
+    [L / 2 - 4.9, L / 2 + 4.9].forEach(function (cy) {
+      [-1, 1].forEach(function (sx) {
+        for (var k = 0; k < 26; k++) { t.fillStyle = 'rgba(232,214,176,' + (0.015 + rnd() * 0.02) + ')'; t.beginPath(); t.ellipse(X(sx * hw * 0.5 + (rnd() - 0.5) * 2.4), Y(cy + (rnd() - 0.5) * 3.4), (0.45 + rnd() * 0.9) * ppm, (0.3 + rnd() * 0.6) * ppm, rnd() * 3, 0, Math.PI * 2); t.fill(); }
+        for (var f2 = 0; f2 < 900; f2++) { t.fillStyle = 'rgba(235,220,185,' + (0.03 + rnd() * 0.05) + ')'; var rr = Math.sqrt(rnd()), aa = rnd() * 6.283; t.fillRect(X(sx * hw * 0.5 + Math.cos(aa) * rr * 1.3), Y(cy + Math.sin(aa) * rr * 1.8), 1.4, 1.4); }
+      });
+    });
   } else if (type === 'grass') {
     // gras: maaistroken, sprietjes en slijtplekken achter de baselines
     for (var sy = 0; sy * 1.5 < (Y1 - Y0); sy++) { t.fillStyle = sy % 2 ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.05)'; t.fillRect(0, sy * 1.5 * ppm, Wp, 1.5 * ppm); }
     for (i = 0; i < Wp * Hp / 10; i++) { t.fillStyle = rnd() < 0.5 ? 'rgba(255,255,255,.06)' : 'rgba(0,30,0,.08)'; t.fillRect(rnd() * Wp, rnd() * Hp, 1, 2); }
-    [[0, -0.6], [L, 0.6]].forEach(function (bl) {
-      for (var k = 0; k < 26; k++) { t.fillStyle = 'rgba(150,120,70,' + (0.05 + rnd() * 0.08) + ')'; t.beginPath(); t.ellipse(X((rnd() - 0.5) * 6), Y(bl[0] + bl[1] + (rnd() - 0.5) * 1.6), (0.6 + rnd()) * ppm, (0.3 + rnd() * 0.5) * ppm, 0, 0, Math.PI * 2); t.fill(); }
+    [[0, -1], [L, 1]].forEach(function (bl) {
+      // langs de hele baseline: bruine plekken, erachter het meest
+      for (var k = 0; k < 46; k++) { t.fillStyle = 'rgba(150,120,70,' + (0.025 + rnd() * 0.04) + ')'; t.beginPath(); t.ellipse(X((rnd() - 0.5) * 2 * hw * 0.92), Y(bl[0] + bl[1] * (rnd() * 1.6 - 0.5)), (0.5 + rnd()) * ppm, (0.25 + rnd() * 0.45) * ppm, 0, 0, Math.PI * 2); t.fill(); }
     });
   } else if (type === 'clay') {
     // gravel: fijne korrel, vlekken en glijsporen
     for (i = 0; i < Wp * Hp / 7; i++) { t.fillStyle = rnd() < 0.5 ? 'rgba(255,220,180,.07)' : 'rgba(90,30,10,.08)'; t.fillRect(rnd() * Wp, rnd() * Hp, 1.2, 1.2); }
     for (i = 0; i < 60; i++) { t.fillStyle = 'rgba(120,40,10,.05)'; t.beginPath(); t.ellipse(rnd() * Wp, rnd() * Hp, 20 + rnd() * 60, 10 + rnd() * 30, rnd() * 3, 0, Math.PI * 2); t.fill(); }
     [0, L].forEach(function (by) {
-      for (var k2 = 0; k2 < 14; k2++) { var sx2 = X((rnd() - 0.5) * 8), sy2 = Y(by + (by ? 1 : -1) * rnd() * 1.6); t.strokeStyle = 'rgba(255,215,170,.18)'; t.lineWidth = 3 + rnd() * 4; t.beginPath(); t.moveTo(sx2, sy2); t.quadraticCurveTo(sx2 + 20 + rnd() * 30, sy2 - 6, sx2 + 40 + rnd() * 50, sy2 + 4); t.stroke(); }
+      var sg = by ? 1 : -1;
+      // een lichtere, geschuurde band langs de baseline, en glijsporen over de hele breedte, ervoor en erachter
+      var gb = t.createLinearGradient(0, Y(by + sg * 1.8), 0, Y(by - sg * 0.9)); gb.addColorStop(0, 'rgba(255,215,170,0)'); gb.addColorStop(0.55, 'rgba(255,215,170,.07)'); gb.addColorStop(1, 'rgba(255,215,170,0)');
+      t.fillStyle = gb; t.fillRect(X(-hw - 0.4), Math.min(Y(by + sg * 1.8), Y(by - sg * 0.9)), (2 * hw + 0.8) * ppm, 2.7 * ppm);
+      for (var k2 = 0; k2 < 30; k2++) { var sx2 = X((rnd() - 0.5) * 2 * hw * 0.95), sy2 = Y(by + sg * (rnd() * 1.8 - 0.6)); t.strokeStyle = 'rgba(255,215,170,' + (0.05 + rnd() * 0.05) + ')'; t.lineWidth = 3 + rnd() * 4; t.beginPath(); t.moveTo(sx2, sy2); t.quadraticCurveTo(sx2 + (rnd() - 0.5) * 50, sy2 + (rnd() - 0.5) * 18, sx2 + (rnd() - 0.5) * 90, sy2 + (rnd() - 0.5) * 10); t.stroke(); }
     });
   } else {
     // hardcourt: fijne korrel in de toplaag
     for (i = 0; i < Wp * Hp / 9; i++) { t.fillStyle = rnd() < 0.5 ? 'rgba(255,255,255,.035)' : 'rgba(0,0,0,.05)'; t.fillRect(rnd() * Wp, rnd() * Hp, 1, 1); }
+    if (S.sport === 'tennis') [0, L].forEach(function (by) {
+      // tennis op hardcourt: donkere rubbersporen van schoenen langs de baseline (pickleball: geen slijtage)
+      var sg = by ? 1 : -1;
+      for (var k3 = 0; k3 < 34; k3++) { var x3 = X((rnd() - 0.5) * 2 * hw * 0.95), y3 = Y(by + sg * (rnd() * 1.7 - 0.5)); t.strokeStyle = 'rgba(0,0,0,' + (0.025 + rnd() * 0.03) + ')'; t.lineWidth = 2 + rnd() * 3; t.beginPath(); t.moveTo(x3, y3); t.quadraticCurveTo(x3 + (rnd() - 0.5) * 30, y3 + (rnd() - 0.5) * 12, x3 + (rnd() - 0.5) * 60, y3 + (rnd() - 0.5) * 8); t.stroke(); }
+    });
   }
   surfCache.key = key; surfCache.cv = cv2; surfCache.X0 = X0; surfCache.X1 = X1; surfCache.Y0 = Y0; surfCache.Y1 = Y1;
   return cv2;
@@ -2474,6 +2506,12 @@ function moveRunner(w, tx, ty, dt, now) {
   var tvx = d > 0.01 ? dx / d * want : 0, tvy = d > 0.01 ? dy / d * want : 0, k = 1 - Math.exp(-dt * 7);
   w.vx = (w.vx || 0) + (tvx - (w.vx || 0)) * k; w.vy = (w.vy || 0) + (tvy - (w.vy || 0)) * k;
   w.x += w.vx * dt; w.y += w.vy * dt;
+  if (S.sport === 'padel') {
+    // door het glas van de kooi mag niets: binnen blijven, met wat ruimte voor het lichaam
+    var C0 = court(), hw0 = C0.Wd / 2 - 0.32, L0 = C0.L;
+    if (w.x > hw0) { w.x = hw0; w.vx = Math.min(0, w.vx); } else if (w.x < -hw0) { w.x = -hw0; w.vx = Math.max(0, w.vx); }
+    if (w.y < 0.32) { w.y = 0.32; w.vy = Math.max(0, w.vy); } else if (w.y > L0 - 0.32) { w.y = L0 - 0.32; w.vy = Math.min(0, w.vy); }
+  }
   var sp = Math.sqrt(w.vx * w.vx + w.vy * w.vy);
   w.spd = sp; w.runPh = (w.runPh || 0) + sp * dt * 3.3;
 }
@@ -2745,18 +2783,24 @@ function serve(now) {
 }
 /* een punt dat pas na een vertraging valt, telt alleen als het nog dezelfde wedstrijd is */
 function later(fn, ms) { var ref = MS; setTimeout(function () { if (MS && MS === ref) fn(); }, ms); }
+/* een opslag gaat met een rustige zwaai al vlot over het net; harder slaan geeft een snellere opslag */
+function serveDepth() { return S.sport === 'tennis' ? 0.82 : S.sport === 'padel' ? 0.7 : 0.6; }   // snelle opslagen dieper richten: meer ruimte boven het net
+function serveSpeed(kmh) {
+  var sp = S.sport, base = sp === 'tennis' ? 95 : sp === 'padel' ? 45 : 48, top = sp === 'tennis' ? 200 : sp === 'padel' ? 72 : 80, k = sp === 'tennis' ? 1.1 : sp === 'padel' ? 0.45 : 0.5;   // padel: korte servicevakken, opslag 45-72 km/u
+  return clamp(Math.max(base, base * 0.6 + kmh * k), base, top);
+}
 function humanServe(info, m) {
   var w = info.w, C = court(), L = C.L, mir = w.team === 1, now = performance.now();
   balls = balls.filter(function (b) { return b !== MS.heldBall; }); MS.heldBall = null;
-  var speed = clamp(+m.speed || 0, 15, 160), lift = typeof m.lift === 'number' ? m.lift : 0, faz = typeof m.az === 'number' ? clamp(m.az, -35, 35) : 0;
+  var speed = serveSpeed(+m.speed || 0), lift = (typeof m.lift === 'number' ? m.lift : 0) * 0.5, faz = typeof m.az === 'number' ? clamp(m.az, -35, 35) : 0;
   var ph = mir ? [-info.from[0], L - info.from[1], 0] : [info.from[0], info.from[1], 0];
   ph[2] = S.sport === 'tennis' ? 2.6 : (S.sport === 'padel' ? 0.75 : 0.7);
-  var box = serviceBoxFor(ph[0]), tx = (box.x0 + box.x1) / 2, ty = box.y0 + (box.y1 - box.y0) * 0.65;
+  var box = serviceBoxFor(ph[0]), tx = (box.x0 + box.x1) / 2, ty = box.y0 + (box.y1 - box.y0) * serveDepth();
   var az = Math.atan2(tx - ph[0], ty - ph[1]) * 180 / Math.PI + faz * 0.3 + (Math.random() - 0.5) * 3;
-  var el = serveElevation(ph, speed, az, ty) + clamp(lift, -30, 30) * 0.22 + (Math.random() - 0.5) * 1.5;
+  var el = serveElevation(ph, speed, az, ty) + clamp(lift, -30, 30) * 0.12 + (Math.random() - 0.5) * 1.0;
   var sim = simulateShot(ph, speed, el, az, null), ok = sim.outcome === 'in' && inBox(sim.land, box);
   // let (tennis, padel): de bal raakte het net en viel in het vak: opslag overdoen. Bij pickleball speel je door.
-  if (ok && S.sport !== 'pickleball' && sim.netClear != null && sim.netClear < 0.05) {
+  if (ok && S.sport !== 'pickleball' && sim.netClear != null && sim.netClear < 0.033) {
     w.swingT = now; w.cT = now; playHit(speed / 60); netPulse(ph[0] * 0.5, mir ? -1 : 1, 0.14);
     showOutBall(sim, mir, now); showVerdict('Let', 'good'); showShot(w.name + ': let, de bal raakte het net. Opnieuw');
     sendTo(w.p, { type: 'result', verdict: 'Let', hit: false, swung: false });
@@ -2784,7 +2828,16 @@ function humanServe(info, m) {
     else { MS.srvFault = 0; showVerdict(S.sport === 'pickleball' ? 'Fout' : 'Dubbele fout', 'bad'); later(function () { pointTo(1 - w.team, w.name + (S.sport === 'pickleball' ? ': opslag fout' : ': dubbele fout')); }, 900); }
   }
 }
+function pauseTimer(now) {
+  var el = $('pauseTimer'); if (!el) return;
+  var on = MS && S.phase === 'play' && MS.state === 'wait' && MS.after === 'serve' && MS.pauseFrom && now < MS.nextAt;
+  el.hidden = !on; if (!on) return;
+  var left = Math.max(0, MS.nextAt - now), tot = Math.max(1, MS.nextAt - MS.pauseFrom);
+  el.querySelector('b').textContent = Math.ceil(left / 1000);
+  el.style.setProperty('--p', (1 - left / tot).toFixed(3));
+}
 function matchTick(now) {
+  pauseTimer(now);
   if (!MS || S.phase !== 'play') return;
   if (MS.state === 'serveWait' && MS.srvInfo && now - MS.srvInfo.t0 > 15000) humanServe(MS.srvInfo, { speed: 50, lift: 0, az: 0 });   // te lang gewacht: dan serveert de tv voor je
   var dt = MS.lastT ? clamp((now - MS.lastT) / 1000, 0.001, 0.05) : 0.016; MS.lastT = now;
@@ -2926,8 +2979,8 @@ function pointTo(t, reason) {
   if (MS.teams[t].some(function (w) { return w.kind === 'human'; })) { celebrate(MS.ranked ? 1.3 : 1); shake(1.2); } else { applause(0.4); shake(0.7); if (G3 && G3.crowd) crowdCheer(0.4); }
   if (G3 && G3.props) G3.props.coaches.forEach(function (co) { if (co.team === t) co.cheerUntil = performance.now() + 2600; });   // de coach van dat team juicht
   updateMatchHud();
-  MS.state = 'wait'; MS.after = 'serve'; MS.nextAt = performance.now() + 2200;
-  if (won) { MS.winner = t; MS.after = 'end'; MS.nextAt += 600; }
+  MS.state = 'wait'; MS.after = 'serve'; MS.nextAt = performance.now() + 3000; MS.pauseFrom = performance.now();   // 3 s om de stand te bekijken
+  if (won) { MS.winner = t; MS.after = 'end'; MS.nextAt += 600; MS.pauseFrom = 0; }
 }
 function scoreLine(t) {
   return MS.sets.map(function (s) { return s[2] === 'stb' ? '[' + s[t] + '-' + s[1 - t] + ']' : s[t] + '-' + s[1 - t]; }).join(' ');
@@ -3213,6 +3266,28 @@ function loadModel(id) {
       var fy = Math.min.apply(null, feet.map(function (f) { return wpos(f).y; }));
       M.height = Math.max(0.01, top ? (wpos(top).y - fy) : (wpos(head).y - fy) / 0.92); M.footY = fy;
     } else { var box = new THREE.Box3().setFromObject(g.scene); M.height = (box.max.y - box.min.y) || 1.8; M.footY = box.min.y; }
+    // plek voor het logo: linkerborst van het shirt (in de rusthouding), vastgemaakt aan het borstbeen van het skelet
+    try {
+      var sp2 = findBone(g.scene, 'Spine2'), best = null, bestZ = -9, fem = M.g === 'v';
+      if (sp2) {
+        var sy0 = wpos(sp2).y, v = new THREE.Vector3(), nv = new THREE.Vector3();
+        g.scene.traverse(function (o) {
+          if (!o.isMesh || !/tee$|tank top|top$|shirt$|jersey|singlet/i.test(o.material.name || '')) return;
+          var pa = o.geometry.attributes.position, na = o.geometry.attributes.normal;
+          if (o.isSkinnedMesh && o.skeleton) o.skeleton.update();
+          for (var i = 0; i < pa.count; i++) {
+            // echte plaats van het punt: via het skelet (de punten zijn gecomprimeerd en in de rusthouding van de botten opgeslagen)
+            if (o.isSkinnedMesh && o.boneTransform) { v.fromBufferAttribute(pa, i); o.boneTransform(i, v); v.applyMatrix4(o.matrixWorld); }
+            else v.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+            var dy = v.y - sy0;
+            if (dy < (fem ? 0.10 : 0.03) || dy > (fem ? 0.17 : 0.12) || v.x < 0.055 || v.x > 0.10) continue;
+            if (v.z > bestZ) { bestZ = v.z; best = v.clone(); M.logoN = new THREE.Vector3(0, 0, 1); }
+          }
+        });
+        if (best) { var inv = new THREE.Matrix4().copy(sp2.matrixWorld).invert(), nrm = (M.logoN || new THREE.Vector3(0, 0, 1)); nrm.z = Math.max(nrm.z, 0.6); nrm.normalize();
+          M.logo = { pos: best.clone().addScaledVector(nrm, 0.004).applyMatrix4(inv), n: nrm.clone().transformDirection(inv), up: new THREE.Vector3(0, 1, 0).transformDirection(inv) }; }
+      }
+    } catch (e) {}
     M.ready = true; CHAR.ready = true;
   };
   var onFail = function (e) { M.failed = true; M.loading = false; CHAR.failed = Object.keys(PLAYERS3D).every(function (k) { return PLAYERS3D[k].failed; }); if (window.console) console.warn('SwingLab: speler ' + id + ' niet geladen', e); };
@@ -3249,7 +3324,9 @@ function makeRigged(av) {
     o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false;
     var list = [].concat(o.material).map(function (m0) {
       var m = m0.clone(), n = m.name || ''; m.userData.map0 = m.map; m.userData.r0 = m.roughness; mats.push(m);
-      if (/^skin$/i.test(n)) cat.skin.push(m);
+      if (/jersey number/i.test(n)) { o.visible = false; o.userData.hideAlways = true; }
+      else if (/collar|cuffs/i.test(n)) cat.shirt.push(m);
+      else if (/^skin$/i.test(n)) cat.skin.push(m);
       else if (/hair|buzz|braid|afro|cornrow|mohawk/i.test(n)) { cat.hair.push(m); cat.hairMesh.push(o); }
       else if (/sneaker leather/i.test(n)) cat.shoes.push(m);
       else if (/shorts fabric|mini skirt$|skirt$|legging|pants/i.test(n)) cat.bottom.push(m);
@@ -3274,10 +3351,22 @@ function makeRigged(av) {
   // van de zelfgebouwde kleding houden we alleen de accessoires over (pet, zonneklep, zweetband, bril, kroon, oorbellen)
   var cloth = makeHuman3D(), P = cloth.P, keep = [P.cap, P.visor, P.band, P.glasses, P.crown].concat(P.earring || []);
   Object.keys(P).forEach(function (k) { [].concat(P[k]).forEach(function (m) { if (keep.indexOf(m) < 0) { m.visible = false; m.userData.off = true; } }); });
-  return { rig: true, real: true, modelId: id, g: root, model: model, B: B, base: base, fing: fing, fingRest: rest, sc0: sc, py0: -(M.footY || 0) * sc, mixer: mixer, act: act, mats: mats, cat: cat, cloth: cloth, paint: null, wi: 1, ww: 0, wr: 0, racket: null, racketSport: null, avKey: '' };
+  var logo = null;
+  if (M.logo && B.spine2) {
+    logo = new THREE.Mesh(new THREE.PlaneGeometry(0.062, 0.062), new THREE.MeshStandardMaterial({ map: shirtLogoTex(), transparent: true, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2, depthWrite: false }));
+    var zl = M.logo.n.clone().normalize(), yl = M.logo.up.clone(); yl.addScaledVector(zl, -yl.dot(zl)).normalize(); var xl = new THREE.Vector3().crossVectors(yl, zl);
+    logo.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xl, yl, zl)); logo.position.copy(M.logo.pos);
+    var bsc = new THREE.Vector3(); B.spine2.getWorldScale(bsc); logo.scale.setScalar(1 / Math.max(1e-6, bsc.x / sc));   // ware grootte ongeveer 6 cm
+    B.spine2.add(logo);
+  }
+  return { logo: logo, rig: true, real: true, modelId: id, g: root, model: model, B: B, base: base, fing: fing, fingRest: rest, sc0: sc, py0: -(M.footY || 0) * sc, mixer: mixer, act: act, mats: mats, cat: cat, cloth: cloth, paint: null, wi: 1, ww: 0, wr: 0, racket: null, racketSport: null, avKey: '' };
 }
 /* kleuren op het echte model: shirt, broek of rokje, schoenen, haar en huid */
+function shirtLogoTex() {
+  return canvasTex('shirtlogo' + SL_V, 128, 128, function (c, w) { c.clearRect(0, 0, w, w); drawSL(c, 8, 8, w - 16); });
+}
 function realLook(H3, av, sport) {
+  if (H3.logo) { H3.logo.material.map = shirtLogoTex(); H3.logo.material.needsUpdate = true; }
   var C = H3.cat, sc = SPORT_HEX[sport];
   var shirtCol = av.shirt === 'sport' || av.shirt === 'pro' ? sc : ({ wit: '#f4f4f4', zwart: '#1d1f24', streep: '#ffffff', camo: '#ffffff', goud: '#e6b53a', regenboog: '#ffffff' })[av.shirt] || sc;
   var pat = (av.shirt === 'streep' || av.shirt === 'camo' || av.shirt === 'regenboog') ? shirtTex(av.shirt, sport) : null;
@@ -3418,7 +3507,7 @@ function tintRig(H3, av, sport) {
   if (P.skirt) { P.skirt.visible = !!av.rok && !H3.real; P.earring.forEach(function (m) { m.visible = av.extra === 'oorbellen'; }); }
   if (H3.real) {
     [P.torso, P.trap, P.pelvis, P.tail, P.knot, P.mohawk].forEach(function (m) { m.visible = false; }); P.curls.forEach(function (c) { c.visible = false; });
-    var rk = JSON.stringify(av) + sport; if (H3.avKey !== rk) { H3.avKey = rk; realLook(H3, av, sport); }
+    var rk = JSON.stringify(av) + sport + SL_V; if (H3.avKey !== rk) { H3.avKey = rk; realLook(H3, av, sport); }
     return;
   }
   [P.torso, P.trap, P.pelvis].forEach(function (m) { m.visible = false; });
@@ -3464,13 +3553,19 @@ function handFrame(Fg) {
   return { W: W, f: f, s: s, n: n, len: M.distanceTo(W), chir: Math.sign(n.dot(new THREE.Vector3().crossVectors(f, s))) || 1 };
 }
 /* draai de hand zodat ze dwars om het handvat staat (wijsvingerkant naar het blad), met zo weinig mogelijk knik in de pols */
-function orientHand(Fg, Yr) {
+function orientHand(Fg, Yr, fa) {
   var fr = handFrame(Fg); if (!fr) return null;
   var ft = fr.f.clone().addScaledVector(Yr, -fr.f.dot(Yr)); if (ft.lengthSq() < 1e-6) ft = fr.n.clone(); ft.normalize();
-  var st = Yr.clone(), nt = new THREE.Vector3().crossVectors(ft, st).multiplyScalar(fr.chir);
+  if (fa) {
+    // een echte pols buigt maar zo'n 55 graden ten opzichte van de onderarm: verder draait de hand niet, het racket volgt dan de hand
+    var lim = 55 * Math.PI / 180, ang = Math.acos(clamp(ft.dot(fa), -1, 1));
+    if (ang > lim) { var ax = new THREE.Vector3().crossVectors(fa, ft); if (ax.lengthSq() < 1e-8) ax = fr.s.clone(); ax.normalize(); ft = fa.clone().applyAxisAngle(ax, lim).normalize(); }
+  }
+  var st = Yr.clone().addScaledVector(ft, -Yr.dot(ft)); if (st.lengthSq() < 1e-6) st = fr.s.clone(); st.normalize();
+  var nt = new THREE.Vector3().crossVectors(ft, st).multiplyScalar(fr.chir);
   var Mf = new THREE.Matrix4().makeBasis(fr.f, fr.s, fr.n), Mt = new THREE.Matrix4().makeBasis(ft, st, nt);
-  var R = Mt.multiply(Mf.clone().transpose()); rotBoneWorld(Fg.hand, new THREE.Quaternion().setFromRotationMatrix(R));
-  return handFrame(Fg);
+  rotBoneWorld(Fg.hand, new THREE.Quaternion().setFromRotationMatrix(Mt.multiply(Mf.clone().transpose())));
+  var out = handFrame(Fg); if (out) out.Y = st; return out;
 }
 function bendToward(bone, child, axis, ang, toward) {
   if (!bone || !child) return;
@@ -3493,6 +3588,41 @@ function gripPoint(fr, Yr, hl) {
   // midden van de vuist, en het handvat zo dat de hand vlak boven het uiteinde zit
   return fr.W.clone().addScaledVector(fr.f, fr.len * 0.6).addScaledVector(fr.n, 0.026).addScaledVector(Yr, hl / 2 - 0.045);
 }
+/* organisch bewegen: ademhalen (dieper en sneller na lopen), licht wiegen, iedereen op zijn eigen ritme */
+function organic(H3, w, now, dt, spd) {
+  var B = H3.B; if (!B.spine2) return;
+  if (H3.ph == null) { H3.ph = Math.random() * 6.28; H3.ex = 0; H3.br = Math.random() * 6.28; H3.rate = 0.9 + Math.random() * 0.25; }
+  var run = spd > 2.5 ? 1 : 0;
+  H3.ex += (run - H3.ex) * Math.min(1, dt * (run ? 0.7 : 0.18));                     // hijgen bouwt op tijdens lopen en zakt traag weer
+  H3.br += dt * 2 * Math.PI * (0.27 + 0.55 * H3.ex) * H3.rate;
+  H3.g.updateMatrixWorld(true);
+  var fs = w.team === 0 ? 1 : -1, Fw = w.faceW || T3([0, fs, 0]).normalize(), Up = new THREE.Vector3(0, 1, 0), Sd = new THREE.Vector3().crossVectors(Fw, Up).normalize();
+  var b = Math.sin(H3.br), amp = 0.02 + 0.05 * H3.ex, inh = (b + 1) / 2;
+  // vooral de borst: de borstkas zet uit (dieper en iets breder) en komt licht omhoog
+  var ez = 1 + inh * (0.025 + 0.045 * H3.ex), ex2 = 1 + inh * (0.008 + 0.014 * H3.ex);
+  B.spine2.scale.x *= ex2; B.spine2.scale.z *= ez; B.spine2.updateMatrixWorld(true);
+  if (B.neck) { B.neck.scale.x /= ex2; B.neck.scale.z /= ez; B.neck.updateMatrixWorld(true); }   // hoofd en nek blijven zoals ze zijn
+  rotBoneWorld(B.spine2, new THREE.Quaternion().setFromAxisAngle(Sd, -b * amp * 0.8));
+  if (B.spine1) rotBoneWorld(B.spine1, new THREE.Quaternion().setFromAxisAngle(Sd, -b * amp * 0.35));
+  // de schouders gaan maar een beetje mee (een combinatie, zoals bij echt ademen)
+  if (B.lSh) rotBoneWorld(B.lSh, new THREE.Quaternion().setFromAxisAngle(Fw, b * amp * 0.18));
+  if (B.rSh) rotBoneWorld(B.rSh, new THREE.Quaternion().setFromAxisAngle(Fw, -b * amp * 0.18));
+  if (B.neck) rotBoneWorld(B.neck, new THREE.Quaternion().setFromAxisAngle(Sd, b * amp * 0.5));
+  var calm = 1 - Math.min(1, spd / 2), sway = Math.sin(now / 1000 * 0.85 * H3.rate + H3.ph) * 0.025 * calm;
+  if (B.spine0) rotBoneWorld(B.spine0, new THREE.Quaternion().setFromAxisAngle(Fw, sway));  // gewicht verplaatsen
+}
+/* het hoofd volgt de bal, binnen wat een nek kan */
+function lookAtBall(H3, w, now) {
+  var B = H3.B; if (!B.head || !B.neck) return;
+  var tgt = null;
+  for (var i = balls.length - 1; i >= 0; i--) { var bb = balls[i]; if (bb.held) continue; var pp = ballPos(bb, now); if (pp) { tgt = pp; break; } }
+  if (!tgt) return;
+  var hp = wpos(B.head), d = T3(tgt).sub(hp); d.y = 0; if (d.lengthSq() < 0.04) return; d.normalize();
+  var fs = w.team === 0 ? 1 : -1, Fw = w.faceW || T3([0, fs, 0]).normalize(); Fw.y = 0; Fw.normalize();
+  var a = Math.atan2(new THREE.Vector3().crossVectors(Fw, d).y, Fw.dot(d)); a = clamp(a, -0.8, 0.8);
+  var up = new THREE.Vector3(0, 1, 0);
+  rotBoneWorld(B.neck, new THREE.Quaternion().setFromAxisAngle(up, a * 0.4)); rotBoneWorld(B.head, new THREE.Quaternion().setFromAxisAngle(up, a * 0.55));
+}
 function updateRigged(H3, w, now, live, dt) {
   var q = computePose(w, now, live), B = H3.B, spd = w.spd || 0;
   tintRig(H3, w.av || botAvatar(w), S.sport);
@@ -3505,6 +3635,7 @@ function updateRigged(H3, w, now, live, dt) {
   if (H3.act.run) { H3.act.run.setEffectiveWeight(H3.wr); H3.act.run.timeScale = clamp(spd / 4.8, 0.7, 1.4); }
   H3.mixer.update(dt);
   applyBody(H3, bodyOf(w.av || botAvatar(w)));
+  organic(H3, w, now, dt, spd);
   if (w.cheer) {
     // juichen: armen omhoog, racket in de lucht, kleine sprongetjes
     var jj = Math.max(0, Math.sin(now / 1000 * 7 + (w.x || 0))) * 0.12;
@@ -3523,9 +3654,14 @@ function updateRigged(H3, w, now, live, dt) {
   ikArm(dom[0], dom[1], dom[2], target, poleD);
   if (Fg) {
     // twee keer: hand om het handvat draaien, dan de arm zo bijsturen dat het handvat op de plek van de slag zit
-    fr = orientHand(Fg, Yr);
-    if (fr) { grip = gripPoint(fr, Yr, hl); ikArm(dom[0], dom[1], dom[2], target.clone().sub(grip.clone().sub(fr.W)), poleD); fr = orientHand(Fg, Yr); }
-    if (fr) { grip = gripPoint(fr, Yr, hl); curlFingers(Fg, fr, 1); }
+    var fa = function () { return dom[1] && dom[2] ? wpos(dom[2]).sub(wpos(dom[1])).normalize() : null; };   // richting van de onderarm
+    fr = orientHand(Fg, Yr, fa());
+    if (fr) { grip = gripPoint(fr, fr.Y, hl); ikArm(dom[0], dom[1], dom[2], target.clone().sub(grip.clone().sub(fr.W)), poleD); fr = orientHand(Fg, Yr, fa()); }
+    if (fr) {
+      // het racket ligt in de hand zoals die werkelijk staat (na de begrenzing van de pols)
+      Yr = fr.s.clone(); Zr.addScaledVector(Yr, -Zr.dot(Yr)); if (Zr.lengthSq() < 1e-4) Zr = fr.n.clone(); Zr.normalize();
+      grip = gripPoint(fr, Yr, hl); curlFingers(Fg, fr, 1);
+    }
   }
   ikArm(off[0], off[1], off[2], T3(q.wrO), T3([-q.hs * q.fs * 0.6, 0, -0.8]).normalize());
   // racket in de hand
@@ -3534,6 +3670,7 @@ function updateRigged(H3, w, now, live, dt) {
   setBasis(H3.racket, hand, new THREE.Vector3().crossVectors(Yr, Zr), Yr, Zr, 1.15, 1.15, 1.15);
   H3.racket.visible = true;
   H3.g.visible = true;
+  lookAtBall(H3, w, now);
   placeClothing(H3, q.fs);
   var hd = B.head ? wpos(B.head) : T3(q.head);
   H3.head2d = proj(hd.x, -hd.z, hd.y + 0.36);
@@ -3865,7 +4002,34 @@ function screenTex() {
   var cv = document.createElement('canvas'); cv.width = 1024; cv.height = 440; paintScreen(cv);
   var tex = new THREE.CanvasTexture(cv); tex.anisotropy = 4; tex.userData = { cv: cv }; return tex;
 }
-function refreshScreen() { if (G3 && G3.arena && G3.arena.scr) { paintScreen(G3.arena.scr.userData.cv); G3.arena.scr.needsUpdate = true; } }
+function refreshScreen() {
+  if (G3 && G3.arena && G3.arena.scr) { paintScreen(G3.arena.scr.userData.cv); G3.arena.scr.needsUpdate = true; }
+  if (G3 && G3.arena && G3.arena.board) { paintBoard(G3.arena.board.userData.cv); G3.arena.board.needsUpdate = true; }
+}
+/* breed scorebord op de verre tribune (tennis, pickleball): logo's, en tijdens een wedstrijd de live stand */
+function boardTex() { var cv = document.createElement('canvas'); cv.width = 1024; cv.height = 220; paintBoard(cv); var t = new THREE.CanvasTexture(cv); t.anisotropy = 4; t.userData = { cv: cv }; return t; }
+function paintBoard(cv) {
+  var c = cv.getContext('2d'), w = cv.width, hh = cv.height, E = env(), acc = accHex(E), lab = sportLabel();
+  var g = c.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, '#101a33'); g.addColorStop(1, '#070b16'); c.fillStyle = g; c.fillRect(0, 0, w, hh);
+  c.strokeStyle = 'rgba(80,150,255,.9)'; c.lineWidth = 6; c.strokeRect(3, 3, w - 6, hh - 6);
+  if (!MS) {
+    stripes(c, 30, 30, 100, hh - 60, acc); stripes(c, w - 160, 30, 100, hh - 60, acc);
+    var sz = hh * 0.62, lh = hh * 0.5, lw = logoWidth(c, lh, lab), tot = sz + 40 + lw, x0 = (w - tot) / 2;
+    drawSL(c, x0, (hh - sz) / 2, sz); c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(x0 + sz + 18, hh * 0.24, 3, hh * 0.52);
+    drawLogo(c, x0 + sz + 40, hh * 0.74, lh, lab, '#fff', '#0b1222'); return;
+  }
+  // live stand: logo links, daarna per team naam, sets, games en punten
+  drawSL(c, 22, 30, hh - 60);
+  [0, 1].forEach(function (t) {
+    var y = hh * (0.42 + t * 0.4);
+    c.fillStyle = MS.server === t ? '#B9E631' : 'rgba(255,255,255,.25)'; c.beginPath(); c.arc(200, y - 16, 9, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#fff'; c.font = '700 50px system-ui, sans-serif'; c.textBaseline = 'alphabetic';
+    var nm = teamName(t); if (nm.length > 20) nm = nm.slice(0, 19) + '…'; c.fillText(nm, 222, y);
+    var x = w - 380; MS.sets.forEach(function (s) { c.fillStyle = 'rgba(255,255,255,.55)'; c.fillText(String(s[t]), x, y); x += 56; });
+    c.fillStyle = '#fff'; c.fillText(String(S.sport === 'pickleball' ? MS.setsWon[t] : MS.games[t]), w - 220, y);
+    c.fillStyle = acc; c.fillRect(w - 150, y - 48, 120, 62); c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(pointText(t), w - 90, y); c.textAlign = 'left';
+  });
+}
 /* tennis en pickleball: groot bord op de verre tribune, twee hoge lichtmasten (buiten) en plantenbakken */
 function arenaExtras(E, g, item, post, lay, hw, L) {
   var m = 3.2, far = lay.sides[0];
@@ -3873,7 +4037,8 @@ function arenaExtras(E, g, item, post, lay, hw, L) {
     var topZ = far.front[2] + far.rows * far.rise, dTop = far.rows * far.step;
     var bz = far.upper ? topZ + 1.3 : topZ + 1.2, by = far.front[1] + dTop + (far.upper ? 0.3 : -0.2);
     var bw = 17, bh = bw * 220 / 1024;
-    var bb = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 0.3), [post, post, post, post, new THREE.MeshBasicMaterial({ map: bigBoardTex(E) }), post]);
+    var btex = boardTex(), bb = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 0.3), [post, post, post, post, new THREE.MeshBasicMaterial({ map: btex }), post]);
+    g.userData.board = btex;
     bb.position.copy(T3([0, by, bz + (bh - 2.6) / 2])); item(bb);
     var nc = new THREE.MeshBasicMaterial({ color: new THREE.Color(accHex(E)) });
     var tl = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.1, 0.06, 0.06), nc); tl.position.copy(T3([0, by - 0.18, bz + (bh - 2.6) / 2 + bh / 2 + 0.03])); item(tl);
@@ -3934,16 +4099,7 @@ function buildArena3D(E) {
     }
   });
   var post = M3('#0d0f13', { roughness: 0.4, metalness: 0.5 });
-  if (S.sport !== 'padel') { arenaExtras(E, g, item, post, lay, hw, L); G3.arena = { g: g, key: E.city + E.venue + S.sport, scr: null }; G3.scene.add(g); return; }
-  // portaal boven de achterwand met SWINGLAB
-  [-1, 1].forEach(function (sd) { var pm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 8.4, 0.18), post); pm.position.copy(T3([sd * (hw + 0.15), L + 0.15, 4.2])); pm.castShadow = true; item(pm); });
-  var bt = canvasTex('portaal' + SL_V, 2048, 160, function (cc, w, hh) {
-    var gg = cc.createLinearGradient(0, 0, 0, hh); gg.addColorStop(0, '#0e1730'); gg.addColorStop(1, '#070b16'); cc.fillStyle = gg; cc.fillRect(0, 0, w, hh);
-    drawLogo(cc, 120, hh * 0.84, hh * 0.72, 'PADEL'); drawLogo(cc, w - 120 - logoWidth(cc, hh * 0.72, 'PADEL'), hh * 0.84, hh * 0.72, 'PADEL');
-    var ah = hh * 0.74, aw = slAdWidth(cc, ah); drawSLAd(cc, (w - aw) / 2, hh * 0.87, ah);
-  });
-  panel(2 * hw + 0.3, 0.95, [0, L + 0.15, 7.75], 0, bt);
-  strip(2 * hw + 0.3, [0, L + 0.08, 7.25], 0); strip(2 * hw + 0.3, [0, L + 0.08, 8.25], 0);
+  if (S.sport !== 'padel') { arenaExtras(E, g, item, post, lay, hw, L); G3.arena = { g: g, key: E.city + E.venue + S.sport, scr: null, board: g.userData.board || null }; G3.scene.add(g); refreshScreen(); return; }
   // groot scherm boven de overkant
   var stex = screenTex(), sm = new THREE.Mesh(new THREE.BoxGeometry(14, 6, 0.3), [post, post, post, post, new THREE.MeshBasicMaterial({ map: stex }), post]);
   sm.position.copy(T3([0, L + 13, 12.6])); item(sm);
@@ -4031,8 +4187,13 @@ function poseFigure(F, J) {
 function stripeTex(a, b) { return canvasTex('streep' + a + b, 32, 32, function (c, w) { c.fillStyle = a; c.fillRect(0, 0, w, w); c.fillStyle = b; for (var i = 0; i < 4; i++) c.fillRect(0, i * 8 + 2, w, 3); }); }
 /* rond het veld, zoals bij een groot toernooi: per team een witte sofa met flessen, tassen, een handdoek en de rackets,
    een coach op zijn stoel, en bij tennis een scheidsrechter op zijn hoge stoel */
+function removeCoach(H3) { if (!H3) return; G3.scene.remove(H3.g); if (H3.cloth) G3.scene.remove(H3.cloth.g); if (H3.racket) G3.scene.remove(H3.racket); if (H3.blob) G3.scene.remove(H3.blob); }
 function buildCourtside3D() {
-  if (G3.props) { G3.scene.remove(G3.props.g); G3.props = null; }
+  if (G3.props) {
+    // eerst de vorige coaches weghalen (anders bleven ze als bevroren figuren staan)
+    (G3.props.coaches || []).forEach(function (co) { removeCoach(co.H3); co.H3 = null; });
+    G3.scene.remove(G3.props.g); G3.props = null;
+  }
   var c = court(), hw = c.Wd / 2, L = c.L, nY = L / 2, g = new THREE.Group();
   var off = S.sport === 'padel' ? 1.9 : S.sport === 'tennis' ? 3.0 : 2.3, bx = -(hw + off);
   var white = M3('#f3f3f0', { roughness: 0.35 }), cushion = M3('#e6e6e2', { roughness: 0.5 }), black = M3('#16181c', { roughness: 0.6 });
@@ -4065,9 +4226,8 @@ function buildCourtside3D() {
     var cy = y + (ti ? 1.9 : -1.9);
     box(0.45, 0.06, 0.45, [bx - 0.1, cy, 0.46], black); box(0.06, 0.5, 0.45, [bx - 0.32, cy, 0.72], black);
     [[-0.3, -0.18], [-0.3, 0.18], [0.1, -0.18], [0.1, 0.18]].forEach(function (lg) { box(0.04, 0.44, 0.04, [bx + lg[0] * 0.6, cy + lg[1], 0.22], black); });
-    var F = makeFigure({ skin: SKIN[(ti * 3 + 1) % SKIN.length], shirt: ti ? '#2a3140' : SPORT_HEX[S.sport], pants: '#1d1f24', hair: ti ? '#5a3a22' : '#1d1a17' });
-    g.add(F.g); poseFigure(F, figJoints([bx - 0.12, cy], 0, 'sit'));
-    coaches.push({ F: F, o: [bx - 0.12, cy], team: ti, cheerUntil: 0, standing: false });
+    var cav = { gender: Math.random() < 0.5 ? 'v' : 'm', skin: ['s0', 's1', 's2', 's3', 's4'][Math.floor(Math.random() * 5)], hair: 'eigen', hairCol: ['zwart', 'bruin', 'blond'][Math.floor(Math.random() * 3)], shirt: ti ? 'zwart' : 'sport', shorts: 'zwart', shoes: 'wit', extra: Math.random() < 0.3 ? 'pet' : 'geen' };
+    coaches.push({ H3: null, av: cav, o: [bx - 0.12, cy], team: ti, cheerUntil: 0, standing: false });   // het echte model komt erbij zodra het geladen is
   });
   var ump = null;
   if (S.sport === 'tennis') {
@@ -4084,13 +4244,108 @@ function buildCourtside3D() {
   G3.props = { g: g, coaches: coaches, ump: ump, sport: S.sport, teams: MS ? MS.teams.map(function (t) { return t.length; }).join(',') : '' };
   G3.scene.add(g);
 }
-function updateCourtside(now) {
+/* een echt mens die zit (dijen vooruit, onderbenen naar beneden, handen op de knieën) of rechtstaat om te juichen */
+function poseSeated(H3, o, ang, cheer, now, dt) {
+  var B = H3.B, w = { x: o[0], y: o[1], team: 0, faceW: new THREE.Vector3(Math.sin(ang), 0, Math.cos(ang)) };
+  H3.g.position.copy(T3([o[0], o[1], 0])); H3.g.rotation.set(0, ang, 0);
+  if (H3.act.idle) H3.act.idle.setEffectiveWeight(1); if (H3.act.walk) H3.act.walk.setEffectiveWeight(0); if (H3.act.run) H3.act.run.setEffectiveWeight(0);
+  H3.mixer.update(dt); applyBody(H3, bodyOf(H3.av)); H3.g.updateMatrixWorld(true);
+  organic(H3, w, now, dt, 0);
+  var F = w.faceW, Up = new THREE.Vector3(0, 1, 0), Sd = new THREE.Vector3().crossVectors(F, Up).normalize();
+  if (!cheer) {
+    var hipY = B.hips ? wpos(B.hips).y : 0.95; H3.g.position.y += 0.56 - hipY; H3.g.updateMatrixWorld(true);
+    [['lUp', 'lLeg', 'lFoot'], ['rUp', 'rLeg', 'rFoot']].forEach(function (k) {
+      var up = B[k[0]], kn = B[k[1]], ft = B[k[2]]; if (!up || !kn || !ft) return;
+      var d1 = wpos(kn).sub(wpos(up)).normalize(); rotBoneWorld(up, new THREE.Quaternion().setFromUnitVectors(d1, F.clone().multiplyScalar(0.96).add(new THREE.Vector3(0, -0.08, 0)).normalize()));
+      var d2 = wpos(ft).sub(wpos(kn)).normalize(); rotBoneWorld(kn, new THREE.Quaternion().setFromUnitVectors(d2, new THREE.Vector3(0, -1, 0).addScaledVector(F, 0.12).normalize()));
+    });
+    [['lArm', 'lFore', 'lHand', 'lLeg', 1], ['rArm', 'rFore', 'rHand', 'rLeg', -1]].forEach(function (k) {
+      if (!B[k[0]] || !B[k[3]]) return; var knee = wpos(B[k[3]]); ikArm(B[k[0]], B[k[1]], B[k[2]], knee.clone().addScaledVector(F, -0.12).add(new THREE.Vector3(0, 0.07, 0)), Sd.clone().multiplyScalar(k[4]).add(new THREE.Vector3(0, -0.3, 0)).normalize());
+    });
+  } else {
+    var jj = Math.max(0, Math.sin(now / 1000 * 8 + o[1])) * 0.15; H3.g.position.y += jj; H3.g.updateMatrixWorld(true);
+    [['lArm', 'lFore', 'lHand', 1], ['rArm', 'rFore', 'rHand', -1]].forEach(function (k) {
+      if (!B[k[0]]) return; var sh = wpos(B[k[0]]); ikArm(B[k[0]], B[k[1]], B[k[2]], sh.clone().add(new THREE.Vector3(0, 0.55, 0)).addScaledVector(Sd, -k[3] * 0.12), Sd.clone().multiplyScalar(k[3]).normalize());
+    });
+  }
+  H3.g.visible = true; if (H3.racket) H3.racket.visible = false; if (H3.cloth) H3.cloth.g.visible = true;
+  lookAtBall(H3, w, now); placeClothing(H3, 1);
+}
+function updateCourtside(now, dt) {
   var Pp = G3.props; if (!Pp) return;
+  dt = dt || 0.016;
   Pp.coaches.forEach(function (co) {
-    var on = now < co.cheerUntil;
-    if (on) { var j = Math.max(0, Math.sin(now / 1000 * 8 + co.team)) * 0.18; poseFigure(co.F, figJoints([co.o[0] + 0.45, co.o[1]], 0, 'stand', { jump: j })); co.standing = true; }
-    else if (co.standing) { poseFigure(co.F, figJoints(co.o, 0, 'sit')); co.standing = false; }
+    var id = modelFor(co.av), M = PLAYERS3D[id];
+    if (!co.H3) { if (!M.ready) { loadModel(id); return; } co.H3 = makeRigged(co.av); co.H3.av = co.av; tintRig(co.H3, co.av, S.sport); }
+    var trainerHere = isTraining() && co.team === 1;          // tijdens een training staat deze coach als trainer op het veld (niet ook nog op zijn stoel)
+    if (trainerHere) { co.H3.g.visible = false; co.H3.cloth.g.visible = false; return; }
+    tintRig(co.H3, co.av, S.sport);
+    poseSeated(co.H3, co.o, Math.PI / 2, now < co.cheerUntil, now, dt);
   });
+}
+
+/* ---------- de trainer bij een training: komt het veld op met de ballenmand en geeft de ballen aan ---------- */
+var TRAINER = { on: false, w: null, H3: null, basket: null, spot: null };
+function trainerSpot() {
+  var C = court(), nY = C.L / 2, d = S.sport === 'tennis' ? 5.6 : S.sport === 'padel' ? 3.6 : 3.0;
+  return [0.7, nY + d];
+}
+function feedOrigin() { if (!TRAINER.on || !TRAINER.w || !TRAINER.arrived) return null; return [TRAINER.w.x + 0.42, TRAINER.w.y - 0.25, 1.0]; }
+function makeBasket() {
+  var g = new THREE.Group(), steel = M3('#b9bec6', { metalness: 0.8, roughness: 0.35 }), black = M3('#16181c', { roughness: 0.85 }), rub = M3('#1b1d22', { roughness: 0.9 });
+  var hgt = 0.95, s = 0.21;
+  function rod(a, b, r) { var d = b.clone().sub(a), m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 8), steel); m.position.copy(a.clone().add(b).multiplyScalar(0.5)); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); m.castShadow = true; g.add(m); }
+  var V = function (x, y, z) { return new THREE.Vector3(x, y, z); };
+  [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function (c) { rod(V(c[0] * s, 0.06, c[1] * s), V(c[0] * s, hgt, c[1] * s), 0.011); var wh = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.025, 12), rub); wh.rotation.z = Math.PI / 2; wh.position.set(c[0] * s, 0.03, c[1] * s); g.add(wh); });
+  [-1, 1].forEach(function (zz) { rod(V(-s, 0.35, zz * s), V(s, 0.8, zz * s), 0.008); rod(V(s, 0.35, zz * s), V(-s, 0.8, zz * s), 0.008); });   // gekruiste stangen
+  var bag = new THREE.Mesh(new THREE.BoxGeometry(2 * s - 0.01, 0.42, 2 * s - 0.01), black); bag.position.y = hgt - 0.22; bag.castShadow = true; g.add(bag);
+  var lab = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshStandardMaterial({ map: shirtLogoTex(), transparent: true }));
+  lab.position.set(0, hgt - 0.12, s + 0.001); g.add(lab);
+  var balls3 = [], bm = ballMat(S.sport), r = S.sport === 'pickleball' ? 0.037 : 0.033;
+  for (var i = 0; i < 20; i++) { var layer = Math.floor(i / 9), k = i % 9; var m = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 9), bm); m.position.set(((k % 3) - 1) * 0.12 + (layer % 2) * 0.05, hgt - 0.04 + layer * 0.055, (Math.floor(k / 3) - 1) * 0.12 + (layer % 2) * 0.04); m.castShadow = true; g.add(m); balls3.push(m); }
+  g.userData.balls = balls3; g.userData.sport = S.sport;
+  G3.scene.add(g); return g;
+}
+function isTraining() { return !MS && !S.demo && (S.phase === 'countdown' || S.phase === 'play' || S.phase === 'done') && !S.tour && USE3D; }
+function updateTrainer(now, dt) {
+  var training = isTraining();
+  if (!training) {
+    if (TRAINER.on) { TRAINER.on = false; TRAINER.arrived = false; if (TRAINER.H3) { TRAINER.H3.g.visible = false; TRAINER.H3.cloth.g.visible = false; if (TRAINER.H3.racket) TRAINER.H3.racket.visible = false; } if (TRAINER.basket) TRAINER.basket.visible = false; }
+    return null;
+  }
+  var co = G3.props && G3.props.coaches && G3.props.coaches[1]; if (!co) return null;
+  if (TRAINER.co !== co) {   // nieuwe coaches: de vorige trainer weg, deze coach wordt de trainer
+    if (TRAINER.H3) removeCoach(TRAINER.H3); TRAINER.H3 = null; TRAINER.on = false; TRAINER.co = co;
+    if (TRAINER.basket) { G3.scene.remove(TRAINER.basket); TRAINER.basket = null; }
+  }
+  var id = modelFor(co.av), M = PLAYERS3D[id]; if (!M.ready) { loadModel(id); return null; }
+  if (!TRAINER.H3 || TRAINER.H3.modelId !== id || TRAINER.sport !== S.sport) {
+    if (TRAINER.H3) removeCoach(TRAINER.H3);
+    TRAINER.H3 = makeRigged(co.av); TRAINER.H3.av = co.av; TRAINER.sport = S.sport; TRAINER.on = false;   // andere sport: opnieuw opkomen
+    if (TRAINER.basket) G3.scene.remove(TRAINER.basket); TRAINER.basket = makeBasket();
+  }
+  if (!TRAINER.on) {
+    // start bij de stoel van de coach, dan naar de plek tegenover de speler
+    TRAINER.on = true; TRAINER.arrived = false; TRAINER.spot = trainerSpot();
+    TRAINER.w = { name: 'Trainer', team: 1, idx: 9, kind: 'bot', hand: 'right', x: co.o[0] + 0.6, y: co.o[1], spd: 0, runPh: 0, av: co.av, sk: 'fh', cT: 0 };
+    TRAINER.from = [TRAINER.w.x, TRAINER.w.y]; TRAINER.t0 = now;
+  }
+  // op tijd: binnen het aftellen (zo'n 2,8 s) op zijn plek, hoe snel het beeld ook loopt
+  var T = TRAINER.w, sp = TRAINER.spot, fr = TRAINER.from, dist = Math.hypot(sp[0] - fr[0], sp[1] - fr[1]), dur = 2.8;
+  var u = clamp((now - TRAINER.t0) / 1000 / dur, 0, 1), e = u * u * (3 - 2 * u), px = T.x, py = T.y;
+  T.x = fr[0] + (sp[0] - fr[0]) * e; T.y = fr[1] + (sp[1] - fr[1]) * e;
+  var mv = Math.hypot(T.x - px, T.y - py); T.spd = u < 1 ? Math.max(1.2, dist / dur * 1.4 * (1 - Math.abs(2 * u - 1) * 0.5)) : 0; T.runPh += mv * 3.3;
+  if (u >= 1) TRAINER.arrived = true;
+  // aangeven: vlak voor elke nieuwe bal een slag
+  if (S.phase === 'play' && R && R.nextLaunch && TRAINER.arrived) { if (R.nextLaunch - now < 650 && R.nextLaunch > now) { T.sk = 'fh'; T.cT = R.nextLaunch; } }
+  updateRigged(TRAINER.H3, T, now, null, dt);
+  // de mand: meegeduwd tijdens het opwandelen, daarna naast de trainer; er liggen nog zoveel ballen in als er overblijven
+  var bk = TRAINER.basket; bk.visible = true;
+  var bx = TRAINER.arrived ? sp[0] - 0.75 : T.x - 0.55, by = TRAINER.arrived ? sp[1] + 0.35 : T.y + 0.2;
+  bk.position.copy(T3([bx, by, 0]));
+  var left = Math.max(0, 20 - ((R && R.balls) || 0));
+  bk.userData.balls.forEach(function (m, i) { m.visible = i < left; });
+  return T;
 }
 
 /* rackets in 3D, op ware grootte: oorsprong in het midden van het handvat, de kop naar boven, het blad kijkt naar voren */
@@ -4274,6 +4529,7 @@ function contactBlob() {
 }
 function render3D(now, tourCam) {
   if (!USE3D) return false;
+  if (G3 && !tourCam) { G3.dtLast = clamp((now - (G3.tPrev || now)) / 1000, 0.001, 0.05); G3.tPrev = now; }
   // te traag toestel? dan na een paar seconden automatisch terug naar het lichtere beeld, zodat de timing klopt
   // te traag toestel? dan blijft het nieuwe stadion, maar renderen we lichter (minder pixels, minder schaduwen)
   if (perf3.last && !window.__keep3d) { perf3.n++; if (!perf3.t0) perf3.t0 = now; if (now - perf3.t0 > 3000) { var avg = (now - perf3.t0) / perf3.n;
@@ -4289,7 +4545,7 @@ function render3D(now, tourCam) {
     if (G3.arena) G3.arena.g.children.forEach(function (o) { if (o.userData.behind) o.visible = !!tourCam; });
     var tk = MS ? MS.teams.map(function (t) { return t.length; }).join(',') : '';
     if (!G3.props || G3.props.sport !== S.sport || G3.props.teams !== tk) buildCourtside3D();
-    updateCrowd(now, tourCam); updateCourtside(now);
+    updateCrowd(now, tourCam); updateCourtside(now, G3.dtLast || 0.016); updateTrainer(now, G3.dtLast || 0.016);
     if (G3.cageNear) G3.cageNear.forEach(function (o) { var v = tourCam ? o.tour : o.play; if (o.m.opacity !== v) { o.m.opacity = v; o.m.depthWrite = v > 0.9; } });
     var px = Math.min(DPR, 1.5) * ([1, 0.75, 0.6, 0.5])[perf3.q || 0];
     if (G3.w !== W || G3.h !== H || G3.px !== px) { G3.r.setPixelRatio(px); G3.r.setSize(W, H, false); G3.w = W; G3.h = H; G3.px = px; }
@@ -4383,9 +4639,12 @@ function swingPhase(w, now) {
 }
 function botAvatar(w) {
   if (w.av) return w.av;
-  var hsh = hashStr((w.name || 'bot') + w.team + w.idx), skins = ['s0', 's1', 's2', 's3', 's4', 's5'], hairs = ['kort', 'krullen', 'staart', 'kaal', 'knot'], hc = ['zwart', 'bruin', 'blond', 'rood'];
-  var fem = (hsh >> 12) % 2 === 0, hairsG = fem ? ['staart', 'lang', 'knot', 'krullen'] : ['kort', 'krullen', 'kaal', 'kort'];
-  w.av = { gender: fem ? 'v' : 'm', skin: skins[hsh % 6], hairCol0: 0, hair: hairsG[(hsh >> 3) % 4], hairCol: hc[(hsh >> 6) % 4], shirt: w.team === 0 ? 'sport' : 'wit', shorts: w.team === 0 ? 'zwart' : 'navy', shoes: 'wit', extra: (hsh >> 9) % 3 === 0 ? 'zweetband' : (fem && (hsh >> 9) % 3 === 1 ? 'oorbellen' : 'geen') };
+  // willekeurig per wedstrijd: geslacht, huid, haarkleur en kleding
+  var pick = function (a) { return a[Math.floor(Math.random() * a.length)]; }, fem = Math.random() < 0.5;
+  var shirt = pick(['sport', 'sport', 'wit', 'wit', 'zwart', 'streep', 'pro', 'camo', Math.random() < 0.15 ? 'goud' : 'sport', Math.random() < 0.1 ? 'regenboog' : 'wit']);
+  w.av = { gender: fem ? 'v' : 'm', skin: pick(['s0', 's1', 's2', 's3', 's4', 's5']), hair: Math.random() < 0.08 && !fem ? 'kaal' : 'eigen', hairCol: pick(['zwart', 'bruin', 'bruin', 'blond', 'rood']),
+    shirt: shirt, shorts: pick(Object.keys(AVC.shorts)), shoes: pick(Object.keys(AVC.shoes)),
+    extra: pick(fem ? ['geen', 'geen', 'zweetband', 'oorbellen', 'zonnebril', 'pet'] : ['geen', 'geen', 'zweetband', 'pet', 'zonnebril']) };
   return w.av;
 }
 function limb(a, b, r0, r1, col) {
@@ -4581,7 +4840,7 @@ window.__view = {
   unlock: function () { try { unlockAudio(); } catch (e) {} },
   tour: function () { if (USE3D && G3) S.tour = { t0: performance.now(), dur: TOUR_MS }; return !!S.tour; }
 };
-window.__tv = { serveDebug: function (ph, speed) { var box = serviceBoxFor(ph[0]), tx = (box.x0 + box.x1) / 2, ty = box.y0 + (box.y1 - box.y0) * 0.65, az = Math.atan2(tx - ph[0], ty - ph[1]) * 180 / Math.PI, el = serveElevation(ph, speed, az, ty), s = simulateShot(ph, speed, el, az, null); return { box: box, el: el, az: az, outcome: s.outcome, land: s.land, netClear: s.netClear }; }, serverNow: function () { return serverNow(); }, pkCall: function () { return pkCall(); }, matchFormat: matchFormat, tour: function () { return !!S.tour; }, startTour: startTour, shake: shake, charInfo: function () { var M = PLAYERS3D.m_licht; return { h: M.height, foot: M.footY, clips: Object.keys(M.clips) }; }, charReady: function () { return CHAR.ready; }, modelsReady: function () { return Object.keys(PLAYERS3D).filter(function (k) { return PLAYERS3D[k].ready; }); }, blockPose: function (pl, mir) { return blockPose(pl, mir, performance.now()); }, use3d: function () { return USE3D; }, sim: function (a, b, c, d) { return simulateShot(a, b, c, d, null); }, netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
+window.__tv = { coachDebug: function () { var P = G3.props; return { trainerOn: TRAINER.on, coaches: P ? P.coaches.map(function (co) { return { team: co.team, heeftModel: !!co.H3, zichtbaar: co.H3 ? co.H3.g.visible : null, inScene: co.H3 ? co.H3.g.parent === G3.scene : null, pos: co.H3 ? [+co.H3.g.position.x.toFixed(1), +(-co.H3.g.position.z).toFixed(1), +co.H3.g.position.y.toFixed(2)] : null, isTrainer: co.H3 === TRAINER.H3 }; }) : null, MS: !!MS, phase: S.phase }; }, people: function () { var vis = 0, all = 0; G3.scene.children.forEach(function (c) { var has = false; c.traverse(function (o) { if (o.isSkinnedMesh) has = true; }); if (has) { all++; if (c.visible) vis++; } }); return { zichtbaar: vis, totaal: all, waar: G3.scene.children.filter(function (c) { var has = false; c.traverse(function (o) { if (o.isSkinnedMesh) has = true; }); return has && c.visible; }).map(function (c) { return [+c.position.x.toFixed(1), +(-c.position.z).toFixed(1)]; }) }; }, serveSpeedOf: function (k) { return serveSpeed(k); }, trainer: function () { return { on: TRAINER.on, arrived: !!TRAINER.arrived, pos: TRAINER.w ? [+TRAINER.w.x.toFixed(2), +TRAINER.w.y.toFixed(2)] : null, left: TRAINER.basket ? TRAINER.basket.userData.balls.filter(function (m) { return m.visible; }).length : null }; }, shirtInfo: function (id) { var M = PLAYERS3D[id], g = M.gltf; g.scene.updateMatrixWorld(true); var sp = findBone(g.scene, 'Spine2'), out = { spine2: wpos(sp).toArray().map(function (x) { return +x.toFixed(3); }), meshes: [] }; g.scene.traverse(function (o) { if (!o.isMesh) return; var nm = o.material.name || '', pa = o.geometry.attributes.position, v = new THREE.Vector3(), mn = [9, 9, 9], mx = [-9, -9, -9]; if (!/shirt|tank/i.test(nm)) return; for (var i = 0; i < pa.count; i += 7) { v.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); mn = [Math.min(mn[0], v.x), Math.min(mn[1], v.y), Math.min(mn[2], v.z)]; mx = [Math.max(mx[0], v.x), Math.max(mx[1], v.y), Math.max(mx[2], v.z)]; } out.meshes.push({ nm: nm, skinned: !!o.isSkinnedMesh, min: mn.map(function (x) { return +x.toFixed(3); }), max: mx.map(function (x) { return +x.toFixed(3); }), norm: pa.normalized, type: pa.array.constructor.name }); }); return out; }, logoDebug: function () { var o = {}; Object.keys(PLAYERS3D).forEach(function (k) { var M = PLAYERS3D[k]; o[k] = M.logo ? { pos: M.logo.pos.toArray().map(function (x) { return +x.toFixed(3); }) } : null; }); var st = G3 && G3.studio; if (st && st.chars[0] && st.chars[0].logo) { var l = st.chars[0].logo, wp = new THREE.Vector3(), ws = new THREE.Vector3(); l.getWorldPosition(wp); l.getWorldScale(ws); o.wereld = wp.toArray().map(function (x) { return +x.toFixed(3); }); o.schaal = +ws.x.toFixed(3); o.zicht = l.visible; } return o; }, serveDebug: function (ph, speed) { var box = serviceBoxFor(ph[0]), tx = (box.x0 + box.x1) / 2, ty = box.y0 + (box.y1 - box.y0) * serveDepth(), az = Math.atan2(tx - ph[0], ty - ph[1]) * 180 / Math.PI, el = serveElevation(ph, speed, az, ty), s = simulateShot(ph, speed, el, az, null); return { box: box, el: el, az: az, outcome: s.outcome, land: s.land, netClear: s.netClear }; }, serverNow: function () { return serverNow(); }, pkCall: function () { return pkCall(); }, matchFormat: matchFormat, tour: function () { return !!S.tour; }, startTour: startTour, shake: shake, charInfo: function () { var M = PLAYERS3D.m_licht; return { h: M.height, foot: M.footY, clips: Object.keys(M.clips) }; }, charReady: function () { return CHAR.ready; }, modelsReady: function () { return Object.keys(PLAYERS3D).filter(function (k) { return PLAYERS3D[k].ready; }); }, blockPose: function (pl, mir) { return blockPose(pl, mir, performance.now()); }, use3d: function () { return USE3D; }, sim: function (a, b, c, d) { return simulateShot(a, b, c, d, null); }, netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
 })();
 </script>
 </body>

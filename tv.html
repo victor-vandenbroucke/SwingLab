@@ -22,7 +22,8 @@ body[data-sport="pickleball"]{--lime:#2fbf5b;--lime-ink:#002a10}
 button{font:inherit;color:inherit;border:0;cursor:pointer}
 button:focus-visible{outline:.5vh solid var(--lime);outline-offset:.4vh}
 
-body.studio .layer,body.studio .hud-top,body.studio .hud-bottom,body.studio .mboard,body.studio .shot{display:none!important}
+body.studio .layer,body.studio .hud-top,body.studio .hud-bottom,body.studio .mboard,body.studio .shot,body.studio .ptimer,body.studio .verdict,body.studio .mcall,body.studio .demo,body.studio .points{display:none!important}
+body.solo{background:#141922}
 .layer{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6vh 6vw}
 .dim{background:rgba(0,0,0,.72)}
 .topmsg{justify-content:flex-start;padding-top:7vh;background:linear-gradient(rgba(0,0,0,.8),rgba(0,0,0,0) 45%)}
@@ -2208,7 +2209,8 @@ function renderStudio(now) {
   st.ring.material.color.set(SPORT_HEX[S.sport]);
   STUDIO.chars.forEach(function (c, i) {
     var w = st.w[i], a = STUDIO.anim, thc = (STUDIO.rot || 0) * Math.PI / 180, sg = i === 0 ? 1 : -1; w.av = c.av;
-    w.x = sg * 0.75 * Math.cos(thc); w.y = -sg * 0.75 * Math.sin(thc);          // altijd naast elkaar, ook als de camera rond draait
+    var off = STUDIO.chars.length === 1 ? 0 : 0.75;
+    w.x = sg * off * Math.cos(thc); w.y = -sg * off * Math.sin(thc);          // altijd naast elkaar, ook als de camera rond draait (alleen: in het midden)
     w.spd = a === 'wandelen' ? 1.3 : a === 'lopen' ? 4.6 : 0; w.runPh = (w.runPh || 0) + dt * w.spd * 2.4;
     if (a === 'forehand' || a === 'backhand' || a === 'smash') { w.sk = a === 'forehand' ? 'fh' : a === 'backhand' ? 'bh' : 'over'; if (!w.cT || now > w.cT + 1400) w.cT = now + 520 + i * 140; } else w.cT = 0;
     w.cheer = a === 'juichen';
@@ -2216,6 +2218,7 @@ function renderStudio(now) {
     if (H3.racket && H3.racket.parent !== st.scene) st.scene.add(H3.racket);
   });
   var th = (STUDIO.rot || 0) * Math.PI / 180, R = 6.6 / (STUDIO.zoom || 1), cam = st.cam, ty = 0.92 + (1 - 1 / (STUDIO.zoom || 1)) * 0.35;
+  if (STUDIO.solo) { R = W < H ? 5.6 : 4.4; ty = 0.93; }
   cam.aspect = W / H; cam.fov = 30; if (window.__studioLook) ty = window.__studioLook; cam.position.set(Math.sin(th) * R, 1.05, -Math.cos(th) * R); cam.lookAt(0, ty, 0); cam.updateProjectionMatrix();
   G3.r.render(st.scene, cam);
   ctx.drawImage(G3.r.domElement, 0, 0, W, H);
@@ -2223,6 +2226,7 @@ function renderStudio(now) {
   st.chars.forEach(function (H3, i) {
     var hd = H3.B.head ? wpos(H3.B.head) : new THREE.Vector3(st.w[i].x, 1.7, 0); hd.y += 0.32; hd.project(cam);
     var sx = (hd.x + 1) / 2 * W, sy = (1 - hd.y) / 2 * H, lab = STUDIO.chars[i].label, b = bodyOf(STUDIO.chars[i].av);
+    if (!lab) return;
     ctx.font = '700 ' + Math.round(H * 0.03) + 'px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.fillText(lab, sx, sy);
     ctx.font = '500 ' + Math.round(H * 0.02) + 'px system-ui, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillText(b.h + ' cm', sx, sy + H * 0.028); ctx.textAlign = 'left';
   });
@@ -2324,6 +2328,28 @@ function renderLobby() {
 }
 function escTv(t) { return String(t || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
+/* ---------- jouw speler in 3D op de telefoon (in een venster van de app) ---------- */
+function soloAv(a) {
+  a = a || {}; var g = a.gender === 'v' ? 'v' : 'm';
+  return { gender: g, skin: a.skin || 's0', hair: a.hair === 'kaal' ? 'kaal' : 'eigen', hairCol: a.hairCol || 'zwart', shirt: a.shirt || 'sport', shorts: a.shorts || 'zwart', shoes: a.shoes || 'wit', extra: a.extra || 'geen', rok: false, body: JSON.parse(JSON.stringify(BODY[g])) };
+}
+function startSolo() {
+  document.body.classList.add('solo');
+  var sp = (location.search.match(/[?&]sport=(\w+)/) || [])[1]; if (sp === 'padel' || sp === 'tennis' || sp === 'pickleball') S.sport = sp;
+  STUDIO = { anim: 'staan', rot: 0, zoom: 1.35, solo: true, chars: [{ label: '', av: soloAv(null) }] };
+  document.body.classList.add('studio');
+  window.addEventListener('message', function (e) {
+    if (e.origin !== location.origin) return; var m = e.data || {};
+    if (m.type === 'swinglab-av') { STUDIO.chars[0].av = soloAv(m.av); if (m.sport === 'padel' || m.sport === 'tennis' || m.sport === 'pickleball') S.sport = m.sport; }
+  });
+  // draaien met je vinger
+  var drag = null, el = document.getElementById('cv') || document.body;
+  el.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, r: STUDIO.rot || 0 }; try { el.setPointerCapture(e.pointerId); } catch (_) {} });
+  el.addEventListener('pointermove', function (e) { if (drag) STUDIO.rot = drag.r - (e.clientX - drag.x) * 0.6; });
+  ['pointerup', 'pointercancel'].forEach(function (t) { el.addEventListener(t, function () { drag = null; }); });
+  el.style.touchAction = 'none';
+  try { parent.postMessage({ type: 'swinglab-solo-ready' }, location.origin); } catch (e) {}
+}
 function startPeer() {
   if (window.SWINGLAB_VIEWER) return;   // de veldenviewer heeft geen telefoon nodig
   if (typeof Peer === 'undefined') { setStatus('Het koppelonderdeel kon niet laden. Herlaad de pagina.', true); return; }
@@ -2651,6 +2677,26 @@ function buildPath(wps) {
 function inCageX(v) { var C = court(), lim = C.glass ? C.Wd / 2 - 0.35 : MS.hwIn + 0.6; return clamp(v, -lim, lim); }
 function inCageXT(v) { var C = court(), lim = C.glass ? C.Wd / 2 - 0.35 : C.Wd / 2 + 1.5; return clamp(v, -lim, lim); }
 function inCageY(v) { var C = court(); return C.glass ? clamp(v, 0.35, C.L - 0.35) : v; }
+/* de raakmomenten waaruit jij kiest met je timing: volley (voor de bots), na de bots, en bij padel via het glas */
+function shotChoices(b, recv, twoBounce, kind) {
+  var toNear = recv.team === 0, list = [], at = function (tt) { return ballPos(b, b.t0 + tt * 1000); };
+  var last = { kind: b.viaGlass ? 'glass' : (b.volley ? (b.overhead ? 'over' : 'volley') : 'bounce'), t: b.tContact };
+  if (!b.volley && !twoBounce && kind !== 'serve' && b.wps.length > 2) {
+    var yv = zoneY(recv.team, 'net'), w1 = b.wps[1];
+    if (toNear ? w1.p[1] < yv - 0.3 : w1.p[1] > yv + 0.3) {
+      for (var s = 1; s <= 80; s++) {
+        var tt = w1.t * s / 80, pp = at(tt);
+        if (toNear ? pp[1] <= yv : pp[1] >= yv) { if (pp[2] > 0.35 && pp[2] < 2.7) list.push({ kind: pp[2] > 1.9 ? 'over' : 'volley', t: b.t0 + tt * 1000 }); break; }
+      }
+    }
+  }
+  if (b.viaGlass && b.wps.length > 3) {
+    var a1 = b.wps[1], a2 = b.wps[2], tb = a1.t + (a2.t - a1.t) * 0.55, pb = at(tb);
+    if (pb[2] > 0.35) list.push({ kind: 'bounce', t: b.t0 + tb * 1000 });
+  }
+  list.push(last);
+  return list;
+}
 function launchShot(hitter, from, land, recv, vh, now, firstT, kind) {
   var C = court(), L = C.L, nY = L / 2, toNear = recv.team === 0, wps, cx, cy, cz = 1.0, glass = false;
   kind = kind || 'drive';
@@ -2676,7 +2722,7 @@ function launchShot(hitter, from, land, recv, vh, now, firstT, kind) {
     if (recv.kind === 'human') showShot(recv.name + ': volley! Tik hem terug of houd je racket ervoor');
   } else {
     var deep = toNear ? land[1] < 4.2 : land[1] > L - 4.2;
-    glass = S.sport === 'padel' && deep && kind !== 'drop' && Math.random() < 0.75;
+    glass = S.sport === 'padel' && deep && kind !== 'drop' && (recv.kind === 'human' || Math.random() < 0.75);
     wps = [{ p: from.slice(), kind: '', t: 0 }, { p: [land[0], land[1], 0], kind: 'ground', t: 0 }];
     wps[1].t = firstT || Math.max(0.35, dist2(from, wps[1].p) / vh);
     if (glass) {
@@ -2711,6 +2757,10 @@ function launchShot(hitter, from, land, recv, vh, now, firstT, kind) {
   recv.tx = inCageX(cx - sideR * face * reach); recv.ty = inCageY(cy - face * 0.25); recv.cT = b.tContact;
   recv.sk = cz > 1.8 ? 'over' : ((sideR > 0) === (recv.hand !== 'left') ? 'fh' : 'bh');
   b.expDir = recv.sk === 'bh' ? 'bh' : 'fh';
+  if (recv.kind === 'human') {
+    b.cands = shotChoices(b, recv, twoBounce, kind);
+    if (b.cands.length > 1 && !MS.choiceHint) { MS.choiceHint = true; showShot(recv.name + ': jij kiest: volley, na de bots' + (glass ? ' of via het glas' : '') + '. Je timing beslist'); }
+  }
   balls.push(b);
   MS.ball = b; MS.receiver = recv; MS.state = 'rally';
   if (R) R.inc = recv.kind === 'human' ? b : null;
@@ -2928,11 +2978,20 @@ function onMatchSwing(pl, m) {
   if (MS.state === 'serveWait' && MS.srvInfo && MS.srvInfo.w.p === pl) { humanServe(MS.srvInfo, m); return; }
   var b = MS.ball, w = MS.receiver;
   if (!b || b.judged || !w || w.kind !== 'human' || w.p !== pl) return;
-  var now = performance.now(), tp = now - clamp(+m.lag || 0, 0, 400) - NET_MS, d = m.block ? 0 : tp - b.tContact;
-  if (Math.abs(d) > winFor(b)) return;  // te vroeg of te laat: telt niet
+  var now = performance.now(), tp = now - clamp(+m.lag || 0, 0, 400) - NET_MS;
+  // jij kiest met je timing: het raakmoment dat het dichtst bij je zwaai ligt (volley, na de bots of via het glas)
+  var cands = b.cands || [{ kind: b.volley ? 'volley' : 'bounce', t: b.tContact }], cand = cands[cands.length - 1], best = 1e9;
+  cands.forEach(function (c) { var dd = tp - c.t; if (m.block && c.kind !== 'volley') return; if (Math.abs(dd) < Math.abs(best)) { best = dd; cand = c; } });
+  var wasVolley = b.volley; b.volley = cand.kind === 'volley' || cand.kind === 'over';
+  var d = m.block ? 0 : (best === 1e9 ? tp - b.tContact : best);
+  if (Math.abs(d) > winFor(b)) { b.volley = wasVolley; return; }  // te vroeg of te laat: telt niet
+  b.chosen = cand.kind; b.tContact = cand.t; if (cand.kind === 'over') b.overhead = true;
   b.judged = true; w.swingT = now;
   var C = court(), L = C.L, perfect = !m.block && Math.abs(d) <= winPFor(b);
   w.sk = b.overhead ? 'over' : (m.dir === 'bh' ? 'bh' : 'fh');   // je eigen keuze
+  // de speler staat bij de bal op het moment dat jij slaat (ook als je vroeger of later koos dan verwacht)
+  var pb = ballPos(b, now), fc = w.team === 0 ? 1 : -1, sdx = (m.dir === 'bh') === (w.hand !== 'left') ? -1 : 1;
+  w.tx = inCageX(pb[0] - sdx * fc * 0.7); w.ty = inCageY(pb[1] - fc * 0.25); w.x += (w.tx - w.x) * 0.6; w.y += (w.ty - w.y) * 0.6; w.cT = now;
   var speed = clamp(+m.speed || 0, 0, 160), lift = typeof m.lift === 'number' ? m.lift : null, faceAz = typeof m.az === 'number' ? clamp(m.az, -35, 35) : null;
   var p = ballPos(b, now), mir = w.team === 1, ph = mir ? [-p[0], L - p[1], p[2]] : p;
   balls = balls.filter(function (x) { return x !== b; });
@@ -2948,7 +3007,7 @@ function onMatchSwing(pl, m) {
   w.st.swings++; if (speed > w.st.best) w.st.best = Math.round(speed);
   playHit(speed / 60); if (perfect) playPerfect();
   burst(p, perfect);
-  var verdict = m.block ? 'Blok' : (perfect ? 'Perfect' : 'Goed');
+  var verdict = (m.block ? 'Blok' : (perfect ? 'Perfect' : 'Goed')) + (b.cands && b.cands.length > 1 ? ({ volley: ': volley', over: ': smash', bounce: ': na de bots', glass: ': via het glas' })[b.chosen] || '' : '');
   if (sim.outcome === 'in') {
     w.st.hits++; if (perfect) w.st.perfect++;
     var land = mir ? [-sim.land[0], L - sim.land[1]] : sim.land, opp = 1 - w.team;
@@ -3288,6 +3347,7 @@ function loadModel(id) {
           M.logo = { pos: best.clone().addScaledVector(nrm, 0.004).applyMatrix4(inv), n: nrm.clone().transformDirection(inv), up: new THREE.Vector3(0, 1, 0).transformDirection(inv) }; }
       }
     } catch (e) {}
+    try { measureHead(M, g.scene); } catch (e) { if (window.console) console.warn('SwingLab hoofd', e); }
     M.ready = true; CHAR.ready = true;
   };
   var onFail = function (e) { M.failed = true; M.loading = false; CHAR.failed = Object.keys(PLAYERS3D).every(function (k) { return PLAYERS3D[k].failed; }); if (window.console) console.warn('SwingLab: speler ' + id + ' niet geladen', e); };
@@ -3302,6 +3362,86 @@ function loadModel(id) {
       try { new THREE.GLTFLoader().parse(buf.buffer, '', onGltf, onFail); } finally { try { window.createImageBitmap = cib; } catch (e3) {} }
     } catch (e) { onFail(e); }
   } else new THREE.GLTFLoader().load(src, onGltf, undefined, onFail);
+}
+/* het hoofd opmeten (in de rusthouding): schedel en haar per hoogte, de ogen en de oren, zodat de extra's mooi aansluiten */
+function measureHead(M, scene) {
+  var hb = findBone(scene, 'Head'); if (!hb) return;
+  scene.updateMatrixWorld(true);
+  var hy = wpos(hb).y, pts = [], v = new THREE.Vector3();
+  scene.traverse(function (o) {
+    if (!o.isMesh) return; var nm = o.material.name || '', sk = /^skin$/i.test(nm), hr = /hair|buzz|braid|afro|cornrow|mohawk/i.test(nm);
+    if (!sk && !hr) return;
+    var pa = o.geometry.attributes.position; if (o.isSkinnedMesh && o.skeleton) o.skeleton.update();
+    for (var i = 0; i < pa.count; i += 2) {
+      v.fromBufferAttribute(pa, i); if (o.isSkinnedMesh && o.boneTransform) o.boneTransform(i, v); v.applyMatrix4(o.matrixWorld);
+      if (v.y > hy - 0.03 && Math.abs(v.x) < 0.2) pts.push([v.x, v.y, v.z, sk ? 1 : 0]);
+    }
+  });
+  if (pts.length < 50) return;
+  var top = -9; pts.forEach(function (p) { if (p[1] > top) top = p[1]; });
+  var lE = findBone(scene, 'LeftEye'), rE = findBone(scene, 'RightEye');
+  var eyeL = lE ? wpos(lE) : null, eyeR = rE ? wpos(rE) : null, eyeY = eyeL ? (eyeL.y + eyeR.y) / 2 : hy + 0.09;
+  // doorsnede op een hoogte: middelpunt en straal (breedte en diepte), met of zonder haar
+  function ring(y, withHair, tol) {
+    var x0 = 9, x1 = -9, z0 = 9, z1 = -9, n = 0; tol = tol || 0.012;
+    pts.forEach(function (p) { if (Math.abs(p[1] - y) < tol && (withHair || p[3])) { n++; if (p[0] < x0) x0 = p[0]; if (p[0] > x1) x1 = p[0]; if (p[2] < z0) z0 = p[2]; if (p[2] > z1) z1 = p[2]; } });
+    return n < 6 ? null : { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, rx: (x1 - x0) / 2, rz: (z1 - z0) / 2, y: y };
+  }
+  // middelpunt van de schedel; het haar maakt de ring maar beperkt groter (een paardenstaart telt niet mee)
+  function fitRing(y, tol) {
+    var s = ring(y, false, tol), w = ring(y, true, tol); if (!s) return w; if (!w) return s;
+    return { cx: s.cx, cz: s.cz, y: y, rx: clamp(w.rx, s.rx + 0.006, s.rx + 0.022), rz: clamp(Math.max(w.rz, s.rz), s.rz + 0.006, s.rz + 0.022) };
+  }
+  var inv = new THREE.Matrix4().copy(hb.matrixWorld).invert(), wq = new THREE.Quaternion(), ws = new THREE.Vector3(); hb.getWorldQuaternion(wq); hb.getWorldScale(ws);
+  var earY = eyeY - 0.035, ears = ring(earY, false, 0.01);
+  M.head = { inv: inv, iq: wq.clone().invert(), is: 1 / (ws.x || 1), top: top, eyeY: eyeY, eyeL: eyeL, eyeR: eyeR,
+    band: fitRing(eyeY + 0.05), cap: fitRing(eyeY + 0.035), crown: fitRing(top - 0.035, 0.02), ears: ears };
+}
+/* de extra's op het echte hoofd, vast aan het hoofdbot (ze bewegen mee als het hoofd draait) */
+function makeHeadAcc(M, headBone, sport) {
+  var Hd = M.head; if (!Hd || !headBone) return null;
+  var acc = {}, col = new THREE.Color(SPORT_HEX[sport] || '#2f7bff');
+  function holder() { var g = new THREE.Group(); g.matrixAutoUpdate = true; g.position.set(0, 0, 0).applyMatrix4(Hd.inv); g.quaternion.copy(Hd.iq); g.scale.setScalar(Hd.is); headBone.add(g); return g; }
+  // in de houder werken we in meters, met de assen van de wereld in rusthouding (x rechts, y omhoog, z vooruit), gemeten vanaf de wereldoorsprong
+  var cloth = new THREE.MeshStandardMaterial({ color: col, roughness: 0.95 }), fabric = new THREE.MeshStandardMaterial({ color: col, roughness: 0.8 });
+  if (Hd.band) {
+    var b = Hd.band, g1 = holder(), band = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 40, 1, true), cloth);
+    band.material.side = THREE.DoubleSide; band.scale.set(b.rx * 1.06 + 0.004, 0.034, b.rz * 1.06 + 0.004); band.position.set(b.cx, b.y, b.cz); band.castShadow = true; g1.add(band); acc.band = g1;
+  }
+  if (Hd.cap) {
+    var c = Hd.cap, g2 = holder(), hgt = Math.max(0.07, Hd.top - c.y + 0.012);
+    var dome = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), fabric); dome.material.side = THREE.DoubleSide;
+    dome.scale.set(c.rx * 1.07 + 0.006, hgt, c.rz * 1.07 + 0.006); dome.position.set(c.cx, c.y, c.cz); dome.castShadow = true; g2.add(dome);
+    var brim = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.008, 32, 1, false, -Math.PI / 2, Math.PI), fabric);
+    brim.scale.set(c.rx * 0.95, 1, 0.085); brim.position.set(c.cx, c.y + 0.004, c.cz + c.rz * 0.92); brim.rotation.x = -0.12; brim.castShadow = true; g2.add(brim);
+    acc.cap = g2;
+  }
+  if (Hd.eyeL && Hd.eyeR) {
+    var g3 = holder(), dark = new THREE.MeshStandardMaterial({ color: 0x0c0f14, roughness: 0.15, metalness: 0.4 }), frame = new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.5 });
+    var zF = Math.max(Hd.eyeL.z, Hd.eyeR.z) + 0.022, ey = Hd.eyeY;
+    [Hd.eyeL, Hd.eyeR].forEach(function (e) { var l = new THREE.Mesh(new THREE.CylinderGeometry(0.023, 0.023, 0.004, 24), dark); l.rotation.x = Math.PI / 2; l.scale.set(1.15, 1, 0.85); l.position.set(e.x, ey, zF); g3.add(l); });
+    var bridge = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(Hd.eyeL.x - Hd.eyeR.x) * 0.45, 0.004, 0.004), frame); bridge.position.set((Hd.eyeL.x + Hd.eyeR.x) / 2, ey + 0.006, zF); g3.add(bridge);
+    var er = Hd.ears || { rx: 0.075, cx: 0, cz: zF - 0.09 };
+    [-1, 1].forEach(function (sd) {
+      var x = er.cx + sd * (er.rx + 0.002), z0 = zF, z1 = er.cz - 0.005, arm = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.004, Math.abs(z0 - z1)), frame);
+      arm.position.set(x, ey + 0.004, (z0 + z1) / 2); g3.add(arm);
+    });
+    acc.glasses = g3;
+  }
+  if (Hd.ears) {
+    var g4 = holder(), gold = new THREE.MeshStandardMaterial({ color: 0xe6b53a, metalness: 0.9, roughness: 0.25 }), e2 = Hd.ears;
+    [-1, 1].forEach(function (sd) { var r = new THREE.Mesh(new THREE.TorusGeometry(0.007, 0.0018, 8, 16), gold); r.position.set(e2.cx + sd * (e2.rx + 0.001), e2.y - 0.012, e2.cz - 0.004); r.rotation.y = Math.PI / 2; g4.add(r); });
+    acc.earrings = g4;
+  }
+  if (Hd.crown) {
+    var k = Hd.crown, g5 = holder(), gold2 = new THREE.MeshStandardMaterial({ color: 0xf2c94c, metalness: 0.9, roughness: 0.25, side: THREE.DoubleSide });
+    var cr = new THREE.Mesh(new THREE.CylinderGeometry(1, 0.94, 1, 12, 1, true), gold2); cr.scale.set(k.rx * 0.9, 0.06, k.rz * 0.9); cr.position.set(k.cx, Hd.top + 0.01, k.cz); g5.add(cr);
+    for (var t = 0; t < 8; t++) { var a = t / 8 * Math.PI * 2, sp = new THREE.Mesh(new THREE.ConeGeometry(0.008, 0.028, 6), gold2); sp.position.set(k.cx + Math.cos(a) * k.rx * 0.9, Hd.top + 0.054, k.cz + Math.sin(a) * k.rz * 0.9); g5.add(sp); }
+    acc.crown = g5;
+  }
+  Object.keys(acc).forEach(function (k) { acc[k].visible = false; });
+  acc.mats = [cloth, fabric];
+  return acc;
 }
 function loadCharacter() { Object.keys(PLAYERS3D).forEach(loadModel); }
 /* huidtint per model: binnen een model kan je de huid lichter of donkerder kiezen */
@@ -3349,7 +3489,7 @@ function makeRigged(av) {
   ['idle', 'walk', 'run'].forEach(function (n) { if (M.clips[n]) { var a = mixer.clipAction(M.clips[n]); a.play(); a.setEffectiveWeight(n === 'idle' ? 1 : 0); act[n] = a; } });
   G3.scene.add(root);
   // van de zelfgebouwde kleding houden we alleen de accessoires over (pet, zonneklep, zweetband, bril, kroon, oorbellen)
-  var cloth = makeHuman3D(), P = cloth.P, keep = [P.cap, P.visor, P.band, P.glasses, P.crown].concat(P.earring || []);
+  var cloth = makeHuman3D(), P = cloth.P, keep = [];   // de extra's zitten nu vast aan het echte hoofd (makeHeadAcc)
   Object.keys(P).forEach(function (k) { [].concat(P[k]).forEach(function (m) { if (keep.indexOf(m) < 0) { m.visible = false; m.userData.off = true; } }); });
   var logo = null;
   if (M.logo && B.spine2) {
@@ -3359,7 +3499,8 @@ function makeRigged(av) {
     var bsc = new THREE.Vector3(); B.spine2.getWorldScale(bsc); logo.scale.setScalar(1 / Math.max(1e-6, bsc.x / sc));   // ware grootte ongeveer 6 cm
     B.spine2.add(logo);
   }
-  return { logo: logo, rig: true, real: true, modelId: id, g: root, model: model, B: B, base: base, fing: fing, fingRest: rest, sc0: sc, py0: -(M.footY || 0) * sc, mixer: mixer, act: act, mats: mats, cat: cat, cloth: cloth, paint: null, wi: 1, ww: 0, wr: 0, racket: null, racketSport: null, avKey: '' };
+  var headAcc = makeHeadAcc(M, B.head, S.sport);
+  return { headAcc: headAcc, logo: logo, rig: true, real: true, modelId: id, g: root, model: model, B: B, base: base, fing: fing, fingRest: rest, sc0: sc, py0: -(M.footY || 0) * sc, mixer: mixer, act: act, mats: mats, cat: cat, cloth: cloth, paint: null, wi: 1, ww: 0, wr: 0, racket: null, racketSport: null, avKey: '' };
 }
 /* kleuren op het echte model: shirt, broek of rokje, schoenen, haar en huid */
 function shirtLogoTex() {
@@ -3506,7 +3647,17 @@ function tintRig(H3, av, sport) {
   var P = H3.cloth.P; P.hairCap.visible = false;
   if (P.skirt) { P.skirt.visible = !!av.rok && !H3.real; P.earring.forEach(function (m) { m.visible = av.extra === 'oorbellen'; }); }
   if (H3.real) {
-    [P.torso, P.trap, P.pelvis, P.tail, P.knot, P.mohawk].forEach(function (m) { m.visible = false; }); P.curls.forEach(function (c) { c.visible = false; });
+    [P.torso, P.trap, P.pelvis, P.tail, P.knot, P.mohawk, P.cap, P.visor, P.band, P.glasses, P.crown].forEach(function (m) { if (m) m.visible = false; }); P.curls.forEach(function (c) { c.visible = false; });
+    if (P.earring) P.earring.forEach(function (m) { m.visible = false; });
+    var A = H3.headAcc;
+    if (A) {
+      if (A.band) A.band.visible = av.extra === 'zweetband';
+      if (A.cap) A.cap.visible = av.extra === 'pet';
+      if (A.glasses) A.glasses.visible = av.extra === 'zonnebril';
+      if (A.earrings) A.earrings.visible = av.extra === 'oorbellen';
+      if (A.crown) A.crown.visible = av.extra === 'kroon';
+      A.mats.forEach(function (m) { m.color.set(av.shirt === 'wit' ? '#f2f2f2' : SPORT_HEX[sport]); });
+    }
     var rk = JSON.stringify(av) + sport + SL_V; if (H3.avKey !== rk) { H3.avKey = rk; realLook(H3, av, sport); }
     return;
   }
@@ -4810,7 +4961,8 @@ setCamera();
 init3D();
 if (USE3D) loadCharacter();
 requestAnimationFrame(frame);
-startPeer();
+var SOLO = /[?&]solo=1/.test(location.search);   // de telefoon toont hier jouw speler in 3D (geen koppeling, geen code)
+if (SOLO) startSolo(); else startPeer();
 
 window.__view = {
   VENUES: VENUES, COURT_STYLE: COURT_STYLE, skies: { DAY: DAY, DUSK: DUSK, NIGHT: NIGHT, HALL: HALL },
@@ -4840,7 +4992,7 @@ window.__view = {
   unlock: function () { try { unlockAudio(); } catch (e) {} },
   tour: function () { if (USE3D && G3) S.tour = { t0: performance.now(), dur: TOUR_MS }; return !!S.tour; }
 };
-window.__tv = { coachDebug: function () { var P = G3.props; return { trainerOn: TRAINER.on, coaches: P ? P.coaches.map(function (co) { return { team: co.team, heeftModel: !!co.H3, zichtbaar: co.H3 ? co.H3.g.visible : null, inScene: co.H3 ? co.H3.g.parent === G3.scene : null, pos: co.H3 ? [+co.H3.g.position.x.toFixed(1), +(-co.H3.g.position.z).toFixed(1), +co.H3.g.position.y.toFixed(2)] : null, isTrainer: co.H3 === TRAINER.H3 }; }) : null, MS: !!MS, phase: S.phase }; }, people: function () { var vis = 0, all = 0; G3.scene.children.forEach(function (c) { var has = false; c.traverse(function (o) { if (o.isSkinnedMesh) has = true; }); if (has) { all++; if (c.visible) vis++; } }); return { zichtbaar: vis, totaal: all, waar: G3.scene.children.filter(function (c) { var has = false; c.traverse(function (o) { if (o.isSkinnedMesh) has = true; }); return has && c.visible; }).map(function (c) { return [+c.position.x.toFixed(1), +(-c.position.z).toFixed(1)]; }) }; }, serveSpeedOf: function (k) { return serveSpeed(k); }, trainer: function () { return { on: TRAINER.on, arrived: !!TRAINER.arrived, pos: TRAINER.w ? [+TRAINER.w.x.toFixed(2), +TRAINER.w.y.toFixed(2)] : null, left: TRAINER.basket ? TRAINER.basket.userData.balls.filter(function (m) { return m.visible; }).length : null }; }, shirtInfo: function (id) { var M = PLAYERS3D[id], g = M.gltf; g.scene.updateMatrixWorld(true); var sp = findBone(g.scene, 'Spine2'), out = { spine2: wpos(sp).toArray().map(function (x) { return +x.toFixed(3); }), meshes: [] }; g.scene.traverse(function (o) { if (!o.isMesh) return; var nm = o.material.name || '', pa = o.geometry.attributes.position, v = new THREE.Vector3(), mn = [9, 9, 9], mx = [-9, -9, -9]; if (!/shirt|tank/i.test(nm)) return; for (var i = 0; i < pa.count; i += 7) { v.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); mn = [Math.min(mn[0], v.x), Math.min(mn[1], v.y), Math.min(mn[2], v.z)]; mx = [Math.max(mx[0], v.x), Math.max(mx[1], v.y), Math.max(mx[2], v.z)]; } out.meshes.push({ nm: nm, skinned: !!o.isSkinnedMesh, min: mn.map(function (x) { return +x.toFixed(3); }), max: mx.map(function (x) { return +x.toFixed(3); }), norm: pa.normalized, type: pa.array.constructor.name }); }); return out; }, logoDebug: function () { var o = {}; Object.keys(PLAYERS3D).forEach(function (k) { var M = PLAYERS3D[k]; o[k] = M.logo ? { pos: M.logo.pos.toArray().map(function (x) { return +x.toFixed(3); }) } : null; }); var st = G3 && G3.studio; if (st && st.chars[0] && st.chars[0].logo) { var l = st.chars[0].logo, wp = new THREE.Vector3(), ws = new THREE.Vector3(); l.getWorldPosition(wp); l.getWorldScale(ws); o.wereld = wp.toArray().map(function (x) { return +x.toFixed(3); }); o.schaal = +ws.x.toFixed(3); o.zicht = l.visible; } return o; }, serveDebug: function (ph, speed) { var box = serviceBoxFor(ph[0]), tx = (box.x0 + box.x1) / 2, ty = box.y0 + (box.y1 - box.y0) * serveDepth(), az = Math.atan2(tx - ph[0], ty - ph[1]) * 180 / Math.PI, el = serveElevation(ph, speed, az, ty), s = simulateShot(ph, speed, el, az, null); return { box: box, el: el, az: az, outcome: s.outcome, land: s.land, netClear: s.netClear }; }, serverNow: function () { return serverNow(); }, pkCall: function () { return pkCall(); }, matchFormat: matchFormat, tour: function () { return !!S.tour; }, startTour: startTour, shake: shake, charInfo: function () { var M = PLAYERS3D.m_licht; return { h: M.height, foot: M.footY, clips: Object.keys(M.clips) }; }, charReady: function () { return CHAR.ready; }, modelsReady: function () { return Object.keys(PLAYERS3D).filter(function (k) { return PLAYERS3D[k].ready; }); }, blockPose: function (pl, mir) { return blockPose(pl, mir, performance.now()); }, use3d: function () { return USE3D; }, sim: function (a, b, c, d) { return simulateShot(a, b, c, d, null); }, netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
+window.__tv = { shotChoicesOf: function () { var b = MS && MS.ball; return b && b.cands ? b.cands.map(function (c) { return { kind: c.kind, inMs: Math.round(c.t - performance.now()) }; }) : null; }, coachDebug: function () { var P = G3.props; return { trainerOn: TRAINER.on, coaches: P ? P.coaches.map(function (co) { return { team: co.team, heeftModel: !!co.H3, zichtbaar: co.H3 ? co.H3.g.visible : null, inScene: co.H3 ? co.H3.g.parent === G3.scene : null, pos: co.H3 ? [+co.H3.g.position.x.toFixed(1), +(-co.H3.g.position.z).toFixed(1), +co.H3.g.position.y.toFixed(2)] : null, isTrainer: co.H3 === TRAINER.H3 }; }) : null, MS: !!MS, phase: S.phase }; }, people: function () { var vis = 0, all = 0; G3.scene.children.forEach(function (c) { var has = false; c.traverse(function (o) { if (o.isSkinnedMesh) has = true; }); if (has) { all++; if (c.visible) vis++; } }); return { zichtbaar: vis, totaal: all, waar: G3.scene.children.filter(function (c) { var has = false; c.traverse(function (o) { if (o.isSkinnedMesh) has = true; }); return has && c.visible; }).map(function (c) { return [+c.position.x.toFixed(1), +(-c.position.z).toFixed(1)]; }) }; }, serveSpeedOf: function (k) { return serveSpeed(k); }, trainer: function () { return { on: TRAINER.on, arrived: !!TRAINER.arrived, pos: TRAINER.w ? [+TRAINER.w.x.toFixed(2), +TRAINER.w.y.toFixed(2)] : null, left: TRAINER.basket ? TRAINER.basket.userData.balls.filter(function (m) { return m.visible; }).length : null }; }, shirtInfo: function (id) { var M = PLAYERS3D[id], g = M.gltf; g.scene.updateMatrixWorld(true); var sp = findBone(g.scene, 'Spine2'), out = { spine2: wpos(sp).toArray().map(function (x) { return +x.toFixed(3); }), meshes: [] }; g.scene.traverse(function (o) { if (!o.isMesh) return; var nm = o.material.name || '', pa = o.geometry.attributes.position, v = new THREE.Vector3(), mn = [9, 9, 9], mx = [-9, -9, -9]; if (!/shirt|tank/i.test(nm)) return; for (var i = 0; i < pa.count; i += 7) { v.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); mn = [Math.min(mn[0], v.x), Math.min(mn[1], v.y), Math.min(mn[2], v.z)]; mx = [Math.max(mx[0], v.x), Math.max(mx[1], v.y), Math.max(mx[2], v.z)]; } out.meshes.push({ nm: nm, skinned: !!o.isSkinnedMesh, min: mn.map(function (x) { return +x.toFixed(3); }), max: mx.map(function (x) { return +x.toFixed(3); }), norm: pa.normalized, type: pa.array.constructor.name }); }); return out; }, logoDebug: function () { var o = {}; Object.keys(PLAYERS3D).forEach(function (k) { var M = PLAYERS3D[k]; o[k] = M.logo ? { pos: M.logo.pos.toArray().map(function (x) { return +x.toFixed(3); }) } : null; }); var st = G3 && G3.studio; if (st && st.chars[0] && st.chars[0].logo) { var l = st.chars[0].logo, wp = new THREE.Vector3(), ws = new THREE.Vector3(); l.getWorldPosition(wp); l.getWorldScale(ws); o.wereld = wp.toArray().map(function (x) { return +x.toFixed(3); }); o.schaal = +ws.x.toFixed(3); o.zicht = l.visible; } return o; }, serveDebug: function (ph, speed) { var box = serviceBoxFor(ph[0]), tx = (box.x0 + box.x1) / 2, ty = box.y0 + (box.y1 - box.y0) * serveDepth(), az = Math.atan2(tx - ph[0], ty - ph[1]) * 180 / Math.PI, el = serveElevation(ph, speed, az, ty), s = simulateShot(ph, speed, el, az, null); return { box: box, el: el, az: az, outcome: s.outcome, land: s.land, netClear: s.netClear }; }, serverNow: function () { return serverNow(); }, pkCall: function () { return pkCall(); }, matchFormat: matchFormat, tour: function () { return !!S.tour; }, startTour: startTour, shake: shake, charInfo: function () { var M = PLAYERS3D.m_licht; return { h: M.height, foot: M.footY, clips: Object.keys(M.clips) }; }, charReady: function () { return CHAR.ready; }, modelsReady: function () { return Object.keys(PLAYERS3D).filter(function (k) { return PLAYERS3D[k].ready; }); }, blockPose: function (pl, mir) { return blockPose(pl, mir, performance.now()); }, use3d: function () { return USE3D; }, sim: function (a, b, c, d) { return simulateShot(a, b, c, d, null); }, netPulse: netPulse, celebrate: celebrate, surfaceType: function () { return surfaceType(env()); }, players: function () { return players; }, MS: function () { return MS; }, startMatch: startMatch, pointTo: function (t, r) { pointTo(t, r); }, VENUES: VENUES, pickVenue: pickVenue, env: function () { return env(); }, DRILLS: DRILLS, makeIncoming: makeIncoming, ballPos: ballPos, S: S, R: function () { return R; }, onData: onData, onSwing: onSwing, startCountdown: startCountdown };
 })();
 </script>
 </body>

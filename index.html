@@ -77,7 +77,10 @@ body[data-sport="pickleball"]{--lime:#2fbf5b;--lime-ink:#002a10}
 .card .c-lbl{font-size:13px;font-weight:700;color:var(--ink2)}
 .card b{font-family:var(--num);font-variation-settings:"wdth" 115;font-weight:800;font-size:34px;line-height:1.05;color:var(--lime)}
 .card span{font-size:13px;color:var(--ink2)}
-.card canvas{position:absolute;right:4px;bottom:0;width:78px;height:110px}
+.cardme{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end}
+.cardme .pfp{position:absolute;right:12px;top:12px}
+.cardme .pfp .avatar.big{width:52px;height:52px;font-size:18px}
+.cardme #playerSub{color:var(--lime);font-weight:700}
 .sportbadge{display:inline-block;margin:0 auto 4px;padding:6px 14px;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-weight:800;font-size:14px}
 .rankrow{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
 .rankrow:last-child{border-bottom:0}
@@ -92,7 +95,9 @@ body[data-sport="pickleball"]{--lime:#2fbf5b;--lime-ink:#002a10}
 .items button .sw{display:block;width:26px;height:26px;border-radius:50%;margin:0 auto 6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
 .items button .price{display:block;font-size:12px;color:#b98510;margin-top:3px}
 .items button.locked{opacity:.75}
-.avbig{display:block;width:180px;height:240px;margin:0 auto}
+.avstage{position:relative;width:100%;height:min(46vh,380px);border-radius:18px;overflow:hidden;background:#141922;margin:6px 0 4px}
+.avstage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.avhint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:12px;color:rgba(255,255,255,.55);pointer-events:none}
 
 /* Home: today */
 .today{display:flex;align-items:center;gap:22px;padding:22px;background:var(--surface);border-radius:28px}
@@ -359,6 +364,16 @@ details[open] summary::after{transform:rotate(225deg)}
 .ana-grid div{padding:10px 6px;border-radius:14px;background:var(--surface);box-shadow:0 0 0 1px var(--line);text-align:center}
 .ana-grid b{display:block;font-family:var(--num);font-variation-settings:"wdth" 115;font-size:24px;font-weight:800}
 .ana-grid span{font-size:12px;color:var(--ink2)}
+.ana-grid small{font-size:14px;color:var(--ink2);font-weight:700}
+.ana-line{font-size:18px!important}
+.ana-tip b{display:inline-block;margin-bottom:2px;font-size:15px}
+.ana-tip .ana-in{color:#2fbf5b}.ana-tip .ana-out{color:#e5484d}.ana-tip .ana-net{color:#f08a33}
+.ana-legend{display:flex;gap:14px;justify-content:center;align-items:center;font-size:13px;color:var(--ink2);margin:8px 0 0}
+.ana-legend .lg{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.ana-legend .lg.in{background:#35e07a}.ana-legend .lg.net{background:#ffa22e}.ana-legend .lg.out{width:auto;height:auto;border-radius:0;color:#ff5050;font-weight:900;font-size:16px;line-height:1}
+.ana-row{margin:6px 0;font-size:14px;color:var(--ink2)}.ana-row b{color:var(--ink)}
+.ana-advice{color:var(--ink);font-weight:600}
+.ana-saved{margin-top:10px;font-size:13px;color:var(--ink2)}
 .lobbylist{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 4px}
 .lobbylist span{padding:8px 12px;border-radius:12px;background:var(--track);font-size:14px;font-weight:600}
 .lobbylist span.host{box-shadow:inset 0 0 0 2px var(--lime)}
@@ -476,7 +491,7 @@ summary .badge{margin-right:auto}
 
   <div class="cards2">
     <button type="button" class="card" id="cardRank"><span class="c-lbl">Competitie</span><b id="rankBig">–</b><span id="rankSub">Nog geen ranking</span></button>
-    <button type="button" class="card" id="cardPlayer"><span class="c-lbl">Jouw speler</span><span id="playerSub">Aanpassen</span><canvas id="avatarMini" width="156" height="220" aria-hidden="true"></canvas></button>
+    <button type="button" class="card cardme" id="cardPlayer"><span class="pfp" id="playerPfp" aria-hidden="true"></span><span class="c-lbl">Jouw speler</span><span id="playerSub">Jouw speler aanpassen</span></button>
   </div>
 
   <div class="facts">
@@ -619,7 +634,7 @@ summary .badge{margin-right:auto}
   <details>
     <summary>Punten en je speler</summary>
     <div class="dbody">
-      <p>Met trainingen en wedstrijden verdien je <b>punten</b>. Daarmee speel je bij <b>Jouw speler</b> kleren, kapsels en extra's vrij. Elke sport heeft een eigen speler.</p>
+      <p>Met trainingen en wedstrijden verdien je <b>punten</b>. Daarmee speel je bij <b>Jouw speler</b> kleren en extra's vrij. Je speler is dezelfde bij elke sport, en je ziet hem zoals hij op de tv speelt.</p>
     </div>
   </details>
   <details>
@@ -655,7 +670,7 @@ summary .badge{margin-right:auto}
   </details>
 
   <button type="button" class="danger" id="btnReset">Alle gegevens wissen</button>
-  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 47</span></p>
+  <p class="foot">Je gegevens blijven op dit toestel. SwingLab heeft geen account nodig en stuurt niets door.<br><span id="versionLine">SwingLab versie 48</span></p>
 </main>
 
 <!-- ============ PROFIEL ============ -->
@@ -799,8 +814,8 @@ summary .badge{margin-right:auto}
   </div>
 
   <div class="ana" id="tAna">
-    <canvas id="tCourt" width="680" height="440" aria-label="Terrein met waar je ballen landen"></canvas>
-    <div class="ana-line" id="tAnaLine">Maak een slag: hier zie je waar je bal zou landen.</div>
+    <canvas id="tCourt" width="680" height="560" aria-label="Terrein met waar je ballen landen"></canvas>
+    <div class="ana-line" id="tAnaLine">Maak een slag</div>
     <div class="ana-tip" id="tAnaTip"></div>
     <button type="button" class="textbtn" id="tReaim">Richting van het net opnieuw instellen</button>
   </div>
@@ -916,8 +931,10 @@ summary .badge{margin-right:auto}
 <div class="backdrop" id="anaSheet" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="anaTitle">
     <div class="sportbadge" id="anaSport">Padel</div>
-    <h2 id="anaTitle">Je slagen</h2>
-    <canvas id="anaCourt" width="680" height="560" aria-label="Al je slagen op het terrein"></canvas>
+    <h2 id="anaTitle">Je training</h2>
+    <p class="sheet-p">Zo zouden je ballen geland zijn, berekend uit de stand van je racket bij elke slag.</p>
+    <canvas id="anaCourt" width="680" height="620" aria-label="Al je slagen op het terrein"></canvas>
+    <p class="ana-legend"><span class="lg in"></span>binnen <span class="lg out">×</span>uit <span class="lg net"></span>in het net</p>
     <div class="ana-grid" id="anaStats"></div>
     <p class="sheet-p" id="anaTip"></p>
     <button type="button" class="start" id="anaClose">Sluiten</button>
@@ -941,12 +958,12 @@ summary .badge{margin-right:auto}
 <!-- ============ JOUW SPELER ============ -->
 <div class="backdrop" id="avatarSheet" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="avTitle">
-    <div class="sportbadge" id="avSport">Padel</div>
+    <div class="sportbadge" id="avSport">Voor elke sport</div>
     <h2 id="avTitle">Jouw speler</h2>
-    <canvas class="avbig" id="avatarBig" width="360" height="480" aria-hidden="true"></canvas>
+    <div class="avstage"><iframe id="avFrame" title="Jouw speler in 3D" loading="lazy"></iframe><span class="avhint">Sleep om te draaien</span></div>
     <p class="sheet-p" style="text-align:center">Je hebt <b id="avCoins">0</b> punten. Verdien er meer met trainingen en wedstrijden.</p>
     <div class="seg" role="group" aria-label="Onderdeel" id="avCats" style="overflow-x:auto">
-      <button type="button" data-cat="skin">Huid</button><button type="button" data-cat="hair">Haar</button><button type="button" data-cat="hairCol">Kleur</button>
+      <button type="button" data-cat="gender">Wie</button><button type="button" data-cat="skin">Huid</button><button type="button" data-cat="hair">Haar</button><button type="button" data-cat="hairCol">Kleur</button>
       <button type="button" data-cat="shirt">Shirt</button><button type="button" data-cat="shorts">Broek</button><button type="button" data-cat="shoes">Schoen</button><button type="button" data-cat="extra">Extra</button>
     </div>
     <div class="items" id="avItems"></div>
@@ -1049,8 +1066,9 @@ var DEFAULTS = {
 };
 
 /* Bewaarde waarden winnen altijd; standaardwaarden vullen alleen aan wat ontbreekt. */
-function defaultAvatar(sp) {
-  return { skin: sp === 'tennis' ? 's1' : sp === 'pickleball' ? 's2' : 's0', hair: sp === 'tennis' ? 'staart' : 'kort', hairCol: 'bruin', shirt: 'sport', shorts: 'zwart', shoes: 'wit', extra: sp === 'tennis' ? 'zweetband' : 'geen' };
+function defaultAvatar() {
+  // altijd de eerste keuze van elk onderdeel
+  return { gender: 'm', skin: 's0', hair: 'eigen', hairCol: 'zwart', shirt: 'sport', shorts: 'zwart', shoes: 'wit', extra: 'geen' };
 }
 function mergeDefaults(def, saved) {
   if (!isObj(saved)) return clone(def);
@@ -1075,10 +1093,10 @@ function load() {
   if (d.settings.mode !== 'power' && d.settings.mode !== 'control') d.settings.mode = 'power';
   if (d.settings.hand !== 'left') d.settings.hand = 'right';
   ['padel', 'tennis', 'pickleball'].forEach(function (sp) {
-    if (!isObj(d.settings.avatars[sp])) d.settings.avatars[sp] = defaultAvatar(sp);
     if (!isObj(d.settings.career[sp])) d.settings.career[sp] = { pts: 0, w: 0, l: 0, best: 0, next: 0 };
   });
   if (!Array.isArray(d.settings.owned)) d.settings.owned = [];
+  if (!isObj(d.settings.avatar) || !d.settings.avatar.gender) d.settings.avatar = defaultAvatar();   // één speler voor elke sport
   // vroeger munten, nu punten (1 munt = 100 punten)
   if (typeof d.settings.points !== 'number') d.settings.points = 0;
   if (typeof d.settings.coins === 'number') { d.settings.points += d.settings.coins * 100; delete d.settings.coins; }
@@ -1627,7 +1645,7 @@ function beginSession(hasMotionApi) {
   detector.reset();
   window.addEventListener('deviceorientation', soloOrient);
   drawCourtTop($('tCourt'), T.sport, [], null, false);
-  $('tAnaLine').textContent = 'Maak een slag: hier zie je waar je bal zou landen.'; $('tAnaTip').textContent = '';
+  $('tAnaLine').textContent = 'Maak een slag'; $('tAnaTip').textContent = 'Hier zie je waar je bal zou landen, berekend uit de stand van je racket.';
   soloCalShow(true);
   setTimeout(function () { if (T && !T.R) soloCalShow(false); }, 1500);   // geen standsensor: zonder richting verder
   $('tLabel').innerHTML = '<b>' + SPORTS[T.sport].name + '</b>, ' + (T.mode === 'control' ? 'controle' : 'kracht');
@@ -1824,63 +1842,87 @@ function analyzeShot(ev) {
   return res;
 }
 var OUT_TXT = { in: 'binnen', out: 'uit', net: 'in het net' };
+var SIDE_TXT = { links: 'links', midden: 'in het midden', rechts: 'rechts' };
+function shotSentence(a) {
+  var sp = SOLO_COURT[T ? T.sport : data.settings.sport];
+  if (a.outcome === 'net') return 'Je bal zou in het net gaan.';
+  if (a.outcome === 'out') return a.land[1] > sp.L ? 'Je bal zou te lang gaan: uit.' : 'Je bal zou ' + (a.land[0] < 0 ? 'links' : 'rechts') + ' naast het terrein gaan: uit.';
+  var boog = a.kind === 'lob' ? ' met een hoge boog' : '';
+  return 'Je bal zou ' + (a.depth || 'halflang') + ' ' + (a.known ? SIDE_TXT[a.side] + ' ' : '') + 'landen' + boog + '. Binnen!';
+}
 function renderShotLine(a) {
-  var parts = [a.overhead || a.kind === 'smash' ? 'smash' : (a.dir === 'fh' ? 'forehand' : 'backhand'), a.speed + ' km/u'];
-  if (a.kind !== 'smash') parts.push(a.kind);
-  if (a.outcome !== 'net') { parts.push(a.side); if (a.depth) parts.push(a.depth); }
-  parts.push(OUT_TXT[a.outcome]);
-  $('tAnaLine').textContent = parts.join(' · ');
-  $('tAnaTip').textContent = a.known ? a.tip : a.tip + ' (Stel de richting van het net in voor links of rechts.)';
+  var what = a.overhead || a.kind === 'smash' ? 'Smash' : (a.dir === 'fh' ? 'Forehand' : 'Backhand');
+  $('tAnaLine').textContent = what + ' · ' + a.speed + ' km/u';
+  $('tAnaTip').innerHTML = '<b class="ana-' + a.outcome + '">' + esc(shotSentence(a)) + '</b><br>' + esc(a.tip) + (a.known ? '' : ' <i>(Stel de richting van het net in om links en rechts te zien.)</i>');
 }
 /* het terrein van bovenaf, in de stijl van je sport, met waar elke bal landde */
-function drawCourtTop(cv, sport, shots, last, full) {
+function drawCourtTop(cv, sport, shots, last) {
   var sp = SOLO_COURT[sport], c = cv.getContext('2d'), Wc = cv.width, Hc = cv.height, L = sp.L, nY = L / 2, hw = sp.W / 2;
-  var mx = sport === 'tennis' ? 2.2 : 1.2, y0 = full ? -1.5 : nY - 3.2, y1 = L + 1.4, wspan = sp.W + 2 * mx, hspan = y1 - y0;
-  var s = Math.min(Wc / wspan, Hc / hspan), ox = Wc / 2, oy = Hc - (Hc - hspan * s) / 2;
+  var mx = sp.glass ? 0.35 : (sport === 'tennis' ? 1.6 : 1.0), y0 = nY - 0.9, y1 = L + (sp.glass ? 0.35 : 1.6), wspan = sp.W + 2 * mx, hspan = y1 - y0;
+  var pad = Hc * 0.07, s = Math.min(Wc / wspan, (Hc - 2 * pad) / hspan), ox = Wc / 2, oy = Hc - pad - ((Hc - 2 * pad) - hspan * s) / 2;
   function X(x) { return ox + x * s; } function Y(y) { return oy - (y - y0) * s; }
-  c.clearRect(0, 0, Wc, Hc);
+  c.clearRect(0, 0, Wc, Hc); c.fillStyle = '#20242c'; c.fillRect(0, 0, Wc, Hc);
   c.fillStyle = sp.out; c.fillRect(X(-hw - mx), Y(y1), wspan * s, hspan * s);
-  c.fillStyle = sp.court; c.fillRect(X(-hw), Y(Math.min(L, y1)), 2 * hw * s, (Math.min(L, y1) - Math.max(0, y0)) * s);
-  if (sp.kitchen) { c.fillStyle = sp.kit; c.fillRect(X(-hw), Y(nY + sp.kitchen), 2 * hw * s, Math.min(sp.kitchen * 2, nY + sp.kitchen - y0) * s); }
-  c.strokeStyle = '#ffffff'; c.lineWidth = Math.max(2, s * 0.06);
-  function ln(xa, ya, xb, yb) { if (ya < y0 && yb < y0) return; c.beginPath(); c.moveTo(X(xa), Y(Math.max(ya, y0))); c.lineTo(X(xb), Y(Math.max(yb, y0))); c.stroke(); }
-  ln(-hw, 0, -hw, L); ln(hw, 0, hw, L); ln(-hw, L, hw, L); ln(-hw, 0, hw, 0);
-  if (sport === 'tennis') { var hs2 = sp.Ws / 2; ln(-hs2, 0, -hs2, L); ln(hs2, 0, hs2, L); ln(-hs2, nY + 6.4, hs2, nY + 6.4); ln(-hs2, nY - 6.4, hs2, nY - 6.4); ln(0, nY - 6.4, 0, nY + 6.4); }
-  if (sport === 'padel') { ln(-hw, nY + 6.95, hw, nY + 6.95); ln(-hw, nY - 6.95, hw, nY - 6.95); ln(0, nY - 6.95, 0, nY + 6.95); }
-  if (sport === 'pickleball') { ln(-hw, nY + sp.kitchen, hw, nY + sp.kitchen); ln(-hw, nY - sp.kitchen, hw, nY - sp.kitchen); ln(0, nY + sp.kitchen, 0, L); ln(0, 0, 0, nY - sp.kitchen); }
-  if (sp.glass) { c.strokeStyle = 'rgba(190,225,255,.9)'; c.lineWidth = Math.max(3, s * 0.12); c.strokeRect(X(-hw), Y(L), 2 * hw * s, (L - Math.max(0, y0)) * s); }
-  // net
-  c.strokeStyle = '#111'; c.lineWidth = Math.max(3, s * 0.1); c.beginPath(); c.moveTo(X(-hw - 0.3), Y(nY)); c.lineTo(X(hw + 0.3), Y(nY)); c.stroke();
-  c.strokeStyle = '#fff'; c.lineWidth = Math.max(1, s * 0.03); c.stroke();
-  // ballen
-  var col = { in: '#35e07a', out: '#ff5050', net: '#ffa22e' };
-  shots.forEach(function (a) { if (a === last) return; c.fillStyle = col[a.outcome]; c.globalAlpha = 0.75; c.beginPath(); c.arc(X(a.land[0]), Y(Math.max(a.land[1], y0)), Math.max(4, s * 0.16), 0, Math.PI * 2); c.fill(); c.globalAlpha = 1; });
-  if (last) {
-    var fx = X(last.from[0]), fy = Y(Math.max(last.from[1], y0)) + (last.from[1] < y0 ? 4 : 0);
-    c.strokeStyle = 'rgba(255,255,255,.75)'; c.setLineDash([8, 7]); c.lineWidth = Math.max(2, s * 0.05);
-    c.beginPath(); c.moveTo(fx, fy); c.quadraticCurveTo((fx + X(last.land[0])) / 2, Math.min(fy, Y(last.land[1])) - last.apex * s * 0.6, X(last.land[0]), Y(Math.max(last.land[1], y0))); c.stroke(); c.setLineDash([]);
-    c.fillStyle = col[last.outcome]; c.strokeStyle = '#fff'; c.lineWidth = 3;
-    c.beginPath(); c.arc(X(last.land[0]), Y(Math.max(last.land[1], y0)), Math.max(7, s * 0.25), 0, Math.PI * 2); c.fill(); c.stroke();
-    c.fillStyle = '#fff'; c.beginPath(); c.arc(fx, fy, Math.max(5, s * 0.15), 0, Math.PI * 2); c.fill();
+  c.fillStyle = sp.court; c.fillRect(X(-hw), Y(L), 2 * hw * s, (L - nY) * s);
+  if (sp.kitchen) { c.fillStyle = sp.kit; c.fillRect(X(-hw), Y(nY + sp.kitchen), 2 * hw * s, sp.kitchen * s); }
+  c.strokeStyle = '#fff'; c.lineWidth = Math.max(2, s * 0.06);
+  function ln(xa, ya, xb, yb) { c.beginPath(); c.moveTo(X(xa), Y(ya)); c.lineTo(X(xb), Y(yb)); c.stroke(); }
+  ln(-hw, nY, -hw, L); ln(hw, nY, hw, L); ln(-hw, L, hw, L);
+  if (sport === 'tennis') { var hs2 = sp.Ws / 2; ln(-hs2, nY, -hs2, L); ln(hs2, nY, hs2, L); ln(-hs2, nY + 6.4, hs2, nY + 6.4); ln(0, nY, 0, nY + 6.4); }
+  if (sport === 'padel') { ln(-hw, nY + 6.95, hw, nY + 6.95); ln(0, nY, 0, nY + 6.95); }
+  if (sport === 'pickleball') { ln(-hw, nY + sp.kitchen, hw, nY + sp.kitchen); ln(0, nY + sp.kitchen, 0, L); }
+  if (sp.glass) { c.strokeStyle = 'rgba(190,225,255,.9)'; c.lineWidth = Math.max(3, s * 0.12); c.beginPath(); c.moveTo(X(-hw), Y(nY)); c.lineTo(X(-hw), Y(L)); c.lineTo(X(hw), Y(L)); c.lineTo(X(hw), Y(nY)); c.stroke(); }
+  // net onderaan, met labels
+  c.strokeStyle = '#0d0f13'; c.lineWidth = Math.max(5, s * 0.16); ln(-hw - 0.3, nY, hw + 0.3, nY);
+  c.strokeStyle = '#fff'; c.lineWidth = Math.max(1.5, s * 0.04); ln(-hw - 0.3, nY, hw + 0.3, nY);
+  var fs = Math.round(Math.max(11, Wc * 0.03)); c.font = '700 ' + fs + 'px system-ui, sans-serif'; c.textAlign = 'center'; c.fillStyle = 'rgba(255,255,255,.8)';
+  c.fillText('NET', ox, Y(nY) + fs * 1.35); c.fillText('ACHTERLIJN', ox, Y(L) - fs * 0.6);
+  // ballen: binnen groen, uit rood kruis, net oranje
+  var col = { in: '#35e07a', out: '#ff5050', net: '#ffa22e' }, r0 = Math.max(5, s * 0.2);
+  function mark(a, big, num) {
+    var x = X(clampNum(a.land[0], -hw - mx, hw + mx)), y = Y(clampNum(a.outcome === 'net' ? nY : a.land[1], y0, y1)), r = big ? r0 * 1.7 : r0;
+    if (a.outcome === 'out') { c.strokeStyle = col.out; c.lineWidth = big ? 5 : 3.5; c.beginPath(); c.moveTo(x - r, y - r); c.lineTo(x + r, y + r); c.moveTo(x + r, y - r); c.lineTo(x - r, y + r); c.stroke(); }
+    else { c.fillStyle = col[a.outcome]; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); if (big) { c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); } }
+    if (num) { c.fillStyle = a.outcome === 'out' ? '#fff' : '#0b1222'; c.font = '800 ' + Math.round(r * 1.1) + 'px system-ui, sans-serif'; c.textBaseline = 'middle'; c.fillText(num, x, y + (a.outcome === 'out' ? -r * 1.6 : 1)); c.textBaseline = 'alphabetic'; }
   }
+  c.globalAlpha = 0.8; shots.forEach(function (a) { if (a !== last) mark(a, false); }); c.globalAlpha = 1;
+  if (last) {
+    var fx = X(clampNum(last.from[0], -hw, hw)), fy = Y(y0), lx = X(clampNum(last.land[0], -hw - mx, hw + mx)), ly = Y(clampNum(last.outcome === 'net' ? nY : last.land[1], y0, y1));
+    c.strokeStyle = 'rgba(255,255,255,.7)'; c.setLineDash([8, 7]); c.lineWidth = Math.max(2, s * 0.05);
+    c.beginPath(); c.moveTo(fx, fy); c.quadraticCurveTo((fx + lx) / 2, Math.min(fy, ly) - Math.min(last.apex, 6) * s * 0.4, lx, ly); c.stroke(); c.setLineDash([]);
+    mark(last, true, String(shots.indexOf(last) + 1));
+  }
+  c.textAlign = 'left';
 }
 function soloCalShow(show) { $('tCal').hidden = !show; }
-function showAnalysisSummary(sport, shots) {
-  if (!shots.length) return;
-  var n = shots.length, cnt = { in: 0, out: 0, net: 0 }, fh = 0, deep = 0, sumB = 0, long = 0, wide = 0;
-  shots.forEach(function (a) { cnt[a.outcome]++; if (a.dir === 'fh') fh++; if (a.depth === 'diep') deep++; sumB += a.ballKmh; if (a.outcome === 'out' && a.land[1] > SOLO_COURT[sport].L) long++; else if (a.outcome === 'out') wide++; });
+function showAnalysisSummary(sport, shots, saved) {
+  if (!shots.length) return false;
+  var n = shots.length, cnt = { in: 0, out: 0, net: 0 }, fh = 0, sumS = 0, top = 0, dep = { diep: 0, halflang: 0, kort: 0 }, sd = { links: 0, midden: 0, rechts: 0 }, long = 0, wide = 0, known = false;
+  shots.forEach(function (a) {
+    cnt[a.outcome]++; if (a.dir === 'fh') fh++; sumS += a.speed; if (a.speed > top) top = a.speed; if (a.known) known = true;
+    if (a.outcome === 'in') { var dk = a.depth === 'in de kitchen' ? 'kort' : (a.depth || 'halflang'); dep[dk] = (dep[dk] || 0) + 1; sd[a.side]++; }
+    if (a.outcome === 'out' && a.land[1] > SOLO_COURT[sport].L) long++; else if (a.outcome === 'out') wide++;
+  });
   $('anaSport').textContent = SPORTS[sport].name;
-  drawCourtTop($('anaCourt'), sport, shots, null, false);
+  drawCourtTop($('anaCourt'), sport, shots, null);
   var pct = function (k) { return Math.round(k / n * 100) + '%'; };
-  $('anaStats').innerHTML = '<div><b style="color:#2fbf5b">' + pct(cnt.in) + '</b><span>binnen</span></div><div><b style="color:#ff5050">' + cnt.out + '</b><span>uit</span></div><div><b style="color:#f08a33">' + cnt.net + '</b><span>in het net</span></div>' +
-    '<div><b>' + fh + '/' + (n - fh) + '</b><span>forehand/backhand</span></div><div><b>' + Math.round(sumB / n) + '</b><span>km/u balsnelheid</span></div><div><b>' + pct(deep) + '</b><span>diep</span></div>';
+  $('anaStats').innerHTML =
+    '<div><b>' + n + '</b><span>slagen</span></div>' +
+    '<div><b style="color:#2fbf5b">' + pct(cnt.in) + '</b><span>binnen</span></div>' +
+    '<div><b>' + (cnt.out + cnt.net) + '</b><span>' + cnt.out + ' uit, ' + cnt.net + ' in het net</span></div>' +
+    '<div><b>' + fh + '</b><span>forehand</span></div>' +
+    '<div><b>' + (n - fh) + '</b><span>backhand</span></div>' +
+    '<div><b>' + Math.round(sumS / n) + '<small> / ' + top + '</small></b><span>km/u zwaai: gemiddeld / top</span></div>';
+  var nin = Math.max(1, cnt.in), rows = '<p class="ana-row"><b>Diepte</b> van je goede ballen: ' + dep.diep + ' diep, ' + dep.halflang + ' halflang, ' + dep.kort + ' kort.</p>';
+  if (known) rows += '<p class="ana-row"><b>Richting</b>: ' + sd.links + ' links, ' + sd.midden + ' in het midden, ' + sd.rechts + ' rechts.</p>';
   var worst = Math.max(cnt.net, long, wide), tip;
-  if (cnt.in / n >= 0.8) tip = 'Sterk: ' + pct(cnt.in) + ' van je ballen was binnen. Probeer nu dieper te spelen en meer te variëren tussen links en rechts.';
-  else if (worst === cnt.net) tip = 'De meeste missers gingen in het net. Open je blad een beetje en zwaai meer van laag naar hoog.';
-  else if (worst === long) tip = 'De meeste missers waren te lang. Sluit je blad wat meer of sla iets gecontroleerder.';
-  else tip = 'De meeste missers gingen naast. Richt je blad meer naar het midden van het terrein.';
-  $('anaTip').textContent = tip;
+  if (cnt.in / n >= 0.8) tip = dep.diep / nin < 0.4 ? 'Sterk: ' + pct(cnt.in) + ' binnen. Probeer nu dieper te spelen, dichter bij de achterlijn.' : 'Sterk: ' + pct(cnt.in) + ' binnen en mooi diep. Wissel nu af tussen links en rechts.';
+  else if (worst === cnt.net) tip = 'De meeste missers gingen in het net: open je blad een beetje en zwaai van laag naar hoog.';
+  else if (worst === long) tip = 'De meeste missers waren te lang: sluit je blad wat meer of sla iets gecontroleerder.';
+  else tip = 'De meeste missers gingen naast: richt je blad meer naar het midden van het terrein.';
+  $('anaTip').innerHTML = rows + '<p class="ana-row ana-advice">' + esc(tip) + '</p>' + (saved ? '<p class="ana-saved">' + esc(saved) + '</p>' : '');
   $('anaSheet').hidden = false;
+  return true;
 }
 
 function stopTraining() {
@@ -1902,11 +1944,12 @@ function stopTraining() {
   var shots = T.shots || [], sport = T.sport;
   if (shots.length && data.stats.sessions.length) { var last = data.stats.sessions[data.stats.sessions.length - 1]; last.inn = shots.filter(function (a) { return a.outcome === 'in'; }).length; last.out = shots.filter(function (a) { return a.outcome === 'out'; }).length; last.net = shots.filter(function (a) { return a.outcome === 'net'; }).length; save(); }
   T = null;
-  setTimeout(function () { showAnalysisSummary(sport, shots); }, 50);
   $('train').hidden = true;
   document.body.style.overflow = '';
   renderHome();
-  if (summary) toast('Training bewaard. ' + summary);
+  // het overzicht toont zelf dat de training bewaard is (geen melding er bovenop)
+  if (shots.length) setTimeout(function () { showAnalysisSummary(sport, shots, summary ? 'Training bewaard. ' + summary : ''); }, 50);
+  else if (summary) toast('Training bewaard. ' + summary);
 }
 
 function requestWake() {
@@ -2246,10 +2289,10 @@ function tvConfigMsg(type) {
   var s = data.settings, mt = s.match;
   return Object.assign({ type: type || 'config', sport: s.sport, hand: s.hand, level: s.level, drill: curTvDrill(),
     mode: playMode(), team: mt.team, bots: mt.bots, length: playMode() === 'ranked' ? 'kort' : mt.length, tennis: lobbyCount() > 2 ? 'dubbel' : mt.tennis, deuce: mt.deuce || 'golden',
-    opp: playMode() === 'ranked' ? nextOpponent(s.sport) : null, av: s.avatars[s.sport] }, tvPlayerInfo());
+    opp: playMode() === 'ranked' ? nextOpponent(s.sport) : null, av: myAv() }, tvPlayerInfo());
 }
 function tvSendConfig() {
-  if (TVS && TVS.isHost === false) { tvSend(Object.assign({ type: 'hello', hand: data.settings.hand, av: data.settings.avatars[data.settings.sport] }, tvPlayerInfo())); return; }
+  if (TVS && TVS.isHost === false) { tvSend(Object.assign({ type: 'hello', hand: data.settings.hand, av: myAv() }, tvPlayerInfo())); return; }
   tvSend(tvConfigMsg('config'));
 }
 function tvSettingsChanged() {
@@ -2575,7 +2618,12 @@ function renderRankCard() {
   $('rankBig').textContent = r ? '#' + r : '–';
   $('rankSub').textContent = r ? c.w + ' gewonnen, ' + c.l + ' verloren' : 'Win je eerste wedstrijd';
   $('coinChip').textContent = fmt(data.settings.points || 0);
-  drawAvatar($('avatarMini'), data.settings.avatars[sp], sp);
+  renderPfp();
+}
+function renderPfp() {
+  var el = $('playerPfp'); if (!el) return;
+  var p = (typeof ME !== 'undefined' && ME && ME.profile) ? ME.profile : { display_name: (data.settings.name || '') };
+  el.innerHTML = p.display_name || p.avatar_url ? avatarHTML(p, true) : '<div class="avatar big"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg></div>';
 }
 function openRank() {
   var sp = data.settings.sport, r = myRank(sp), c = data.settings.career[sp], o = nextOpponent(sp), pool = rankPool(sp);
@@ -2601,15 +2649,21 @@ function openRank() {
 
 /* Jouw speler: per sport een eigen figuurtje, met kleren die je vrijspeelt */
 var AV = {
+  gender: [['m', 'Man', 0], ['v', 'Vrouw', 0]],
   skin: [['s0', 'Licht', 0, '#f1c9a5'], ['s1', 'Getint', 0, '#e0ac85'], ['s2', 'Midden', 0, '#c68863'], ['s3', 'Bruin', 0, '#8d5a3b'], ['s4', 'Donker', 0, '#5c3a26'], ['s5', 'Bleek', 0, '#f6d7bd']],
-  hair: [['kort', 'Kort', 0], ['krullen', 'Krullen', 0], ['staart', 'Staart', 0], ['kaal', 'Kaal', 0], ['knot', 'Knot', 6000], ['lang', 'Lang', 10000], ['hanenkam', 'Hanenkam', 25000]],
+  hair: [['eigen', 'Eigen kapsel', 0], ['kaal', 'Kaal', 0]],
   hairCol: [['zwart', 'Zwart', 0, '#1d1a17'], ['bruin', 'Bruin', 0, '#5a3a22'], ['blond', 'Blond', 0, '#d8b25a'], ['rood', 'Rood', 0, '#a8452a'], ['grijs', 'Grijs', 0, '#9a9a9a'], ['blauw', 'Blauw', 12000, '#2f7bff'], ['roze', 'Roze', 12000, '#ff5aa8']],
   shirt: [['sport', 'Sportkleur', 0], ['wit', 'Wit', 0, '#f4f4f4'], ['zwart', 'Zwart', 0, '#1b1d22'], ['streep', 'Strepen', 8000], ['pro', 'Pro', 20000], ['camo', 'Camo', 30000], ['goud', 'Goud', 60000], ['regenboog', 'Regenboog', 80000]],
   shorts: [['zwart', 'Zwart', 0, '#16181c'], ['wit', 'Wit', 0, '#f2f2f2'], ['navy', 'Marine', 0, '#1d2a4a'], ['rood', 'Rood', 6000, '#c43b3b'], ['camo', 'Camo', 25000, '#4a5a32']],
   shoes: [['wit', 'Wit', 0, '#f4f4f4'], ['zwart', 'Zwart', 0, '#111111'], ['neon', 'Neon', 15000, '#c6ff3a'], ['goud', 'Goud', 50000, '#e6b53a']],
-  extra: [['geen', 'Niets', 0], ['zweetband', 'Zweetband', 6000], ['polsband', 'Polsbandjes', 4000], ['pet', 'Pet', 10000], ['zonnebril', 'Zonnebril', 20000], ['medaille', 'Top 10', 0, null, 10], ['kroon', 'Nummer 1', 0, null, 1]]
+  extra: [['geen', 'Niets', 0], ['zweetband', 'Zweetband', 6000], ['oorbellen', 'Oorbellen', 4000], ['pet', 'Pet', 10000], ['zonnebril', 'Zonnebril', 20000], ['kroon', 'Nummer 1', 0, null, 1]]
 };
-var avCat = 'skin';
+function myAv() {
+  var a = data.settings.avatar || (data.settings.avatar = defaultAvatar());
+  Object.keys(AV).forEach(function (cat) { if (!AV[cat].some(function (it) { return it[0] === a[cat]; })) a[cat] = AV[cat][0][0]; });
+  return a;
+}
+var avCat = 'gender';
 function avItem(cat, id) { var l = AV[cat]; for (var i = 0; i < l.length; i++) if (l[i][0] === id) return l[i]; return l[0]; }
 function avOwned(cat, it) {
   if (it[4]) { var c = data.settings.career[data.settings.sport]; return !!(c.best && c.best <= it[4]); }
@@ -2676,16 +2730,23 @@ function drawAvatar(cv, av, sp) {
   if (av.extra === 'kroon') { c.fillStyle = '#f2c230'; c.beginPath(); c.moveTo(cx - u * 1.8, u * 2.6); c.lineTo(cx - u * 1.8, u * 1.2); c.lineTo(cx - u * 0.9, u * 2); c.lineTo(cx, u * 0.8); c.lineTo(cx + u * 0.9, u * 2); c.lineTo(cx + u * 1.8, u * 1.2); c.lineTo(cx + u * 1.8, u * 2.6); c.closePath(); c.fill(); }
   if (av.extra === 'medaille') { c.strokeStyle = sc; c.lineWidth = u * 0.3; c.beginPath(); c.moveTo(cx - u * 1.2, u * 7.4); c.lineTo(cx, u * 9.6); c.lineTo(cx + u * 1.2, u * 7.4); c.stroke(); c.fillStyle = '#e6b53a'; c.beginPath(); c.arc(cx, u * 10, u * 0.7, 0, Math.PI * 2); c.fill(); }
 }
-function openAvatar() { $('avatarSheet').hidden = false; renderAvatarSheet(); }
+function openAvatar() {
+  $('avatarSheet').hidden = false;
+  var fr = $('avFrame');
+  if (!fr.getAttribute('src')) { fr.addEventListener('load', function () { setTimeout(sendAvToFrame, 300); }); fr.setAttribute('src', 'tv.html?solo=1&sport=' + data.settings.sport); }
+  renderAvatarSheet();
+}
+function sendAvToFrame() { var fr = $('avFrame'); try { if (fr && fr.contentWindow) fr.contentWindow.postMessage({ type: 'swinglab-av', av: myAv(), sport: data.settings.sport }, location.origin); } catch (e) {} }
+window.addEventListener('message', function (e) { if (e.origin === location.origin && e.data && e.data.type === 'swinglab-solo-ready') sendAvToFrame(); });
 function renderAvatarSheet() {
-  var sp = data.settings.sport, av = data.settings.avatars[sp];
-  $('avSport').textContent = SPORTS[sp].name; $('avCoins').textContent = fmt(data.settings.points || 0);
-  drawAvatar($('avatarBig'), av, sp);
+  var sp = data.settings.sport, av = myAv();
+  $('avCoins').textContent = fmt(data.settings.points || 0);
+  sendAvToFrame();
   Array.prototype.forEach.call(document.querySelectorAll('#avCats button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-cat') === avCat)); });
   $('avItems').innerHTML = AV[avCat].map(function (it) {
     var own = avOwned(avCat, it), col = avCat === 'shirt' && it[0] === 'sport' ? SPORT_COL[sp] : it[3];
     var price = own ? '' : (it[4] ? '<span class="price">' + (it[4] === 1 ? 'Word nummer 1' : 'Haal de top ' + it[4]) + '</span>' : '<span class="price">' + fmt(it[2]) + ' punten</span>');
-    return '<button type="button" data-id="' + it[0] + '" aria-pressed="' + (av[avCat] === it[0]) + '" class="' + (own ? '' : 'locked') + '">' + (col ? '<span class="sw" style="background:' + col + '"></span>' : '') + it[1] + price + '</button>';
+    return '<button type="button" data-id="' + it[0] + '" aria-pressed="' + (av[avCat] === it[0]) + '" class="' + (own ? '' : 'locked') + '">' + (col ? '<span class="sw" style="background:' + col + '"></span>' : '') + esc(it[1]) + price + '</button>';
   }).join('');
 }
 function avatarPick(id) {
@@ -2696,7 +2757,7 @@ function avatarPick(id) {
     if (!confirm(it[1] + ' vrijspelen voor ' + fmt(it[2]) + ' punten?')) return;
     data.settings.points -= it[2]; data.settings.owned.push(avCat + ':' + it[0]);
   }
-  data.settings.avatars[sp][avCat] = id; save();
+  myAv()[avCat] = id; save();
   renderAvatarSheet(); renderRankCard();
 }
 
@@ -3274,7 +3335,7 @@ sbInit();
   if (r === 'tv') setTimeout(openTv, 50);
   if (r === 'train') setTimeout(function () { toast('Klaar. Tik nog eens op Start training.'); }, 300);
 })();
-$('versionLine').textContent = 'SwingLab versie 47, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
+$('versionLine').textContent = 'SwingLab versie 48, geopend ' + (isStandalone() ? 'als app op je beginscherm' : 'in de browser');
 renderHome();
 if (!data.settings.onboarded) $('onboard').hidden = false;
 
